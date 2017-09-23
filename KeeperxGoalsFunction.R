@@ -1,4 +1,4 @@
-# keeperxgoals <- readRDS('xGoalsByKeeper.rds') %>%
+# keeperxgoals <- readRDS('IgnoreList/xGoalsByKeeper.rds') %>%
 #   mutate(date = as.Date(date, format = '%m/%d/%Y'))
 # date1 = as.Date('2000-01-01')
 # date2 = as.Date('9999-12-31')
@@ -55,13 +55,13 @@ keeperxgoals.func <- function(keeperxgoals = keeperxgoals,
   
 }
 
-keeperxgoals.func(keeperxgoals = readRDS('xGoalsByKeeper.rds') %>%
-                     mutate(date = as.Date(date, format = '%m/%d/%Y')),
-                   date1 = as.Date('2000-01-01'),
-                   date2 = as.Date('9999-12-31'),
-                   season = 2011:2017,
-                   shotfilter = 10,
-                   byteams = F,
-                   OtherShots = T,
-                   FK = T,
-                   PK = T) -> x
+# keeperxgoals.func(keeperxgoals = readRDS('IgnoreList/xGoalsByKeeper.rds') %>%
+#                      mutate(date = as.Date(date, format = '%m/%d/%Y')),
+#                    date1 = as.Date('2000-01-01'),
+#                    date2 = as.Date('9999-12-31'),
+#                    season = 2011:2017,
+#                    shotfilter = 10,
+#                    byteams = F,
+#                    OtherShots = T,
+#                    FK = T,
+#                    PK = T) -> x
