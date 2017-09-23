@@ -4,7 +4,7 @@ library(dplyr)
 teamnames <- read.csv('TeamNameLinks.csv', stringsAsFactors = F)
 #load in the requisite data
 
-shooting15 <- bind_rows(lapply(grep('shots with xG', list.files('IgnoreList'), value = T), 
+shooting15 <- bind_rows(lapply(paste0('IgnoreList/', grep('shots with xG', list.files('IgnoreList'), value = T)), 
                                function(x) read.csv(x, stringsAsFactors = F) %>% select(-X))) %>%
   left_join(teamnames, by = c('team' = 'FullName')) %>%
   left_join(teamnames, by = c('team.1' = 'FullName')) %>%
@@ -20,7 +20,7 @@ shooting15 <- bind_rows(lapply(grep('shots with xG', list.files('IgnoreList'), v
          year = format(date, '%Y'),
          time = sapply(strsplit(time, ':'), function(x) as.numeric(x[1]) + as.numeric(x[2])/60))
 
-shooting14 <- bind_rows(lapply(grep('shotdata with xgoals', list.files("IgnoreList"), value = T), 
+shooting14 <- bind_rows(lapply(paste0('IgnoreList/', grep('shotdata with xgoals', list.files("IgnoreList"), value = T)), 
                              function(x) read.csv(x, stringsAsFactors = F))) %>%
   left_join(teamnames, by = c('Team' = 'FullName')) %>%
   left_join(teamnames, by = c('Team.1' = 'FullName')) %>%
