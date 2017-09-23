@@ -23,20 +23,4 @@ vignettes/*.pdf
 *.utf8.md
 *.knit.md
 .Rproj.user
-UpdatedModels_2017-08-28
-AllShotsData2011-2017.rds
-touches 2015.csv
-touches 2016.csv
-touches 2017.csv
-ShotsByTeam
-minutes played by game 2015.csv
-minutes played by game 2016.csv
-minutes played by game 2017.csv
-player_season_data_07_16.csv
-shotdata with xgoals 3.0 2011.csv
-shotdata with xgoals 3.0 2012.csv
-shotdata with xgoals 3.0 2013.csv
-shotdata with xgoals 3.0 2014.csv
-shots with xG 2015.csv
-shots with xG 2016.csv
-shots with xG.csv
+IgnoreList/
