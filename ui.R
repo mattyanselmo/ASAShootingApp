@@ -1,0 +1,239 @@
+
+# This is the user-interface definition of a Shiny web application.
+# You can find out more about building applications with Shiny here:
+#
+# http://shiny.rstudio.com
+#
+
+library(shiny)
+
+shinyUI(
+  navbarPage(strong('ASA Database'),
+             theme = 'bootstrap_edited.css',
+             
+             tabPanel(strong('Overview'),
+                      h1('Overview'),
+                      p("We built this interactive web application to give ASA's loyal readers more control over 
+                 sorting and filtering our data. We plan to grow this application out to include
+                 more content, as well as more ways to view the content (like plots and other visuals, for example).
+                 If you have an idea for a feature that will make the app totes better,
+                 then please don't hesitate to email Matthias (mkullowatz at gmail) with your idea."),
+                      br(),
+                      p('A quick rundown of what we have here. Under the xGoals tab, you will find four subtabs.
+                 These subtabs break the data summary down by shooters (and key passers), teams, and keepers.
+                 There are options to filter by season and date on each subtab, as well as other tab-specific
+                 filters and sorting tools that we hope prove intuitive to use and fun to play with.')),
+             navbarMenu(strong('xGoals'),
+                        tabPanel('Shooter',
+                                 sidebarLayout(
+                                   sidebarPanel(width = 2,
+                                                numericInput('shooting_minshots',
+                                                             "Minimum shots:",
+                                                             value = 0,
+                                                             min = 0, max = 100, step = 10),
+                                                numericInput('shooting_minkeypasses',
+                                                             'Minimum key passes:',
+                                                             value = 0,
+                                                             min = 0, max = 100, step = 10),
+                                                radioButtons('shooting_seasonordate',
+                                                             'Filter by:',
+                                                             choices = c('Season', 'Date')),
+                                                conditionalPanel(condition = "input.shooting_seasonordate == 'Season'",
+                                                                 checkboxGroupInput('shooting_seasonfilter',
+                                                                                    'Select seasons:',
+                                                                                    choices = min(playerxgoals$Season):max(playerxgoals$Season),
+                                                                                    selected = max(playerxgoals$Season))),
+                                                conditionalPanel(condition = "input.shooting_seasonordate == 'Date'",
+                                                                 dateInput('shooting_date1',
+                                                                           'From:',
+                                                                           value = min(playerxgoals$date[playerxgoals$Season == max(playerxgoals$Season)]),
+                                                                           min = min(playerxgoals$date),
+                                                                           max = max(playerxgoals$date),
+                                                                           format = 'mm/dd/yyyy'),
+                                                                 dateInput('shooting_date2',
+                                                                           'To:',
+                                                                           value = max(playerxgoals$date),
+                                                                           min = min(playerxgoals$date),
+                                                                           max = max(playerxgoals$date),
+                                                                           format = 'mm/dd/yyyy')
+                                                ),                  
+                                                
+                                                checkboxInput('shooting_byteams',
+                                                              label = 'Split players by teams',
+                                                              value = F),
+                                                checkboxInput('shooting_other',
+                                                              label = 'Include non PK/FK',
+                                                              value = T),
+                                                checkboxInput('shooting_pk',
+                                                              label = 'Include PKs',
+                                                              value = F),
+                                                checkboxInput('shooting_fk',
+                                                              label = 'Include FKs',
+                                                              value = F)),
+                                   
+                                   mainPanel(
+                                     h1('Shooter xGoals'),
+                                     p(paste0('Updated through games on ', max(as.Date(playerxgoals$date)))),
+                                     downloadButton('player_download', 'Download CSV'),
+                                     br(),
+                                     br(),
+                                     DT::dataTableOutput('shootertable')
+                                   )
+                                 )),
+                        tabPanel('Team',
+                                 sidebarLayout(
+                                   sidebarPanel(width = 2,
+                                                radioButtons('team_advanced',
+                                                             '',
+                                                             choices = c('Basic stats', 'Advanced stats')),
+                                                radioButtons('team_seasonordate',
+                                                             'Filter by:',
+                                                             choices = c('Season', 'Date')),
+                                                conditionalPanel(condition = "input.team_seasonordate == 'Season'",
+                                                                 checkboxGroupInput('team_seasonfilter',
+                                                                                    'Select seasons:',
+                                                                                    choices = min(teamxgoals$Season):max(teamxgoals$Season),
+                                                                                    selected = max(teamxgoals$Season))),
+                                                conditionalPanel(condition = "input.team_seasonordate == 'Date'",
+                                                                 dateInput('team_date1',
+                                                                           'From:',
+                                                                           value = min(teamxgoals$date[teamxgoals$Season == max(teamxgoals$Season)]),
+                                                                           min = min(teamxgoals$date),
+                                                                           max = max(teamxgoals$date),
+                                                                           format = 'mm/dd/yyyy'),
+                                                                 dateInput('team_date2',
+                                                                           'To:',
+                                                                           value = max(teamxgoals$date),
+                                                                           min = min(teamxgoals$date),
+                                                                           max = max(teamxgoals$date),
+                                                                           format = 'mm/dd/yyyy')
+                                                ),
+                                                selectInput('team_pattern',
+                                                            'Pattern of play:',
+                                                            choices = c('All', sort(unique(teamxgoals$patternOfPlay.model))),
+                                                            selected = 'All'),
+                                                checkboxInput('team_evenstate',
+                                                              label = 'Even gamesate only?',
+                                                              value = F)),
+                                   mainPanel(
+                                     h1('Team shots data'),
+                                     p(paste0('Updated through games on ', max(as.Date(teamxgoals$date)))),
+                                     tabsetPanel(
+                                       tabPanel('Totals',
+                                                downloadButton('team_download', 'Download CSV'),
+                                                br(),
+                                                br(),
+                                                conditionalPanel(condition = "input.team_seasonordate == 'Season' && input.team_seasonfilter.length == 1",
+                                                                 h2('Western conference')),
+                                                DT::dataTableOutput('teamtotalxgoalswest'),
+                                                br(),
+                                                conditionalPanel(condition = "input.team_seasonordate == 'Season' && input.team_seasonfilter.length == 1",
+                                                                 h2('Eastern conference'),
+                                                                 DT::dataTableOutput('teamtotalxgoalseast'))
+                                       ),
+                                       tabPanel('Per game',
+                                                downloadButton('team_download_pergame', 'Download CSV'),
+                                                br(),
+                                                br(),
+                                                conditionalPanel(condition = "input.team_seasonordate == 'Season' && input.team_seasonfilter.length == 1",
+                                                                 h2('Western conference')),
+                                                DT::dataTableOutput('teampergamexgoalswest'),
+                                                br(),
+                                                conditionalPanel(condition = "input.team_seasonordate == 'Season' && input.team_seasonfilter.length == 1",
+                                                                 h2('Eastern conference'),
+                                                                 DT::dataTableOutput('teampergamexgoalseast'))
+                                       )
+                                     )
+                                   )
+                                 )
+                        ),
+                        tabPanel('Game-by-game xG',
+                                 sidebarLayout(
+                                   sidebarPanel(width = 2,
+                                                radioButtons('teambygame_seasonordate',
+                                                             'Filter by:',
+                                                             choices = c('Season', 'Date')),
+                                                conditionalPanel(condition = "input.teambygame_seasonordate == 'Season'",
+                                                                 checkboxGroupInput('teambygame_seasonfilter',
+                                                                                    'Select seasons:',
+                                                                                    choices = min(xgbygame$Season):max(xgbygame$Season),
+                                                                                    selected = max(xgbygame$Season))),
+                                                conditionalPanel(condition = "input.teambygame_seasonordate == 'Date'",
+                                                                 dateInput('teambygame_date1',
+                                                                           'From:',
+                                                                           value = min(xgbygame$Date[xgbygame$Season == max(xgbygame$Season)]),
+                                                                           min = min(xgbygame$Date),
+                                                                           max = max(xgbygame$Date),
+                                                                           format = 'mm/dd/yyyy'),
+                                                                 dateInput('teambygame_date2',
+                                                                           'To:',
+                                                                           value = max(xgbygame$Date),
+                                                                           min = min(xgbygame$Date),
+                                                                           max = max(xgbygame$Date),
+                                                                           format = 'mm/dd/yyyy'))
+                                   ),
+                                   mainPanel(
+                                     h1('Team xGoals by game'),
+                                     p(paste0('Updated through games on ', max(as.Date(xgbygame$Date)))),
+                                     downloadButton('teambygame_download', 'Download CSV'),
+                                     br(),
+                                     br(),
+                                     DT::dataTableOutput('teamxgoalsbygame')
+                                   )
+                                 )
+                        ),
+                        tabPanel('Keepers',
+                                 sidebarLayout(
+                                   sidebarPanel(width = 2,
+                                                numericInput('keeper_minshots',
+                                                             "Minimum shots faced:",
+                                                             value = 0,
+                                                             min = 0, max = 100, step = 10),
+                                                radioButtons('keeper_seasonordate',
+                                                             'Filter by:',
+                                                             choices = c('Season', 'Date')),
+                                                conditionalPanel(condition = "input.keeper_seasonordate == 'Season'",
+                                                                 checkboxGroupInput('keeper_seasonfilter',
+                                                                                    'Select seasons:',
+                                                                                    choices = min(playerxgoals$Season):max(playerxgoals$Season),
+                                                                                    selected = max(playerxgoals$Season))),
+                                                conditionalPanel(condition = "input.keeper_seasonordate == 'Date'",
+                                                                 dateInput('keeper_date1',
+                                                                           'From:',
+                                                                           value = min(playerxgoals$date[playerxgoals$Season == max(playerxgoals$Season)]),
+                                                                           min = min(playerxgoals$date),
+                                                                           max = max(playerxgoals$date),
+                                                                           format = 'mm/dd/yyyy'),
+                                                                 dateInput('keeper_date2',
+                                                                           'To:',
+                                                                           value = max(playerxgoals$date),
+                                                                           min = min(playerxgoals$date),
+                                                                           max = max(playerxgoals$date),
+                                                                           format = 'mm/dd/yyyy')
+                                                ),                  
+                                                
+                                                checkboxInput('keeper_byteams',
+                                                              label = 'Split keepers by teams',
+                                                              value = F),
+                                                checkboxInput('keeper_othershots',
+                                                              label = 'Include non PK/FK',
+                                                              value = T),
+                                                checkboxInput('keeper_pk',
+                                                              label = 'Include PKs',
+                                                              value = F),
+                                                checkboxInput('keeper_fk',
+                                                              label = 'Include FKs',
+                                                              value = F)),
+                                   
+                                   mainPanel(
+                                     h1('Keeper xGoals'),
+                                     p(paste0('Updated through games on ', max(as.Date(keeperxgoals$date)))),
+                                     downloadButton('keeper_download', 'Download CSV'),
+                                     br(),
+                                     br(),
+                                     DT::dataTableOutput('keepertable')
+                                   )
+                                 ))
+             )
+  )
+)

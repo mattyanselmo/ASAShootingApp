@@ -1,0 +1,128 @@
+# teamxgoals <- readRDS('xGoalsByTeam.rds')
+# conferences <- read.csv('teamsbyconferencebyseason.csv')
+# date1 = as.Date('2000-01-01')
+# date2 = as.Date('9999-12-31')
+# season = 2017
+# even = T
+# pattern = 'All'
+# pergame = F
+# advanced = F
+
+teamxgoals.func <- function(teamxgoals = teamxgoals, 
+                            date1 = as.Date('2000-01-01'), 
+                            date2 = as.Date('9999-12-31'),
+                            season = 2011:2017,
+                            even = F,
+                            pattern = 'All',
+                            pergame = F,
+                            advanced = F){
+  
+  
+  
+  tempdat <- teamxgoals %>%
+    filter(date >= date1 & date <= date2,
+           Season %in% season) %>%
+    group_by(Team) %>%
+    mutate(gamesplayed = length(unique(date)),
+           Pts = ifelse(is.na(Pts), 0, Pts)) %>%
+    ungroup()
+  
+  ptsdat <- unique(tempdat %>% select(Team, date, Pts)) %>%
+    group_by(Team) %>%
+    summarize(Pts = sum(Pts)) %>%
+    ungroup()
+  
+  tempdat <- tempdat %>%
+    filter(evengamestate %in% ifelse(rep(even, 2), c(1, 1), c(0, 1)))
+  
+  if(pattern != 'All'){
+    tempdat <- tempdat %>% filter(patternOfPlay.model == pattern)
+  }
+  
+  if(pergame){
+    if(advanced){
+      aggdata <- tempdat %>%
+        group_by(Team) %>%
+        summarize(Games = gamesplayed[1],
+                  ShtF = sum(shots)/Games,
+                  ShtA = sum(shotsA)/Games,
+                  `Unassted%F` = (sum(shots) - sum(assisted))/sum(shots),
+                  `Unassted%A` = (sum(shotsA) - sum(assistedA))/sum(shotsA),
+                  xGF = sum(xGF)/Games,
+                  xGA = sum(xGA)/Games,
+                  xGD = xGF - xGA,
+                  GD = (sum(goals) - sum(goalsA))/Games,
+                  TSR = sum(shots)/sum(shotsA),
+                  PDO = 1000*(sum(goals)/sum(shots) + 1 - sum(goalsA)/sum(shotsA))) %>%
+        ungroup()
+    }else{
+    aggdata <- tempdat %>%
+      group_by(Team) %>%
+      summarize(Games = gamesplayed[1],
+                ShtF = sum(shots)/Games,
+                SoTF = sum(ontarget)/Games,
+                GF = sum(goals)/Games,
+                AccuracyF = SoTF/ShtF,
+                `Finish%F` = sum(goals)/sum(shots),
+                ShtA = sum(shotsA)/Games,
+                SoTA = sum(ontargetA)/Games,
+                GA = sum(goalsA)/Games,
+                AccuracyA = SoTA/ShtA,
+                `Finish%A` = sum(goalsA)/sum(shotsA),
+                GD = GF - GA)
+    }
+  }else{
+    if(advanced){
+      aggdata <- tempdat %>%
+        group_by(Team) %>%
+        summarize(Games = gamesplayed[1],
+                  ShtF = sum(shots),
+                  ShtA = sum(shotsA),
+                  `Unassted%F` = (sum(shots) - sum(assisted))/sum(shots),
+                  `Unassted%A` = (sum(shotsA) - sum(assistedA))/sum(shotsA),
+                  xGF = sum(xGF),
+                  xGA = sum(xGA),
+                  xGD = xGF - xGA,
+                  GD = sum(goals) - sum(goalsA),
+                  TSR = sum(shots)/sum(shotsA),
+                  PDO = 1000*(sum(goals)/sum(shots) + 1 - sum(goalsA)/sum(shotsA)))
+    }else{
+      aggdata <- tempdat %>%
+        group_by(Team) %>%
+        summarize(Games = gamesplayed[1],
+                  ShtF = sum(shots),
+                  SoTF = sum(ontarget),
+                  GF = sum(goals),
+                  AccuracyF = SoTF/ShtF,
+                  `Finish%F` = sum(goals)/sum(shots),
+                  ShtA = sum(shotsA),
+                  SoTA = sum(ontargetA),
+                  GA = sum(goalsA),
+                  AccuracyA = SoTA/ShtA,
+                  `Finish%A` = sum(goalsA)/sum(shotsA),
+                  GD = GF - GA)
+    }
+  }
+  
+  aggdata <- aggdata %>%
+    left_join(ptsdat, 'Team')
+  
+  if(length(season) == 1){
+  aggdata <- aggdata %>%
+    left_join(conferences %>% filter(Season == season) %>% select(-Season), 
+              by = c('Team'))
+  }
+  
+  return(aggdata %>% 
+           arrange(desc(Pts)))
+  
+}
+
+# teamxgoals.func(teamxgoals = teamxgoals,
+#                 date1 = as.Date('2000-01-01'),
+#                 date2 = as.Date('9999-12-31'),
+#                 season = 2011:2017,
+#                 even = F,
+#                 pattern = 'All',
+#                 pergame = T,
+#                 advanced = F) -> x
