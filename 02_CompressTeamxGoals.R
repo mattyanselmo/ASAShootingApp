@@ -1,4 +1,4 @@
-shooting <- readRDS('AllShotsData2011-2017.rds')
+shooting <- readRDS('IgnoreList/AllShotsData2011-2017.rds')
 library(dplyr)
 source('xGoalByGameFunction.R')
 xGByGame <- xG.by.game(shooting) %>%
@@ -42,5 +42,5 @@ teamxgoals <- teamxgoalsF %>%
   mutate(Season = as.numeric(format(date, '%Y'))) %>%
   left_join(Pts, by = c('Team', 'date'))
 
-saveRDS(teamxgoals, file = 'xGoalsByTeam.rds')
-saveRDS(xGByGame, file = 'xGoalsByTeam_byGame.rds')
+saveRDS(teamxgoals, file = 'IgnoreList/xGoalsByTeam.rds')
+saveRDS(xGByGame, file = 'IgnoreList/xGoalsByTeam_byGame.rds')

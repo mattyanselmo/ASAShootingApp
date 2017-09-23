@@ -1,4 +1,4 @@
-shooting <- readRDS('AllShotsData2011-2017.rds')
+shooting <- readRDS('IgnoreList/AllShotsData2011-2017.rds')
 library(dplyr)
 
 shooting <- shooting %>%
@@ -38,4 +38,4 @@ playerxgoals <- shooterxgoals %>%
   filter(!is.na(date)) %>%
   mutate(Season = as.numeric(format(date, '%Y')))
 
-saveRDS(playerxgoals, file = 'xGoalsByPlayer.rds')
+saveRDS(playerxgoals, file = 'IgnoreList/xGoalsByPlayer.rds')

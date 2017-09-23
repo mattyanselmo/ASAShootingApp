@@ -1,1 +1,1 @@
-shooting <- readRDS('AllShotsData2011-2017.rds')
+shooting <- readRDS('IgnoreList/AllShotsData2011-2017.rds')
