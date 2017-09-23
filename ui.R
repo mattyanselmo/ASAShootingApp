@@ -66,10 +66,10 @@ shinyUI(
                                                               value = T),
                                                 checkboxInput('shooting_pk',
                                                               label = 'Include PKs',
-                                                              value = F),
+                                                              value = T),
                                                 checkboxInput('shooting_fk',
                                                               label = 'Include FKs',
-                                                              value = F)),
+                                                              value = T)),
                                    
                                    mainPanel(
                                      h1('Shooter xGoals'),
@@ -220,10 +220,10 @@ shinyUI(
                                                               value = T),
                                                 checkboxInput('keeper_pk',
                                                               label = 'Include PKs',
-                                                              value = F),
+                                                              value = T),
                                                 checkboxInput('keeper_fk',
                                                               label = 'Include FKs',
-                                                              value = F)),
+                                                              value = T)),
                                    
                                    mainPanel(
                                      h1('Keeper xGoals'),
