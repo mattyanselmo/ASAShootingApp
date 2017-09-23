@@ -4,6 +4,18 @@ library(dplyr)
 teamnames <- read.csv('TeamNameLinks.csv', stringsAsFactors = F)
 #load in the requisite data
 
+if(file.exists('C:/Users/Matthias')){
+  temp <- read.csv('C:/Users/Matthias/Dropbox/ASA Blog Data/2017 Stats/shots with xG.csv')
+  write.csv(temp, 'C:/Users/Matthias/Documents/GitHub/ASAShootingApp/IgnoreList/shots with xG.csv')
+  rm(temp)
+  gc()
+} else if(file.exists('C:/Users/Matthias.Kullowatz')){
+  temp <- read.csv('C:/Users/Matthias.Kullowatz/Dropbox/ASA Blog Data/2017 Stats/shots with xG.csv')
+  write.csv(temp, 'C:/Users/Matthias.Kullowatz/Documents/GitHub/ASAShootingApp/IgnoreList/shots with xG.csv')
+  rm(temp)
+  gc()
+}
+
 shooting15 <- bind_rows(lapply(paste0('IgnoreList/', grep('shots with xG', list.files('IgnoreList'), value = T)), 
                                function(x) read.csv(x, stringsAsFactors = F) %>% select(-X))) %>%
   left_join(teamnames, by = c('team' = 'FullName')) %>%
