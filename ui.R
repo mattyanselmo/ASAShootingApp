@@ -113,8 +113,12 @@ shinyUI(
                                                             choices = c('All', sort(unique(teamxgoals$patternOfPlay.model))),
                                                             selected = 'All'),
                                                 checkboxInput('team_evenstate',
-                                                              label = 'Even gamesate only?',
-                                                              value = F)),
+                                                              label = 'Even gamesate only',
+                                                              value = F),
+                                                checkboxGroupInput('team_home',
+                                                              label = 'Venue:',
+                                                              choices = c('Home', 'Away'),
+                                                              selected = c('Home', 'Away'))),
                                    mainPanel(
                                      h1('Team shots data'),
                                      p(paste0('Updated through games on ', max(as.Date(teamxgoals$date)))),
@@ -125,11 +129,11 @@ shinyUI(
                                                 br(),
                                                 conditionalPanel(condition = "input.team_seasonordate == 'Season' && input.team_seasonfilter.length == 1",
                                                                  h2('Western conference')),
-                                                DT::dataTableOutput('teamtotalxgoalswest'),
+                                                div(DT::dataTableOutput('teamtotalxgoalswest')),
                                                 br(),
-                                                conditionalPanel(condition = "input.team_seasonordate == 'Season' && input.team_seasonfilter.length == 1",
+                                                div(conditionalPanel(condition = "input.team_seasonordate == 'Season' && input.team_seasonfilter.length == 1",
                                                                  h2('Eastern conference'),
-                                                                 DT::dataTableOutput('teamtotalxgoalseast'))
+                                                                 DT::dataTableOutput('teamtotalxgoalseast')))
                                        ),
                                        tabPanel('Per game',
                                                 downloadButton('team_download_pergame', 'Download CSV'),
@@ -137,11 +141,11 @@ shinyUI(
                                                 br(),
                                                 conditionalPanel(condition = "input.team_seasonordate == 'Season' && input.team_seasonfilter.length == 1",
                                                                  h2('Western conference')),
-                                                DT::dataTableOutput('teampergamexgoalswest'),
+                                                div(DT::dataTableOutput('teampergamexgoalswest')),
                                                 br(),
                                                 conditionalPanel(condition = "input.team_seasonordate == 'Season' && input.team_seasonfilter.length == 1",
                                                                  h2('Eastern conference'),
-                                                                 DT::dataTableOutput('teampergamexgoalseast'))
+                                                                 div(DT::dataTableOutput('teampergamexgoalseast')))
                                        )
                                      )
                                    )

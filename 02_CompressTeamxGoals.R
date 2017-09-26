@@ -11,7 +11,8 @@ shooting <- shooting %>%
 
 teamxgoalsF <- shooting %>%
   group_by(Team = team, date, evengamestate, patternOfPlay.model) %>%
-  summarize(shots = n(),
+  summarize(home = ifelse(hteam[1] == Team[1], 1, 0),
+            shots = n(),
             assisted = sum(assisted),
             ontarget = sum(result %in% c('Goal', 'Saved', 'Blocked off line')),
             goals = sum(result == 'Goal'),
@@ -26,7 +27,8 @@ Pts <- shooting %>%
 
 teamxgoalsA <- shooting %>%
   group_by(Team = team.1, date, evengamestate, patternOfPlay.model) %>%
-  summarize(shotsA = n(),
+  summarize(home = ifelse(hteam[1] == Team[1], 1, 0),
+            shotsA = n(),
             ontargetA = sum(result %in% c('Goal', 'Saved', 'Blocked off line')),
             goalsA = sum(result == 'Goal'),
             assistedA = sum(assisted),
@@ -35,7 +37,7 @@ teamxgoalsA <- shooting %>%
             xGA = sum(xGTeam))
 
 teamxgoals <- teamxgoalsF %>%
-  full_join(teamxgoalsA, by = c('Team', 'date', 'evengamestate', 'patternOfPlay.model')) %>%
+  full_join(teamxgoalsA, by = c('Team', 'date', 'evengamestate', 'patternOfPlay.model', 'home')) %>%
   mutate_each(funs(((function(x) {ifelse(is.na(x), 0, as.numeric(x))})(.))), -c(Team, date, evengamestate, patternOfPlay.model)) %>%
   ungroup() %>%
   filter(!is.na(date)) %>%

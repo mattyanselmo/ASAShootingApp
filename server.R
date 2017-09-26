@@ -148,7 +148,8 @@ shinyServer(function(input, output) {
                             even = input$team_evenstate,
                             pattern = input$team_pattern,
                             pergame = F,
-                            advanced = ifelse(input$team_advanced == 'Basic stats', F, T))
+                            advanced = ifelse(input$team_advanced == 'Basic stats', F, T),
+                            venue = input$team_home)
       
     } else{
       dt <- teamxgoals.func(teamxgoals, 
@@ -158,7 +159,8 @@ shinyServer(function(input, output) {
                             even = input$team_evenstate,
                             pattern = input$team_pattern,
                             pergame = F,
-                            advanced = ifelse(input$team_advanced == 'Basic stats', F, T))
+                            advanced = ifelse(input$team_advanced == 'Basic stats', F, T),
+                            venue = input$team_home)
     }
     
     is.num <- sapply(dt, is.numeric)
@@ -186,7 +188,8 @@ shinyServer(function(input, output) {
                             even = input$team_evenstate,
                             pattern = input$team_pattern,
                             pergame = F,
-                            advanced = ifelse(input$team_advanced == 'Basic stats', F, T))
+                            advanced = ifelse(input$team_advanced == 'Basic stats', F, T),
+                            venue = input$team_home)
       
     } else{
       dt <- teamxgoals.func(teamxgoals, 
@@ -196,7 +199,8 @@ shinyServer(function(input, output) {
                             even = input$team_evenstate,
                             pattern = input$team_pattern,
                             pergame = F,
-                            advanced = ifelse(input$team_advanced == 'Basic stats', F, T))
+                            advanced = ifelse(input$team_advanced == 'Basic stats', F, T),
+                            venue = input$team_home)
     }
     
     is.num <- sapply(dt, is.numeric)
@@ -227,7 +231,8 @@ shinyServer(function(input, output) {
                               even = input$team_evenstate,
                               pattern = input$team_pattern,
                               pergame = F,
-                              advanced = ifelse(input$team_advanced == 'Basic stats', F, T))
+                              advanced = ifelse(input$team_advanced == 'Basic stats', F, T),
+                              venue = input$team_home)
         
       } else{
         dt <- teamxgoals.func(teamxgoals, 
@@ -237,7 +242,8 @@ shinyServer(function(input, output) {
                               even = input$team_evenstate,
                               pattern = input$team_pattern,
                               pergame = F,
-                              advanced = ifelse(input$team_advanced == 'Basic stats', F, T))
+                              advanced = ifelse(input$team_advanced == 'Basic stats', F, T),
+                              venue = input$team_home)
       }
       
       write.csv(dt, file, row.names = F)
@@ -253,7 +259,8 @@ shinyServer(function(input, output) {
                             even = input$team_evenstate,
                             pattern = input$team_pattern,
                             pergame = T,
-                            advanced = ifelse(input$team_advanced == 'Basic stats', F, T))
+                            advanced = ifelse(input$team_advanced == 'Basic stats', F, T),
+                            venue = input$team_home)
       
     } else{
       dt <- teamxgoals.func(teamxgoals, 
@@ -263,7 +270,8 @@ shinyServer(function(input, output) {
                             even = input$team_evenstate,
                             pattern = input$team_pattern,
                             pergame = T,
-                            advanced = ifelse(input$team_advanced == 'Basic stats', F, T))
+                            advanced = ifelse(input$team_advanced == 'Basic stats', F, T),
+                            venue = input$team_home)
     }
     
     is.num <- sapply(dt, is.numeric)
@@ -291,7 +299,8 @@ shinyServer(function(input, output) {
                             even = input$team_evenstate,
                             pattern = input$team_pattern,
                             pergame = T,
-                            advanced = ifelse(input$team_advanced == 'Basic stats', F, T))
+                            advanced = ifelse(input$team_advanced == 'Basic stats', F, T),
+                            venue = input$team_home)
       
     } else{
       dt <- teamxgoals.func(teamxgoals, 
@@ -301,7 +310,8 @@ shinyServer(function(input, output) {
                             even = input$team_evenstate,
                             pattern = input$team_pattern,
                             pergame = T,
-                            advanced = ifelse(input$team_advanced == 'Basic stats', F, T))
+                            advanced = ifelse(input$team_advanced == 'Basic stats', F, T),
+                            venue = input$team_home)
     }
     
     is.num <- sapply(dt, is.numeric)
@@ -332,7 +342,8 @@ shinyServer(function(input, output) {
                               even = input$team_evenstate,
                               pattern = input$team_pattern,
                               pergame = T,
-                              advanced = ifelse(input$team_advanced == 'Basic stats', F, T))
+                              advanced = ifelse(input$team_advanced == 'Basic stats', F, T),
+                              venue = input$team_home)
         
       } else{
         dt <- teamxgoals.func(teamxgoals, 
@@ -342,7 +353,8 @@ shinyServer(function(input, output) {
                               even = input$team_evenstate,
                               pattern = input$team_pattern,
                               pergame = T,
-                              advanced = ifelse(input$team_advanced == 'Basic stats', F, T))
+                              advanced = ifelse(input$team_advanced == 'Basic stats', F, T),
+                              venue = input$team_home)
       }
       write.csv(dt, file, row.names = F)
     }

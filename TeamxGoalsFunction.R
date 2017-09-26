@@ -1,4 +1,4 @@
-# teamxgoals <- readRDS('xGoalsByTeam.rds')
+# teamxgoals <- readRDS('IgnoreList/xGoalsByTeam.rds')
 # conferences <- read.csv('teamsbyconferencebyseason.csv')
 # date1 = as.Date('2000-01-01')
 # date2 = as.Date('9999-12-31')
@@ -7,6 +7,9 @@
 # pattern = 'All'
 # pergame = F
 # advanced = F
+# venue = c('Home', 'Away')
+# venue = 'Home'
+# venue = 'Away'
 
 teamxgoals.func <- function(teamxgoals = teamxgoals, 
                             date1 = as.Date('2000-01-01'), 
@@ -15,13 +18,15 @@ teamxgoals.func <- function(teamxgoals = teamxgoals,
                             even = F,
                             pattern = 'All',
                             pergame = F,
-                            advanced = F){
+                            advanced = F,
+                            venue = c('Home', 'Away')){
   
   
   
   tempdat <- teamxgoals %>%
     filter(date >= date1 & date <= date2,
-           Season %in% season) %>%
+           Season %in% season,
+           home %in% ifelse(venue == 'Home', 1, 0)) %>%
     group_by(Team) %>%
     mutate(gamesplayed = length(unique(date)),
            Pts = ifelse(is.na(Pts), 0, Pts)) %>%
@@ -125,4 +130,5 @@ teamxgoals.func <- function(teamxgoals = teamxgoals,
 #                 even = F,
 #                 pattern = 'All',
 #                 pergame = T,
-#                 advanced = F) -> x
+#                 advanced = F,
+#                 venue = c('Home')) -> x
