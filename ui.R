@@ -19,12 +19,18 @@ shinyUI(
                  If you have an idea for a feature that will make the app totes better,
                  then please don't hesitate to email Matthias (mkullowatz at gmail) with your idea."),
                       br(),
+                      p('Please note that the statistics displayed in this app are very similiar to, but not exactly
+                        the same as, those in our static tables. This is due to two things. 1) This app utilizes
+                        updated xGoal models, fit through 2016, with a better method of capturing penalty kicks. 2)
+                        We have not imported minutes data into this app yet. For this second reason, we will keep the 
+                        static tables up on the site to include per-minute based statistics.'),
+                      br(),
                       p('A quick rundown of what we have here. Under the xGoals tab, you will find four subtabs.
-                 These subtabs break the data summary down by shooters (and key passers), teams, and keepers.
+                 These subtabs summarize the data by players (non-GK), teams, and keepers.
                  There are options to filter by season and date on each subtab, as well as other tab-specific
                  filters and sorting tools that we hope prove intuitive to use and fun to play with.')),
              navbarMenu(strong('xGoals'),
-                        tabPanel('Shooter',
+                        tabPanel('Players',
                                  sidebarLayout(
                                    sidebarPanel(width = 2,
                                                 numericInput('shooting_minshots',
@@ -72,7 +78,7 @@ shinyUI(
                                                               value = T)),
                                    
                                    mainPanel(
-                                     h1('Shooter xGoals'),
+                                     h1('Player xGoals'),
                                      p(paste0('Updated through games on ', max(as.Date(playerxgoals$date)))),
                                      downloadButton('player_download', 'Download CSV'),
                                      br(),
@@ -80,7 +86,7 @@ shinyUI(
                                      DT::dataTableOutput('shootertable')
                                    )
                                  )),
-                        tabPanel('Team',
+                        tabPanel('Teams',
                                  sidebarLayout(
                                    sidebarPanel(width = 2,
                                                 radioButtons('team_advanced',

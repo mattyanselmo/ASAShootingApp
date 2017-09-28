@@ -109,8 +109,14 @@ teamxgoals.func <- function(teamxgoals = teamxgoals,
     }
   }
   
-  aggdata <- aggdata %>%
-    left_join(ptsdat, 'Team')
+  if(pergame){
+    aggdata <- aggdata %>%
+      left_join(ptsdat, 'Team') %>%
+      mutate(Pts = Pts/Games)
+  } else{
+    aggdata <- aggdata %>%
+      left_join(ptsdat, 'Team')
+  }
   
   if(length(season) == 1){
   aggdata <- aggdata %>%
@@ -126,9 +132,9 @@ teamxgoals.func <- function(teamxgoals = teamxgoals,
 # teamxgoals.func(teamxgoals = teamxgoals,
 #                 date1 = as.Date('2000-01-01'),
 #                 date2 = as.Date('9999-12-31'),
-#                 season = 2011:2017,
+#                 season = 2017,
 #                 even = F,
 #                 pattern = 'All',
 #                 pergame = T,
 #                 advanced = F,
-#                 venue = c('Home')) -> x
+#                 venue = c('Home', 'Away')) -> x
