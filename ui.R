@@ -19,12 +19,18 @@ shinyUI(
                  If you have an idea for a feature that will make the app totes better,
                  then please don't hesitate to email Matthias (mkullowatz at gmail) with your idea."),
                       br(),
+                      p('Please note that the statistics displayed in this app are very similiar to, but not exactly
+                        the same as, those in our static tables. This is due to two things. 1) This app utilizes
+                        updated xGoal models, fit through 2016, with a better method of capturing penalty kicks. 2)
+                        We have not imported minutes data into this app yet. For this second reason, we will keep the 
+                        static tables up on the site to include per-minute based statistics.'),
+                      br(),
                       p('A quick rundown of what we have here. Under the xGoals tab, you will find four subtabs.
-                 These subtabs break the data summary down by shooters (and key passers), teams, and keepers.
+                 These subtabs summarize the data by players (non-GK), teams, and keepers.
                  There are options to filter by season and date on each subtab, as well as other tab-specific
                  filters and sorting tools that we hope prove intuitive to use and fun to play with.')),
              navbarMenu(strong('xGoals'),
-                        tabPanel('Shooter',
+                        tabPanel('Players',
                                  sidebarLayout(
                                    sidebarPanel(width = 2,
                                                 numericInput('shooting_minshots',
@@ -61,6 +67,9 @@ shinyUI(
                                                 checkboxInput('shooting_byteams',
                                                               label = 'Split players by teams',
                                                               value = F),
+                                                checkboxInput('shooting_byseasons',
+                                                              label = 'Split players by seasons',
+                                                              value = T),
                                                 checkboxInput('shooting_other',
                                                               label = 'Include non PK/FK',
                                                               value = T),
@@ -72,7 +81,7 @@ shinyUI(
                                                               value = T)),
                                    
                                    mainPanel(
-                                     h1('Shooter xGoals'),
+                                     h1('Player xGoals'),
                                      p(paste0('Updated through games on ', max(as.Date(playerxgoals$date)))),
                                      downloadButton('player_download', 'Download CSV'),
                                      br(),
@@ -80,7 +89,7 @@ shinyUI(
                                      DT::dataTableOutput('shootertable')
                                    )
                                  )),
-                        tabPanel('Team',
+                        tabPanel('Teams',
                                  sidebarLayout(
                                    sidebarPanel(width = 2,
                                                 radioButtons('team_advanced',
@@ -113,8 +122,12 @@ shinyUI(
                                                             choices = c('All', sort(unique(teamxgoals$patternOfPlay.model))),
                                                             selected = 'All'),
                                                 checkboxInput('team_evenstate',
-                                                              label = 'Even gamesate only?',
-                                                              value = F)),
+                                                              label = 'Even gamesate only',
+                                                              value = F),
+                                                checkboxGroupInput('team_home',
+                                                              label = 'Venue:',
+                                                              choices = c('Home', 'Away'),
+                                                              selected = c('Home', 'Away'))),
                                    mainPanel(
                                      h1('Team shots data'),
                                      p(paste0('Updated through games on ', max(as.Date(teamxgoals$date)))),
@@ -123,13 +136,13 @@ shinyUI(
                                                 downloadButton('team_download', 'Download CSV'),
                                                 br(),
                                                 br(),
-                                                conditionalPanel(condition = "input.team_seasonordate == 'Season' && input.team_seasonfilter.length == 1",
+                                                div(id = 'west', conditionalPanel(condition = "input.team_seasonordate == 'Season' && input.team_seasonfilter.length == 1",
                                                                  h2('Western conference')),
-                                                DT::dataTableOutput('teamtotalxgoalswest'),
+                                                DT::dataTableOutput('teamtotalxgoalswest')),
                                                 br(),
-                                                conditionalPanel(condition = "input.team_seasonordate == 'Season' && input.team_seasonfilter.length == 1",
+                                                div(id = 'east', conditionalPanel(condition = "input.team_seasonordate == 'Season' && input.team_seasonfilter.length == 1",
                                                                  h2('Eastern conference'),
-                                                                 DT::dataTableOutput('teamtotalxgoalseast'))
+                                                                 DT::dataTableOutput('teamtotalxgoalseast')))
                                        ),
                                        tabPanel('Per game',
                                                 downloadButton('team_download_pergame', 'Download CSV'),
@@ -137,11 +150,11 @@ shinyUI(
                                                 br(),
                                                 conditionalPanel(condition = "input.team_seasonordate == 'Season' && input.team_seasonfilter.length == 1",
                                                                  h2('Western conference')),
-                                                DT::dataTableOutput('teampergamexgoalswest'),
+                                                div(DT::dataTableOutput('teampergamexgoalswest')),
                                                 br(),
                                                 conditionalPanel(condition = "input.team_seasonordate == 'Season' && input.team_seasonfilter.length == 1",
                                                                  h2('Eastern conference'),
-                                                                 DT::dataTableOutput('teampergamexgoalseast'))
+                                                                 div(DT::dataTableOutput('teampergamexgoalseast')))
                                        )
                                      )
                                    )
@@ -213,8 +226,11 @@ shinyUI(
                                                 ),                  
                                                 
                                                 checkboxInput('keeper_byteams',
-                                                              label = 'Split keepers by teams',
+                                                              label = 'Split by teams',
                                                               value = F),
+                                                checkboxInput('keeper_byseasons',
+                                                              label = 'Split by seasons',
+                                                              value = T),
                                                 checkboxInput('keeper_othershots',
                                                               label = 'Include non PK/FK',
                                                               value = T),
