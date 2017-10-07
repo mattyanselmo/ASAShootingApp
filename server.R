@@ -413,4 +413,42 @@ shinyServer(function(input, output) {
     }
   )
   
+  output$shooterplot <- renderPlot({
+    if(input$shooting_seasonordate == 'Season'){
+      dt <- shooterxgoals.func(playerxgoals,
+                               date1 = as.Date('2000-01-01'),
+                               date2 = as.Date('9999-12-31'),
+                               season = input$shooting_seasonfilter,
+                               shotfilter = input$shooting_minshots,
+                               keyfilter = input$shooting_minkeypasses,
+                               byteams = input$shooting_byteams,
+                               byseasons = input$shooting_byseasons,
+                               OtherShots = input$shooting_other,
+                               FK = input$shooting_fk,
+                               PK = input$shooting_pk)
+    } else{
+      dt <- shooterxgoals.func(playerxgoals,
+                               date1 = input$shooting_date1,
+                               date2 = input$shooting_date2,
+                               season = min(playerxgoals$Season):max(playerxgoals$Season),
+                               shotfilter = input$shooting_minshots,
+                               keyfilter = input$shooting_minkeypasses,
+                               byteams = input$shooting_byteams,
+                               byseasons = input$shooting_byseasons,
+                               OtherShots = input$shooting_other,
+                               FK = input$shooting_fk,
+                               PK = input$shooting_pk)
+    }
+    
+    ## PIPE SOME GGPLOT ####
+    
+    dt %>%
+      mutate(`xG/shot` = xG/Shots,
+             `xA/shot` = xA/Shots) %>%
+      ggplot(
+        aes_string(x = input$shooterplot_xvar, y = input$shooterplot_yvar)) +
+      
+    
+  })
+  
 })

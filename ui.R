@@ -86,8 +86,23 @@ shinyUI(
                                      downloadButton('player_download', 'Download CSV'),
                                      br(),
                                      br(),
-                                     DT::dataTableOutput('shootertable')
-                                   )
+                                     tabsetPanel(
+                                       tabPanel('Table',
+                                                DT::dataTableOutput('shootertable')
+                                       ),
+                                       tabPanel('Visuals',
+                                                renderPlot('shooterplot'),
+                                                fluidPage(fluidRow(
+                                                  column(3,
+                                                         selectInput('shooterplot_xvar',
+                                                                     label = 'X-axis variable',
+                                                                     choices = c('xG', 'xA', 'xG/shot', 'xA/shot'),
+                                                                     selected ='xG')),
+                                                  column(3,
+                                                         selectInput('shooterplot_yvar',
+                                                                     label = 'Y-axis variable',
+                                                                     choices = c('xG', 'xA', 'xG/shot', 'xA/shot'),
+                                                                     selected ='xA')))))))
                                  )),
                         tabPanel('Teams',
                                  sidebarLayout(
