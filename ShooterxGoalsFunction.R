@@ -112,11 +112,11 @@ shooterxgoals.func <- function(playerxgoals = playerxgoals,
   
 }
 
-# shooterxgoals.func(playerxgoals = readRDS('xGoalsByPlayer.rds') %>%
+# shooterxgoals.func(playerxgoals = readRDS('IgnoreList/xGoalsByPlayer.rds') %>%
 #                      mutate(date = as.Date(date, format = '%m/%d/%Y')),
 #                    date1 = as.Date('2000-01-01'),
 #                    date2 = as.Date('9999-12-31'),
-#                    season = 2011:2017,
+#                    season = 2017,
 #                    shotfilter = 10,
 #                    keyfilter = 10,
 #                    byteams = T,

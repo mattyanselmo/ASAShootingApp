@@ -368,7 +368,7 @@ shinyServer(function(input, output) {
     }
   )
   
-  ## Add output for by game xgoals and download handers (copy code from above)
+  ## XGoals by game ####
   output$teamxgoalsbygame <- renderDataTable({
     if(input$teambygame_seasonordate == 'Season'){
       dt <- xgbygame %>%
@@ -413,7 +413,9 @@ shinyServer(function(input, output) {
     }
   )
   
+  ## Shooter plots
   output$shooterplot <- renderPlot({
+    
     if(input$shooting_seasonordate == 'Season'){
       dt <- shooterxgoals.func(playerxgoals,
                                date1 = as.Date('2000-01-01'),
@@ -425,7 +427,9 @@ shinyServer(function(input, output) {
                                byseasons = input$shooting_byseasons,
                                OtherShots = input$shooting_other,
                                FK = input$shooting_fk,
-                               PK = input$shooting_pk)
+                               PK = input$shooting_pk) %>%
+        mutate(xGperShot = xG/Shots,
+               xAperShot = xA/Shots)
     } else{
       dt <- shooterxgoals.func(playerxgoals,
                                date1 = input$shooting_date1,
@@ -437,18 +441,35 @@ shinyServer(function(input, output) {
                                byseasons = input$shooting_byseasons,
                                OtherShots = input$shooting_other,
                                FK = input$shooting_fk,
-                               PK = input$shooting_pk)
+                               PK = input$shooting_pk) %>%
+        mutate(xGperShot = xG/Shots,
+               xAperShot = xA/Shots)
     }
     
-    ## PIPE SOME GGPLOT ####
+    dt[['extreme']] <- rank(dt[[input$shooterplot_xvar]]) + rank(dt[[input$shooterplot_yvar]])
+    if(length(unique(dt$Season)) > 1){
+      dt[['plotnames']] <- paste(unlist(lapply(strsplit(dt$Player, " "), function(x) { return(x[length(x)]) })), dt$Season)
+      
+    }else{
+      dt[['plotnames']] <- unlist(lapply(strsplit(dt$Player, " "), function(x) { return(x[length(x)]) }))
+    }
     
-    dt %>%
-      mutate(`xG/shot` = xG/Shots,
-             `xA/shot` = xA/Shots) %>%
+    p <- dt  %>%
       ggplot(
         aes_string(x = input$shooterplot_xvar, y = input$shooterplot_yvar)) +
+      geom_point(color = '#0000cc') +
+      geom_text(aes(label = ifelse(dt$extreme >= sort(dt$extreme, decreasing = T)[min(input$shooterplot_howmany, nrow(dt))] |
+                                     dt[[input$shooterplot_xvar]] == max(dt[[input$shooterplot_xvar]]) |
+                                     dt[[input$shooterplot_yvar]] == max(dt[[input$shooterplot_yvar]]),
+                                   plotnames, ''), 
+                    hjust = 1),
+                size = 5,
+                check_overlap = T,
+                color = '#ff3300') +
+      theme(legend.position = "none")
+    p
       
     
-  })
+  }, height = 600, width = 800)
   
 })

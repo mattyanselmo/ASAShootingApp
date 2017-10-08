@@ -91,18 +91,23 @@ shinyUI(
                                                 DT::dataTableOutput('shootertable')
                                        ),
                                        tabPanel('Visuals',
-                                                renderPlot('shooterplot'),
+                                                
                                                 fluidPage(fluidRow(
                                                   column(3,
                                                          selectInput('shooterplot_xvar',
                                                                      label = 'X-axis variable',
-                                                                     choices = c('xG', 'xA', 'xG/shot', 'xA/shot'),
+                                                                     choices = c('xG', 'xA', 'xGperShot', 'xAperShot'),
                                                                      selected ='xG')),
                                                   column(3,
                                                          selectInput('shooterplot_yvar',
                                                                      label = 'Y-axis variable',
-                                                                     choices = c('xG', 'xA', 'xG/shot', 'xA/shot'),
-                                                                     selected ='xA')))))))
+                                                                     choices = c('xG', 'xA', 'xGperShot', 'xGperShot'),
+                                                                     selected ='xA')),
+                                                  column(3, 
+                                                         numericInput('shooterplot_howmany',
+                                                                      label = 'Label how many:',
+                                                                      value = 5, min = 1, max = 25, step = 1)))),
+                                                plotOutput('shooterplot'))))
                                  )),
                         tabPanel('Teams',
                                  sidebarLayout(
