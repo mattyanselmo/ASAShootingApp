@@ -1,8 +1,10 @@
 name: asashootingapp
 title:
+username:
 account: asashinyapps
 server: shinyapps.io
+hostUrl: https://api.shinyapps.io/v1
 appId: 218737
-bundleId: 1012740
+bundleId: 1018505
 url: https://asashinyapps.shinyapps.io/asashootingapp/
-when: 1507226144.90341
+when: 1507609856.08803
