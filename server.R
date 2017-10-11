@@ -428,8 +428,8 @@ shinyServer(function(input, output) {
                                OtherShots = input$shooting_other,
                                FK = input$shooting_fk,
                                PK = input$shooting_pk) %>%
-        mutate(xGperShot = xG/Shots,
-               xAperShot = xA/Shots)
+        mutate(xGperShot = ifelse(Shots > 0, xG/Shots, 0),
+               xAperPass = ifelse(KeyP > 0, xA/KeyP, 0))
     } else{
       dt <- shooterxgoals.func(playerxgoals,
                                date1 = input$shooting_date1,
@@ -442,8 +442,8 @@ shinyServer(function(input, output) {
                                OtherShots = input$shooting_other,
                                FK = input$shooting_fk,
                                PK = input$shooting_pk) %>%
-        mutate(xGperShot = xG/Shots,
-               xAperShot = xA/Shots)
+        mutate(xGperShot = ifelse(Shots > 0, xG/Shots, 0),
+               xAperPass = ifelse(KeyP > 0, xA/KeyP, 0))
     }
     
     dt[['extreme']] <- rank(dt[[input$shooterplot_xvar]]) + rank(dt[[input$shooterplot_yvar]])
@@ -456,20 +456,23 @@ shinyServer(function(input, output) {
     
     p <- dt  %>%
       ggplot(
-        aes_string(x = input$shooterplot_xvar, y = input$shooterplot_yvar)) +
+        aes_string(x = paste0('`', input$shooterplot_xvar, '`'), 
+                   y = paste0('`', input$shooterplot_yvar, '`'))) +
       geom_point(color = '#0000cc') +
-      geom_text(aes(label = ifelse(dt$extreme >= sort(dt$extreme, decreasing = T)[min(input$shooterplot_howmany, nrow(dt))] |
+      geom_text(aes(label = ifelse(dt$extreme >= sort(dt$extreme, decreasing = T)[min(5, nrow(dt))] |
                                      dt[[input$shooterplot_xvar]] == max(dt[[input$shooterplot_xvar]]) |
                                      dt[[input$shooterplot_yvar]] == max(dt[[input$shooterplot_yvar]]),
-                                   plotnames, ''), 
-                    hjust = 1),
+                                   dt$plotnames, ''), 
+                    hjust = 'inward'),
                 size = 5,
-                check_overlap = T,
+                check_overlap = F,
                 color = '#ff3300') +
-      theme(legend.position = "none")
+      theme(legend.position = "none",
+            axis.text = element_text(size = 14),
+            axis.title = element_text(size = 14))
     p
       
     
-  }, height = 600, width = 800)
+  }, height = 500, width = 700)
   
 })
