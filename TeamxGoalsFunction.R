@@ -1,15 +1,14 @@
-# teamxgoals <- readRDS('IgnoreList/xGoalsByTeam.rds')
-# conferences <- read.csv('teamsbyconferencebyseason.csv')
-# date1 = as.Date('2000-01-01')
-# date2 = as.Date('9999-12-31')
-# season = 2017
-# even = T
-# pattern = 'All'
-# pergame = F
-# advanced = F
-# venue = c('Home', 'Away')
-# venue = 'Home'
-# venue = 'Away'
+teamxgoals <- readRDS('IgnoreList/xGoalsByTeam.rds')
+conferences <- read.csv('teamsbyconferencebyseason.csv')
+date1 = as.Date('2000-01-01')
+date2 = as.Date('9999-12-31')
+season = 2016:2017
+even = T
+pattern = 'All'
+pergame = F
+advanced = F
+venue = c('Home', 'Away')
+byseasons = T
 
 teamxgoals.func <- function(teamxgoals = teamxgoals, 
                             date1 = as.Date('2000-01-01'), 
@@ -19,21 +18,20 @@ teamxgoals.func <- function(teamxgoals = teamxgoals,
                             pattern = 'All',
                             pergame = F,
                             advanced = F,
-                            venue = c('Home', 'Away')){
-  
-  
+                            venue = c('Home', 'Away'),
+                            byseasons = T){
   
   tempdat <- teamxgoals %>%
     filter(date >= date1 & date <= date2,
            Season %in% season,
            home %in% ifelse(venue == 'Home', 1, 0)) %>%
-    group_by(Team) %>%
+    group_by_(.dots = c('Team', 'Season')[c(T, byseasons)]) %>%
     mutate(gamesplayed = length(unique(date)),
            Pts = ifelse(is.na(Pts), 0, Pts)) %>%
     ungroup()
   
-  ptsdat <- unique(tempdat %>% select(Team, date, Pts)) %>%
-    group_by(Team) %>%
+  ptsdat <- unique(tempdat %>% select_(.dots = c('Team', 'Season', 'date', 'Pts')[c(T, byseasons, T, T)])) %>%
+    group_by_(.dots = c('Team', 'Season')[c(T, byseasons)]) %>%
     summarize(Pts = sum(Pts)) %>%
     ungroup()
   
@@ -47,7 +45,7 @@ teamxgoals.func <- function(teamxgoals = teamxgoals,
   if(pergame){
     if(advanced){
       aggdata <- tempdat %>%
-        group_by(Team) %>%
+        group_by_(.dots = c('Team', 'Season')[c(T, byseasons)]) %>%
         summarize(Games = gamesplayed[1],
                   ShtF = sum(shots)/Games,
                   ShtA = sum(shotsA)/Games,
@@ -62,7 +60,7 @@ teamxgoals.func <- function(teamxgoals = teamxgoals,
         ungroup()
     }else{
     aggdata <- tempdat %>%
-      group_by(Team) %>%
+      group_by_(.dots = c('Team', 'Season')[c(T, byseasons)]) %>%
       summarize(Games = gamesplayed[1],
                 ShtF = sum(shots)/Games,
                 SoTF = sum(ontarget)/Games,
@@ -79,7 +77,7 @@ teamxgoals.func <- function(teamxgoals = teamxgoals,
   }else{
     if(advanced){
       aggdata <- tempdat %>%
-        group_by(Team) %>%
+        group_by_(.dots = c('Team', 'Season')[c(T, byseasons)]) %>%
         summarize(Games = gamesplayed[1],
                   ShtF = sum(shots),
                   ShtA = sum(shotsA),
@@ -93,7 +91,7 @@ teamxgoals.func <- function(teamxgoals = teamxgoals,
                   PDO = 1000*(sum(goals)/sum(shots) + 1 - sum(goalsA)/sum(shotsA)))
     }else{
       aggdata <- tempdat %>%
-        group_by(Team) %>%
+        group_by_(.dots = c('Team', 'Season')[c(T, byseasons)]) %>%
         summarize(Games = gamesplayed[1],
                   ShtF = sum(shots),
                   SoTF = sum(ontarget),
@@ -111,11 +109,11 @@ teamxgoals.func <- function(teamxgoals = teamxgoals,
   
   if(pergame){
     aggdata <- aggdata %>%
-      left_join(ptsdat, 'Team') %>%
+      left_join(ptsdat, by = c('Team', 'Season')[c(T, byseasons)]) %>%
       mutate(Pts = Pts/Games)
   } else{
     aggdata <- aggdata %>%
-      left_join(ptsdat, 'Team')
+      left_join(ptsdat, by = c('Team', 'Season')[c(T, byseasons)])
   }
   
   if(length(season) == 1){
@@ -132,9 +130,10 @@ teamxgoals.func <- function(teamxgoals = teamxgoals,
 # teamxgoals.func(teamxgoals = teamxgoals,
 #                 date1 = as.Date('2000-01-01'),
 #                 date2 = as.Date('9999-12-31'),
-#                 season = 2017,
+#                 season = 2016:2017,
 #                 even = F,
 #                 pattern = 'All',
 #                 pergame = T,
-#                 advanced = F,
-#                 venue = c('Home', 'Away')) -> x
+#                 advanced = T,
+#                 venue = c('Home', 'Away'),
+#                 byseasons = T) -> x

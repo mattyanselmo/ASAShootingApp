@@ -139,6 +139,9 @@ shinyUI(
                                                                            max = max(teamxgoals$date),
                                                                            format = 'mm/dd/yyyy')
                                                 ),
+                                                checkboxInput('team_byseasons',
+                                                              label = 'Split teams by seasons',
+                                                              value = T),
                                                 selectInput('team_pattern',
                                                             'Pattern of play:',
                                                             choices = c('All', sort(unique(teamxgoals$patternOfPlay.model))),
