@@ -185,7 +185,7 @@ shinyServer(function(input, output) {
     datatable(dt,
               rownames = F,
               options(list(autoWidth = T,
-                           pageLength = 100,
+                           pageLength = nrow(dt),
                            dom = 't')))
   })
   
@@ -227,7 +227,7 @@ shinyServer(function(input, output) {
     datatable(dt,
               rownames = F,
               options(list(autoWidth = T,
-                           pageLength = 100,
+                           pageLength = nrow(dt),
                            dom = 't')))
   })
   
@@ -302,7 +302,7 @@ shinyServer(function(input, output) {
     datatable(dt,
               rownames = F,
               options(list(autoWidth = T,
-                           pageLength = 100,
+                           pageLength = nrow(dt),
                            dom = 't')))
   })
   
@@ -344,7 +344,7 @@ shinyServer(function(input, output) {
     datatable(dt,
               rownames = F,
               options(list(autoWidth = T,
-                           pageLength = 100,
+                           pageLength = nrow(dt),
                            dom = 't')))
   })
   

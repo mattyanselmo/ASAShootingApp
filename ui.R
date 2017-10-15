@@ -91,7 +91,6 @@ shinyUI(
                                                 DT::dataTableOutput('shootertable')
                                        ),
                                        tabPanel('Visuals',
-                                                
                                                 fluidPage(fluidRow(
                                                   column(4,
                                                          selectInput('shooterplot_xvar',
