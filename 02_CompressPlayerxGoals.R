@@ -32,8 +32,9 @@ passerxgoals <- shooting %>%
 
 playerxgoals <- shooterxgoals %>%
             full_join(passerxgoals, by = c('date', 'team', 'shooter' = 'passer', 'type')) %>%
+  ungroup() %>%
   mutate(player = shooter) %>%
-  mutate_each(funs(((function(x) {ifelse(is.na(x), 0, as.numeric(x))})(.))), -c(shooter, type, meddist, meddist.pass, player, date, team)) %>%
+  mutate_at(.funs = funs(((function(x) {ifelse(is.na(x), 0, as.numeric(x))})(.))), .vars = vars(-c(shooter, type, meddist, meddist.pass, player, date, team))) %>%
   ungroup() %>%
   filter(!is.na(date)) %>%
   mutate(Season = as.numeric(format(date, '%Y')))

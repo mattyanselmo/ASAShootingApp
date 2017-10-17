@@ -38,7 +38,8 @@ teamxgoalsA <- shooting %>%
 
 teamxgoals <- teamxgoalsF %>%
   full_join(teamxgoalsA, by = c('Team', 'date', 'evengamestate', 'patternOfPlay.model', 'home')) %>%
-  mutate_each(funs(((function(x) {ifelse(is.na(x), 0, as.numeric(x))})(.))), -c(Team, date, evengamestate, patternOfPlay.model)) %>%
+  ungroup() %>%
+  mutate_at(.funs = funs(((function(x) {ifelse(is.na(x), 0, as.numeric(x))})(.))), .vars = vars(-c(Team, date, evengamestate, patternOfPlay.model))) %>%
   ungroup() %>%
   filter(!is.na(date)) %>%
   mutate(Season = as.numeric(format(date, '%Y'))) %>%
