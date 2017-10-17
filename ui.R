@@ -179,6 +179,31 @@ shinyUI(
                                                 conditionalPanel(condition = "input.team_seasonordate == 'Season' && input.team_seasonfilter.length == 1",
                                                                  h2('Eastern conference'),
                                                                  div(DT::dataTableOutput('teampergamexgoalseast')))
+                                       ),
+                                       tabPanel('Visuals',
+                                                p("<i> All statistics on a per game basis </i>"),
+                                                fluidPage(fluidRow(
+                                                  column(4,
+                                                         selectInput('teamplot_xvar',
+                                                                     label = 'X-axis variable',
+                                                                     choices = c('Shots for' = 'ShtF', 'Shots against' = 'ShtA',
+                                                                                 'Unassisted % for' = 'Unassted%F',
+                                                                                 'Unassisted % against' = 'Unassted%A',
+                                                                                 'Cross % for' = 'CrossPctF', 'Cross % against' = 'CrossPctA',
+                                                                                 'Shots on target for' = 'OnTargetF', 'Shots on target against' = 'OnTargetA',
+                                                                                 'GF', 'GA', 'xGF', 'xGA', 'xGD', 'TSR', 'PDO', 'Points' = 'Pts'),
+                                                                     selected = 'xGF')),
+                                                  column(4,
+                                                         selectInput('teamplot_yvar',
+                                                                     label = 'Y-axis variable',
+                                                                     choices = c('Shots for' = 'ShtF', 'Shots against' = 'ShtA',
+                                                                                 'Unassisted % for' = 'Unassted%F',
+                                                                                 'Unassisted % against' = 'Unassted%A',
+                                                                                 'Cross % for' = 'CrossPctF', 'Cross % against' = 'CrossPctA',
+                                                                                 'Shots on target for' = 'OnTargetF', 'Shots on target against' = 'OnTargetA',
+                                                                                 'GF', 'GA', 'xGF', 'xGA', 'xGD', 'TSR', 'PDO', 'Points' = 'Pts'),
+                                                                     selected = 'xGA')),
+                                                  plotOutput('teamplot')))
                                        )
                                      )
                                    )

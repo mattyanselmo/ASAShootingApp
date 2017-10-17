@@ -1,14 +1,16 @@
+# # Function testing
 # teamxgoals <- readRDS('IgnoreList/xGoalsByTeam.rds')
 # conferences <- read.csv('teamsbyconferencebyseason.csv')
 # date1 = as.Date('2000-01-01')
 # date2 = as.Date('9999-12-31')
 # season = 2016:2017
-# even = T
+# even = F
 # pattern = 'All'
-# pergame = F
-# advanced = F
+# pergame = T
+# advanced = T
 # venue = c('Home', 'Away')
 # byseasons = T
+# plot = T
 
 teamxgoals.func <- function(teamxgoals = teamxgoals, 
                             date1 = as.Date('2000-01-01'), 
@@ -19,7 +21,8 @@ teamxgoals.func <- function(teamxgoals = teamxgoals,
                             pergame = F,
                             advanced = F,
                             venue = c('Home', 'Away'),
-                            byseasons = T){
+                            byseasons = T, 
+                            plot = F){
   
   tempdat <- teamxgoals %>%
     filter(date >= date1 & date <= date2,
@@ -44,6 +47,7 @@ teamxgoals.func <- function(teamxgoals = teamxgoals,
   
   if(pergame){
     if(advanced){
+      if(!plot){
       aggdata <- tempdat %>%
         group_by_(.dots = c('Team', 'Season')[c(T, byseasons)]) %>%
         summarize(Games = gamesplayed[1],
@@ -58,6 +62,28 @@ teamxgoals.func <- function(teamxgoals = teamxgoals,
                   TSR = sum(shots)/sum(shotsA),
                   PDO = 1000*(sum(goals)/sum(shots) + 1 - sum(goalsA)/sum(shotsA))) %>%
         ungroup()
+      }else{
+        aggdata <- tempdat %>%
+          group_by_(.dots = c('Team', 'Season')[c(T, byseasons)]) %>%
+          summarize(Games = gamesplayed[1],
+                    ShtF = sum(shots)/Games,
+                    ShtA = sum(shotsA)/Games,
+                    GF = sum(goals)/Games,
+                    GA = sum(goalsA)/Games,
+                    CrossPctF = sum(crossed)/sum(shots),
+                    CrossPctA = sum(crossedA)/sum(shotsA),
+                    OnTargetF = sum(ontarget)/Games,
+                    OnTargetA = sum(ontargetA)/Games,
+                    `Unassted%F` = (sum(shots) - sum(assisted))/sum(shots),
+                    `Unassted%A` = (sum(shotsA) - sum(assistedA))/sum(shotsA),
+                    xGF = sum(xGF)/Games,
+                    xGA = sum(xGA)/Games,
+                    xGD = xGF - xGA,
+                    GD = (sum(goals) - sum(goalsA))/Games,
+                    TSR = sum(shots)/sum(shotsA),
+                    PDO = 1000*(sum(goals)/sum(shots) + 1 - sum(goalsA)/sum(shotsA))) %>%
+          ungroup()
+      }
     }else{
     aggdata <- tempdat %>%
       group_by_(.dots = c('Team', 'Season')[c(T, byseasons)]) %>%
@@ -136,4 +162,5 @@ teamxgoals.func <- function(teamxgoals = teamxgoals,
 #                 pergame = T,
 #                 advanced = T,
 #                 venue = c('Home', 'Away'),
-#                 byseasons = T) -> x
+#                 byseasons = T,
+#                 plot = F) -> x

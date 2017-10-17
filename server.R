@@ -380,6 +380,65 @@ shinyServer(function(input, output) {
     }
   )
   
+  # Team plots ####
+  
+  # Consider the following:
+  ## Indent dropdown inputs
+  ## Fix italics, include "Not all teams labeled"
+  ## Include trend line or labeled quadrants
+  output$teamplot <- renderPlot({
+    if(input$team_seasonordate == 'Season'){
+      dt <- teamxgoals.func(teamxgoals, 
+                            date1 = as.Date('2000-01-01'), 
+                            date2 = as.Date('9999-12-31'),
+                            season = input$team_seasonfilter,
+                            even = input$team_evenstate,
+                            pattern = input$team_pattern,
+                            pergame = T,
+                            advanced = T,
+                            venue = input$team_home,
+                            byseasons = input$team_byseasons,
+                            plot = T)
+      
+    } else{
+      dt <- teamxgoals.func(teamxgoals, 
+                            date1 = input$team_date1, 
+                            date2 = input$team_date2,
+                            season = min(teamxgoals$Season):max(teamxgoals$Season),
+                            even = input$team_evenstate,
+                            pattern = input$team_pattern,
+                            pergame = T,
+                            advanced = T,
+                            venue = input$team_home,
+                            byseasons = input$team_byseasons,
+                            plot = T)
+    }
+    
+    # dt[['extreme']] <- rank(dt[[input$teamplot_xvar]]) + rank(dt[[input$teamplot_yvar]])
+    if(length(unique(dt$Season)) > 1){
+      dt[['plotnames']] <- paste(unlist(lapply(strsplit(dt$Team, " "), function(x) { return(x[length(x)]) })), dt$Season)
+    }else{
+      dt[['plotnames']] <- unlist(lapply(strsplit(dt$Team, " "), function(x) { return(x[length(x)]) }))
+    }
+    
+    p <- dt  %>%
+      ggplot(
+        aes_string(x = paste0('`', input$teamplot_xvar, '`'), 
+                   y = paste0('`', input$teamplot_yvar, '`'))) +
+      geom_point(color = '#0000cc') +
+      geom_text(aes(label = plotnames, 
+                    hjust = 'inward'),
+                size = 5,
+                check_overlap = T,
+                color = '#ff3300') +
+      theme(legend.position = "none",
+            axis.text = element_text(size = 14),
+            axis.title = element_text(size = 14))
+    p
+    
+    
+  }, height = 500, width = 700)
+  
   ## XGoals by game ####
   output$teamxgoalsbygame <- renderDataTable({
     if(input$teambygame_seasonordate == 'Season'){
@@ -425,7 +484,7 @@ shinyServer(function(input, output) {
     }
   )
   
-  ## Shooter plots
+  ## Shooter plots ####
   output$shooterplot <- renderPlot({
     
     if(input$shooting_seasonordate == 'Season'){
