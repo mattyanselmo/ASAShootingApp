@@ -181,7 +181,7 @@ shinyUI(
                                                                  div(DT::dataTableOutput('teampergamexgoalseast')))
                                        ),
                                        tabPanel('Visuals',
-                                                p("<i> All statistics on a per game basis </i>"),
+                                                p(div(HTML("<i> All statistics on a per game basis </i>"))),
                                                 fluidPage(fluidRow(
                                                   column(4,
                                                          selectInput('teamplot_xvar',
