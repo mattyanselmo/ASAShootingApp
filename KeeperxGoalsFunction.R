@@ -79,6 +79,7 @@ keeperxgoals.func <- function(keeperxgoals = keeperxgoals,
   
 }
 
+# library(dplyr)
 # keeperxgoals.func(keeperxgoals = readRDS('IgnoreList/xGoalsByKeeper.rds') %>%
 #                      mutate(date = as.Date(date, format = '%m/%d/%Y')),
 #                    date1 = as.Date('2000-01-01'),
@@ -88,4 +89,4 @@ keeperxgoals.func <- function(keeperxgoals = keeperxgoals,
 #                    byteams = F,
 #                    OtherShots = T,
 #                    FK = T,
-#                    PK = T) -> x
+#                    PK = T)

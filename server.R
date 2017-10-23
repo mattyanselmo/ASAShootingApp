@@ -79,6 +79,7 @@ shinyServer(function(input, output) {
     }
   )
   
+  # Keeper tables ####
   output$keepertable <- DT::renderDataTable({
     
     if(input$keeper_seasonordate == 'Season'){
@@ -146,6 +147,67 @@ shinyServer(function(input, output) {
       write.csv(dt, file, row.names = F)
     }
   )
+  
+  # Keeper plots ####
+  #Figure out how to label these guys better!
+  output$keeperplot <- renderPlot({
+    if(input$keeper_seasonordate == 'Season'){
+      dt <- keeperxgoals.func(keeperxgoals,
+                              date1 = as.Date('2000-01-01'),
+                              date2 = as.Date('9999-12-31'),
+                              season = input$keeper_seasonfilter,
+                              shotfilter = input$keeper_minshots,
+                              byteams = input$keeper_byteams,
+                              byseasons = input$keeper_byseasons,
+                              OtherShots = input$keeper_othershots,
+                              FK = input$keeper_fk,
+                              PK = input$keeper_pk) %>%
+        mutate(GAperShot = Goals/Shots, 
+               xGperShot = xG/Shots,
+               GmxGperShot = `G-xG`/Shots)
+    } else{
+      dt <- keeperxgoals.func(keeperxgoals,
+                              date1 = input$keeper_date1,
+                              date2 = input$keeper_date2,
+                              season = min(playerxgoals$Season):max(playerxgoals$Season),
+                              shotfilter = input$keeper_minshots,
+                              byteams = input$keeper_byteams,
+                              byseasons = input$keeper_byseasons,
+                              OtherShots = input$keeper_othershots,
+                              FK = input$keeper_fk,
+                              PK = input$keeper_pk) %>%
+        mutate(GAperShot = Goals/Shots, 
+               xGperShot = xG/Shots,
+               GmxGperShot = `G-xG`/Shots)
+    }
+    dt[['extreme']] <- rank(dt[[input$keeperplot_xvar]]) + rank(dt[[input$keeperplot_yvar]])
+    if(length(unique(dt$Season)) > 1){
+      dt[['plotnames']] <- paste(unlist(lapply(strsplit(dt$Keeper, " "), function(x) { return(x[length(x)]) })), dt$Season)
+      
+    }else{
+      dt[['plotnames']] <- unlist(lapply(strsplit(dt$Keeper, " "), function(x) { return(x[length(x)]) }))
+    }
+    
+    p <- dt  %>%
+      ggplot(
+        aes_string(x = paste0('`', input$keeperplot_xvar, '`'), 
+                   y = paste0('`', input$keeperplot_yvar, '`'))) +
+      geom_point(color = '#0000cc') +
+      geom_text(aes(label = ifelse(dt$extreme >= sort(dt$extreme, decreasing = T)[min(3, nrow(dt))] |
+                                     dt$extreme <= sort(dt$extreme)[min(3, nrow(dt))] |
+                                     dt[[input$keeperplot_xvar]] == max(dt[[input$keeperplot_xvar]]) |
+                                     dt[[input$keeperplot_yvar]] == max(dt[[input$keeperplot_yvar]]),
+                                   dt$plotnames, ''), 
+                    hjust = 'inward'),
+                size = 5,
+                check_overlap = F,
+                color = '#ff3300') +
+      theme(legend.position = "none",
+            axis.text = element_text(size = 14),
+            axis.title = element_text(size = 14))
+    p
+    
+  }, height = 500, width = 700)
   
   output$teamtotalxgoalswest <- DT::renderDataTable({
     if(input$team_seasonordate == 'Season'){
