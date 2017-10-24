@@ -16,6 +16,7 @@ shooterxgoals <- shooting %>%
             headers = sum(bodypart == 'Head'),
             goals = sum(result == 'Goal'),
             xG = sum(xGShooter),
+            xG_gk = sum(xGKeeper, na.rm = T),
             `G-xG` = goals - xG)
 
 passerxgoals <- shooting %>%

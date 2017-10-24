@@ -42,7 +42,7 @@ shinyServer(function(input, output) {
               options(list(autoWidth = T,
                            pageLength = 25,
                            lengthMenu = seq(25, 100, 25)))) %>%
-      formatRound(columns = c('Dist', 'xG', 'G-xG', 'Dist.key', 'xA', 'A-xA', 'xG+xA'), 
+      formatRound(columns = c('Dist', 'xG', 'G-xG', 'xPlacement', 'Dist.key', 'xA', 'A-xA', 'xG+xA'), 
                   digits = 1) %>%
       formatRound(columns = c('Unassisted'), digits = 2)
   })
