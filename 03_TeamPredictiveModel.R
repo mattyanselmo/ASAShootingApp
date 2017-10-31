@@ -1,25 +1,63 @@
-dat <- readRDS('IgnoreList/AllShotsData2011-2017.rds')
-library(dplyr)
+# Predict Function ####
 
-# Include games played
-# Prorate by game
-# Include response variables (Goals, xGoals, outcome)
-# Include defensive variables
+pred.data <- readRDS('IgnoreList/TeamPredictionsData_game34.rds')
+mult.model <- readRDS('IgnoreList/MultinomModel_weeks25-35.rds')
 
-dat.for <- dat %>%
-  mutate(Season = format(date, '%Y')) %>%
-  group_by(Season) %>%
-  mutate(week = floor((as.numeric(date) - min(as.numeric(date)))/7) + 1) %>%
-  group_by(Season, team, date) %>%
-  summarize(xGF_team = sum(xGTeam),
-            xGF_shooter = sum(xGShooter),
-            xGF_gk = sum(xGKeeper),
-            GF = sum(result == 'Goal')) %>%
-  ungroup() %>% group_by(Season, team) %>%
-  arrange(date) %>%
-  mutate(xGF_team = lag(cumsum(xGF_team)),
-         xGF_shooter = lag(cumsum(xGF_shooter)),
-         xGF_gk = lag(cumsum(xGF_gk)),
-         GF_season = lag(cumsum(GF)),
-         GF_last10 = sapply(sapply(1:n(), function(x) GF[pmax(0, x - 10):(x - 1)]), sum))
+# mod.data.recent should be each teams most recent updates to xGoals
+pm.function <- function(pred.data, hteam, ateam){
+
+  if(logit){
+    
+  } else{
+    #Poisson stuff
+  }
+
+
+}
+
+resultsglm <- data.frame()
+resultsgbm <- data.frame()
+for(season in unique(mod.data$Season)){
+  glm.temp <- glm(final > 0 ~ 
+                    I(xGF_season_team_home - xGA_season_team_home) +
+                    I(xGF_season_team_away - xGA_season_team_away),
+                  data = mod.data %>% filter(Season != season),
+                  family = binomial)
+  resultsglm <- rbind(resultsglm, data.frame(Season = season, 
+                                             final = mod.data %>% 
+                                               filter(Season == season) %>%
+                                               mutate(final = ifelse(final > 0, 1, 0)) %>%
+                                               select(final),
+                                             prediction = predict(glm.temp,
+                                                                  newdata = mod.data %>%
+                                                                    filter(Season == season),
+                                                                  type = 'response')))
+  gbm.temp <- gbm(final > 0 ~ 
+                    xGF_season_team_home + xGA_season_team_home +
+                    xGF_season_team_away + xGA_season_team_away,
+                  distribution = 'bernoulli',
+                  data = mod.data %>% filter(Season != season),
+                  shrinkage = 0.005,
+                  interaction.depth = 2,
+                  n.trees = 250,
+                  n.minobsinnode = 20,
+                  train.fraction = 0.5)
   
+  resultsgbm <- rbind(resultsgbm, data.frame(Season = season, 
+                                             final = mod.data %>% 
+                                               filter(Season == season) %>%
+                                               mutate(final = ifelse(final > 0, 1, 0)) %>%
+                                               select(final),
+                                             prediction = predict(gbm.temp,
+                                                                  n.trees = gbm.perf(gbm.temp, plot.it = F),
+                                                                  newdata = mod.data %>%
+                                                                    filter(Season == season),
+                                                                  type = 'response')))
+  
+}
+
+-sum((resultsglm %>% 
+        mutate(loglik = ifelse(final == 1, log(prediction), log(1 - prediction))))$loglik)
+-sum((resultsgbm %>% 
+        mutate(loglik = ifelse(final == 1, log(prediction), log(1 - prediction))))$loglik)
+
