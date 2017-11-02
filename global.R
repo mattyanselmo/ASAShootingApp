@@ -8,6 +8,8 @@ teamxgoals <- readRDS('IgnoreList/xGoalsByTeam.rds')
 xgbygame <- readRDS('IgnoreList/xGoalsByTeam_byGame.rds')
 keeperxgoals <- readRDS('IgnoreList/xGoalsByKeeper.rds')
 conferences <- read.csv('teamsbyconferencebyseason.csv')
+pred.data <- readRDS('IgnoreList/TeamPredictionsData_week35.rds')
+load('IgnoreList/UnivariatePoissonModels.Rdata')
 
 source('ShooterxGoalsFunction.R')
 source('TeamxGoalsFunction.R')
