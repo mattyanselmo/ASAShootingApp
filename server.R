@@ -446,7 +446,6 @@ shinyServer(function(input, output) {
   
   # Consider the following:
   ## Indent dropdown inputs
-  ## Fix italics, include "Not all teams labeled"
   ## Include trend line or labeled quadrants
   output$teamplot <- renderPlot({
     if(input$team_seasonordate == 'Season'){
@@ -496,8 +495,16 @@ shinyServer(function(input, output) {
       theme(legend.position = "none",
             axis.text = element_text(size = 14),
             axis.title = element_text(size = 14))
-    p
+    p + geom_smooth(method = 'lm', se = F) +
+        geom_text(x = min(dt[[input$teamplot_xvar]]), 
+                  y = min(dt[[input$teamplot_yvar]]),
+                  hjust = 0,
+                  label = lm_eqn(dt, input$teamplot_xvar, input$teamplot_yvar), 
+                  parse = TRUE, 
+                  color = 'black',
+                  size = 7)
     
+  
     
   }, height = 500, width = 700)
   

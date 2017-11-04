@@ -191,7 +191,7 @@ shinyUI(
                                                                                  'Unassisted % against' = 'Unassted%A',
                                                                                  'Cross % for' = 'CrossPctF', 'Cross % against' = 'CrossPctA',
                                                                                  'Shots on target for' = 'OnTargetF', 'Shots on target against' = 'OnTargetA',
-                                                                                 'GF', 'GA', 'xGF', 'xGA', 'xGD', 'TSR', 'PDO', 'Points' = 'Pts'),
+                                                                                 'GF', 'GA', 'GD', 'xGF', 'xGA', 'xGD', 'TSR', 'PDO', 'Points' = 'Pts'),
                                                                      selected = 'xGF')),
                                                   column(4,
                                                          selectInput('teamplot_yvar',
@@ -201,7 +201,7 @@ shinyUI(
                                                                                  'Unassisted % against' = 'Unassted%A',
                                                                                  'Cross % for' = 'CrossPctF', 'Cross % against' = 'CrossPctA',
                                                                                  'Shots on target for' = 'OnTargetF', 'Shots on target against' = 'OnTargetA',
-                                                                                 'GF', 'GA', 'xGF', 'xGA', 'xGD', 'TSR', 'PDO', 'Points' = 'Pts'),
+                                                                                 'GF', 'GA', 'GD', 'xGF', 'xGA', 'xGD', 'TSR', 'PDO', 'Points' = 'Pts'),
                                                                      selected = 'xGA')),
                                                   plotOutput('teamplot')))
                                        )
@@ -324,14 +324,14 @@ shinyUI(
                                      )
                                    ))
                         )
-                                     h1('Keeper xGoals'),
-                                     p(paste0('Updated through games on ', max(as.Date(keeperxgoals$date)))),
-                                     downloadButton('keeper_download', 'Download CSV'),
-                                     br(),
-                                     br(),
-                                     DT::dataTableOutput('keepertable')
-                                   )
-                                 ))
+                                 #     h1('Keeper xGoals'),
+                                 #     p(paste0('Updated through games on ', max(as.Date(keeperxgoals$date)))),
+                                 #     downloadButton('keeper_download', 'Download CSV'),
+                                 #     br(),
+                                 #     br(),
+                                 #     DT::dataTableOutput('keepertable')
+                                 #   )
+                                 # ))
                        
              )
   )
