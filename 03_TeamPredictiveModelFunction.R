@@ -45,4 +45,4 @@ pm.function <- function(pred.data, model.home, model.away, team.home, team.away,
 
 }
 
-
+pm.function(pred.data, model.home, model.away, 'SEA', 'VAN')
