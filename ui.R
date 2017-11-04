@@ -324,6 +324,15 @@ shinyUI(
                                      )
                                    ))
                         )
+                                     h1('Keeper xGoals'),
+                                     p(paste0('Updated through games on ', max(as.Date(keeperxgoals$date)))),
+                                     downloadButton('keeper_download', 'Download CSV'),
+                                     br(),
+                                     br(),
+                                     DT::dataTableOutput('keepertable')
+                                   )
+                                 ))
+                       
              )
   )
 )
