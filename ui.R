@@ -86,9 +86,30 @@ shinyUI(
                                      downloadButton('player_download', 'Download CSV'),
                                      br(),
                                      br(),
-                                     DT::dataTableOutput('shootertable')
-                                   )
-                                 )),
+                                     tabsetPanel(
+                                       tabPanel('Table',
+                                                DT::dataTableOutput('shootertable')
+                                       ),
+                                       tabPanel('Visuals',
+                                                fluidPage(fluidRow(
+                                                  column(4,
+                                                         selectInput('shooterplot_xvar',
+                                                                     label = 'X-axis variable',
+                                                                     choices = sort(c('xG', 'xA', 'xG/Shot' = 'xGperShot', 
+                                                                                 'xA/Pass' = 'xAperPass', 'Shots on target' = 'OnTarget',
+                                                                                 'Shots', 'Key passes' = 'KeyP', 'Goals', 
+                                                                                 'Assists' = 'Assts', 'G-xG', 'A-xA', 'xPlacement')),
+                                                                     selected ='xG')),
+                                                  column(4,
+                                                         selectInput('shooterplot_yvar',
+                                                                     label = 'Y-axis variable',
+                                                                     choices = sort(c('xG', 'xA', 'xG/Shot' = 'xGperShot', 
+                                                                                      'xA/Pass' = 'xAperPass', 'Shots on target' = 'OnTarget',
+                                                                                      'Shots', 'Key passes' = 'KeyP', 'Goals', 
+                                                                                      'Assists' = 'Assts', 'G-xG', 'A-xA', 'xPlacement')),
+                                                                     selected ='xA')),
+                                                  plotOutput('shooterplot'))))
+                                     )))),
                         tabPanel('Teams',
                                  sidebarLayout(
                                    sidebarPanel(width = 2,
@@ -117,6 +138,9 @@ shinyUI(
                                                                            max = max(teamxgoals$date),
                                                                            format = 'mm/dd/yyyy')
                                                 ),
+                                                checkboxInput('team_byseasons',
+                                                              label = 'Split teams by seasons',
+                                                              value = T),
                                                 selectInput('team_pattern',
                                                             'Pattern of play:',
                                                             choices = c('All', sort(unique(teamxgoals$patternOfPlay.model))),
@@ -125,9 +149,9 @@ shinyUI(
                                                               label = 'Even gamesate only',
                                                               value = F),
                                                 checkboxGroupInput('team_home',
-                                                              label = 'Venue:',
-                                                              choices = c('Home', 'Away'),
-                                                              selected = c('Home', 'Away'))),
+                                                                   label = 'Venue:',
+                                                                   choices = c('Home', 'Away'),
+                                                                   selected = c('Home', 'Away'))),
                                    mainPanel(
                                      h1('Team shots data'),
                                      p(paste0('Updated through games on ', max(as.Date(teamxgoals$date)))),
@@ -137,12 +161,12 @@ shinyUI(
                                                 br(),
                                                 br(),
                                                 div(id = 'west', conditionalPanel(condition = "input.team_seasonordate == 'Season' && input.team_seasonfilter.length == 1",
-                                                                 h2('Western conference')),
-                                                DT::dataTableOutput('teamtotalxgoalswest')),
+                                                                                  h2('Western conference')),
+                                                    DT::dataTableOutput('teamtotalxgoalswest')),
                                                 br(),
                                                 div(id = 'east', conditionalPanel(condition = "input.team_seasonordate == 'Season' && input.team_seasonfilter.length == 1",
-                                                                 h2('Eastern conference'),
-                                                                 DT::dataTableOutput('teamtotalxgoalseast')))
+                                                                                  h2('Eastern conference'),
+                                                                                  DT::dataTableOutput('teamtotalxgoalseast')))
                                        ),
                                        tabPanel('Per game',
                                                 downloadButton('team_download_pergame', 'Download CSV'),
@@ -155,6 +179,31 @@ shinyUI(
                                                 conditionalPanel(condition = "input.team_seasonordate == 'Season' && input.team_seasonfilter.length == 1",
                                                                  h2('Eastern conference'),
                                                                  div(DT::dataTableOutput('teampergamexgoalseast')))
+                                       ),
+                                       tabPanel('Visuals',
+                                                p(div(HTML("<i> All statistics on a per game basis. Not all teams labeled. </i>"))),
+                                                fluidPage(fluidRow(
+                                                  column(4,
+                                                         selectInput('teamplot_xvar',
+                                                                     label = 'X-axis variable',
+                                                                     choices = c('Shots for' = 'ShtF', 'Shots against' = 'ShtA',
+                                                                                 'Unassisted % for' = 'Unassted%F',
+                                                                                 'Unassisted % against' = 'Unassted%A',
+                                                                                 'Cross % for' = 'CrossPctF', 'Cross % against' = 'CrossPctA',
+                                                                                 'Shots on target for' = 'OnTargetF', 'Shots on target against' = 'OnTargetA',
+                                                                                 'GF', 'GA', 'xGF', 'xGA', 'xGD', 'TSR', 'PDO', 'Points' = 'Pts'),
+                                                                     selected = 'xGF')),
+                                                  column(4,
+                                                         selectInput('teamplot_yvar',
+                                                                     label = 'Y-axis variable',
+                                                                     choices = c('Shots for' = 'ShtF', 'Shots against' = 'ShtA',
+                                                                                 'Unassisted % for' = 'Unassted%F',
+                                                                                 'Unassisted % against' = 'Unassted%A',
+                                                                                 'Cross % for' = 'CrossPctF', 'Cross % against' = 'CrossPctA',
+                                                                                 'Shots on target for' = 'OnTargetF', 'Shots on target against' = 'OnTargetA',
+                                                                                 'GF', 'GA', 'xGF', 'xGA', 'xGD', 'TSR', 'PDO', 'Points' = 'Pts'),
+                                                                     selected = 'xGA')),
+                                                  plotOutput('teamplot')))
                                        )
                                      )
                                    )
@@ -242,6 +291,39 @@ shinyUI(
                                                               value = T)),
                                    
                                    mainPanel(
+                                     tabsetPanel(
+                                       tabPanel('Tables',
+                                                h1('Keeper xGoals'),
+                                                p(paste0('Updated through games on ', max(as.Date(keeperxgoals$date)))),
+                                                downloadButton('keeper_download', 'Download CSV'),
+                                                br(),
+                                                br(),
+                                                DT::dataTableOutput('keepertable')),
+                                       tabPanel('Visuals',
+                                                fluidPage(fluidRow(
+                                                  column(4,
+                                                         selectInput('keeperplot_xvar',
+                                                                     label = 'X-axis variable',
+                                                                     choices = c('Shots faced' = 'Shots', 'Goals allowed' = 'GA',
+                                                                                 'GA/shot' = 'GAperShot', 'xG/Shot' = 'xGperShot',
+                                                                                 'G-xG/shot' = 'GmxGperShot',
+                                                                                 '%Shots headed' = 'Header%', 'Avg. distance' = 'Dist',
+                                                                                 'xG faced' = 'xG', 'GA above average' = 'G-xG'),
+                                                                     selected = 'xGF')),
+                                                  column(4,
+                                                         selectInput('keeperplot_yvar',
+                                                                     label = 'Y-axis variable',
+                                                                     choices = c('Shots faced' = 'Shots', 'Goals allowed' = 'GA',
+                                                                                 'GA/shot' = 'GAperShot', 'xG/Shot' = 'xGperShot',
+                                                                                 'G-xG/shot' = 'GmxGperShot',
+                                                                                 '%Shots headed' = 'Header%', 'Avg. distance' = 'Dist',
+                                                                                 'xG faced' = 'xG', 'GA above average' = 'G-xG'),
+                                                                     selected = 'xGperShot')),
+                                                  plotOutput('keeperplot')))
+                                       )
+                                     )
+                                   ))
+                        )
                                      h1('Keeper xGoals'),
                                      p(paste0('Updated through games on ', max(as.Date(keeperxgoals$date)))),
                                      downloadButton('keeper_download', 'Download CSV'),

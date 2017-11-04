@@ -2,6 +2,7 @@ library(dplyr)
 library(shiny)
 library(DT)
 library(shinyjs)
+library(ggplot2)
 
 playerxgoals <- readRDS('IgnoreList/xGoalsByPlayer.rds')
 teamxgoals <- readRDS('IgnoreList/xGoalsByTeam.rds')

@@ -16,6 +16,7 @@ shooterxgoals <- shooting %>%
             headers = sum(bodypart == 'Head'),
             goals = sum(result == 'Goal'),
             xG = sum(xGShooter),
+            xG_gk = sum(xGKeeper, na.rm = T),
             `G-xG` = goals - xG)
 
 passerxgoals <- shooting %>%
@@ -35,7 +36,6 @@ playerxgoals <- shooterxgoals %>%
   ungroup() %>%
   mutate(player = shooter) %>%
   mutate_at(.funs = funs(((function(x) {ifelse(is.na(x), 0, as.numeric(x))})(.))), .vars = vars(-c(shooter, type, meddist, meddist.pass, player, date, team))) %>%
-  ungroup() %>%
   filter(!is.na(date)) %>%
   mutate(Season = as.numeric(format(date, '%Y')))
 
