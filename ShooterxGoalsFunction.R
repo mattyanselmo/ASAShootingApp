@@ -1,15 +1,15 @@
-playerxgoals <- readRDS('IgnoreList/xGoalsByPlayer.rds') %>%
-  mutate(date = as.Date(date, format = '%m/%d/%Y'))
-date1 = as.Date('2000-01-01')
-date2 = as.Date('9999-12-31')
-season = 2011:2017
-shotfilter = 0
-keyfilter = 0
-byteams = T
-byseasons = T
-FK = F
-PK = F
-OtherShots = T
+# playerxgoals <- readRDS('IgnoreList/xGoalsByPlayer.rds') %>%
+#   mutate(date = as.Date(date, format = '%m/%d/%Y'))
+# date1 = as.Date('2000-01-01')
+# date2 = as.Date('9999-12-31')
+# season = 2011:2017
+# shotfilter = 0
+# keyfilter = 0
+# byteams = T
+# byseasons = T
+# FK = F
+# PK = F
+# OtherShots = T
 
 shooterxgoals.func <- function(playerxgoals = playerxgoals, 
                                date1 = as.Date('2000-01-01'), 
@@ -32,12 +32,12 @@ shooterxgoals.func <- function(playerxgoals = playerxgoals,
     aggdata <- tempdat %>%
       group_by(player, Team = team, Season) %>%
       summarize(Shots = sum(shots),
-                OnTarget = sum(ontarget),
+                SoT = sum(ontarget),
                 Dist = sum(shots*meddist, na.rm = T)/sum(shots),
-                Unassisted = sum(unassisted)/Shots,
+                Solo = sum(unassisted)/Shots,
                 Goals = sum(goals),
                 xG = sum(xG),
-                xPlacement = sum(xG_gk) - xG,
+                xPlace = sum(xG_gk) - xG,
                 `G-xG` = sum(`G-xG`),
                 KeyP = sum(keypasses),
                 Dist.key = sum(keypasses*meddist.pass, na.rm = T)/sum(keypasses),
@@ -52,12 +52,12 @@ shooterxgoals.func <- function(playerxgoals = playerxgoals,
     aggdata <- tempdat %>%
       group_by(player, Team = team) %>%
       summarize(Shots = sum(shots),
-                OnTarget = sum(ontarget),
+                SoT = sum(ontarget),
                 Dist = sum(shots*meddist, na.rm = T)/sum(shots),
-                Unassisted = sum(unassisted)/Shots,
+                Solo = sum(unassisted)/Shots,
                 Goals = sum(goals),
                 xG = sum(xG),
-                xPlacement = sum(xG_gk) - xG,
+                xPlace = sum(xG_gk) - xG,
                 `G-xG` = sum(`G-xG`),
                 KeyP = sum(keypasses),
                 Dist.key = sum(keypasses*meddist.pass, na.rm = T)/sum(keypasses),
@@ -72,12 +72,12 @@ shooterxgoals.func <- function(playerxgoals = playerxgoals,
       group_by(player, Season) %>%
       summarize(Team = paste0(na.omit(unique(team)), collapse = ', '),
                 Shots = sum(shots),
-                OnTarget = sum(ontarget),
+                SoT = sum(ontarget),
                 Dist = sum(shots*meddist, na.rm = T)/sum(shots),
-                Unassisted = sum(unassisted)/Shots,
+                Solo = sum(unassisted)/Shots,
                 Goals = sum(goals),
                 xG = sum(xG),
-                xPlacement = sum(xG_gk) - xG,
+                xPlace = sum(xG_gk) - xG,
                 `G-xG` = sum(`G-xG`),
                 KeyP = sum(keypasses),
                 Dist.key = sum(keypasses*meddist.pass, na.rm = T)/sum(keypasses),
@@ -92,12 +92,12 @@ shooterxgoals.func <- function(playerxgoals = playerxgoals,
       group_by(player) %>%
       summarize(Team = paste0(na.omit(unique(team)), collapse = ', '),
                 Shots = sum(shots),
-                OnTarget = sum(ontarget),
+                SoT = sum(ontarget),
                 Dist = sum(shots*meddist, na.rm = T)/sum(shots),
-                Unassisted = sum(unassisted)/Shots,
+                Solo = sum(unassisted)/Shots,
                 Goals = sum(goals),
                 xG = sum(xG),
-                xPlacement = sum(xG_gk) - xG,
+                xPlace = sum(xG_gk) - xG,
                 `G-xG` = sum(`G-xG`),
                 KeyP = sum(keypasses),
                 Dist.key = sum(keypasses*meddist.pass, na.rm = T)/sum(keypasses),
