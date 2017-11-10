@@ -610,8 +610,17 @@ shinyServer(function(input, output) {
       theme(legend.position = "none",
             axis.text = element_text(size = 14),
             axis.title = element_text(size = 14))
-    p
-      
+    p + geom_smooth(method = 'lm', se = F) +
+      geom_text(x = min(dt[[input$shooterplot_xvar]]),
+                y = min(dt[[input$shooterplot_yvar]]),
+                hjust = 0,
+                label = lm_eqn(dt, 
+                               paste0('`', input$shooterplot_xvar, '`'), 
+                               paste0('`', input$shooterplot_yvar, '`')),
+                parse = TRUE,
+                color = 'black',
+                size = 7)
+
     
   }, height = 500, width = 700)
   
