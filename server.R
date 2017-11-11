@@ -209,6 +209,7 @@ shinyServer(function(input, output) {
     
   }, height = 500, width = 700)
   
+  # Team tables ####
   output$teamtotalxgoalswest <- DT::renderDataTable({
     if(input$team_seasonordate == 'Season'){
       dt <- teamxgoals.func(teamxgoals, 
@@ -628,5 +629,13 @@ shinyServer(function(input, output) {
 
     
   }, height = 500, width = 700)
+  
+  output$glossary <- renderDataTable({
+    datatable(glossary %>% select(-Notes),
+              rownames = F,
+              options(list(autoWidth = T,
+                           pageLength = nrow(glossary),
+                           dom = 'ft')))
+  })
   
 })

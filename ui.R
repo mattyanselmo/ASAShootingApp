@@ -8,27 +8,8 @@
 library(shiny)
 
 shinyUI(
-  navbarPage(strong('ASA Database'),
+  navbarPage(title = HTML('<b>ASA Database</b>'),
              theme = 'bootstrap_edited.css',
-             
-             tabPanel(strong('Overview'),
-                      h1('Overview'),
-                      p("We built this interactive web application to give ASA's loyal readers more control over 
-                 sorting and filtering our data. We plan to grow this application out to include
-                 more content, as well as more ways to view the content (like plots and other visuals, for example).
-                 If you have an idea for a feature that will make the app totes better,
-                 then please don't hesitate to email Matthias (mkullowatz at gmail) with your idea."),
-                      br(),
-                      p('Please note that the statistics displayed in this app are very similiar to, but not exactly
-                        the same as, those in our static tables. This is due to two things. 1) This app utilizes
-                        updated xGoal models, fit through 2016, with a better method of capturing penalty kicks. 2)
-                        We have not imported minutes data into this app yet. For this second reason, we will keep the 
-                        static tables up on the site to include per-minute based statistics.'),
-                      br(),
-                      p('A quick rundown of what we have here. Under the xGoals tab, you will find four subtabs.
-                 These subtabs summarize the data by players (non-GK), teams, and keepers.
-                 There are options to filter by season and date on each subtab, as well as other tab-specific
-                 filters and sorting tools that we hope prove intuitive to use and fun to play with.')),
              navbarMenu(strong('xGoals'),
                         tabPanel('Players',
                                  sidebarLayout(
@@ -81,9 +62,11 @@ shinyUI(
                                                               value = T)),
                                    
                                    mainPanel(
-                                     div(style="display: inline-block;vertical-align:bottom; width: 250px;", h1('Player xGoals')),
-                                     div(style="display: inline-block;vertical-align:bottom; width: 250px;", downloadButton('player_download', 'Download CSV')),
+                                     # div(style="display: inline-block;vertical-align:bottom; width: 250px;", h1('Player xGoals')),
+                                     # div(style="display: inline-block;vertical-align:bottom; width: 250px;", downloadButton('player_download', 'Download CSV')),
+                                     h1('Player xGoals'),
                                      p(paste0('Updated through games on ', max(as.Date(playerxgoals$date)))),
+                                     downloadButton('player_download', 'Download CSV'),
                                      br(),
                                      tabsetPanel(
                                        tabPanel('Table',
@@ -186,8 +169,8 @@ shinyUI(
                                                          selectInput('teamplot_xvar',
                                                                      label = 'X-axis variable',
                                                                      choices = c('Shots for' = 'ShtF', 'Shots against' = 'ShtA',
-                                                                                 'Unassisted % for' = 'Unassted%F',
-                                                                                 'Unassisted % against' = 'Unassted%A',
+                                                                                 'Unassisted % for' = 'Solo%F',
+                                                                                 'Unassisted % against' = 'Solo%A',
                                                                                  'Cross % for' = 'CrossPctF', 'Cross % against' = 'CrossPctA',
                                                                                  'Shots on target for' = 'OnTargetF', 'Shots on target against' = 'OnTargetA',
                                                                                  'GF', 'GA', 'GD', 'xGF', 'xGA', 'xGD', 'TSR', 'PDO', 'Points' = 'Pts'),
@@ -196,8 +179,8 @@ shinyUI(
                                                          selectInput('teamplot_yvar',
                                                                      label = 'Y-axis variable',
                                                                      choices = c('Shots for' = 'ShtF', 'Shots against' = 'ShtA',
-                                                                                 'Unassisted % for' = 'Unassted%F',
-                                                                                 'Unassisted % against' = 'Unassted%A',
+                                                                                 'Unassisted % for' = 'Solo%F',
+                                                                                 'Unassisted % against' = 'Solo%A',
                                                                                  'Cross % for' = 'CrossPctF', 'Cross % against' = 'CrossPctA',
                                                                                  'Shots on target for' = 'OnTargetF', 'Shots on target against' = 'OnTargetA',
                                                                                  'GF', 'GA', 'GD', 'xGF', 'xGA', 'xGD', 'TSR', 'PDO', 'Points' = 'Pts'),
@@ -323,10 +306,24 @@ shinyUI(
                                      )
                                    ))
                         )
-                        #tabPanel('Glossary',
-                                 #SHOW THE GLOSSARY HERE
-                        #)
-             
-             )
+             ),
+             tabPanel('Glossary',
+                      h1('Glossary'),
+                      dataTableOutput('glossary')                        
+             ),
+             tabPanel(strong('App info'),
+                      h1('App info'),
+                      p("We built this interactive web application to give ASA's loyal readers more control over 
+                        sorting and filtering our data. We plan to grow this application out to include
+                        more content, as well as more ways to view the content (like plots and other visuals, for example).
+                        If you have an idea for a feature that will make the app totes better,
+                        then please don't hesitate to email Matthias (mkullowatz at gmail) with your idea."),
+                      br(),
+                      p('Please note that the statistics displayed in this app are very similiar to, but not exactly
+                        the same as, those in our static tables. This is due to two things. 1) This app utilizes
+                        updated xGoal models, fit through 2016, with a better method of capturing penalty kicks. 2)
+                        We have not imported minutes data into this app yet. For this second reason, we will keep the 
+                        static tables up on the site to include per-minute based statistics.'))
+
   )
 )
