@@ -14,6 +14,8 @@ shinyUI(
                         tabPanel('Players',
                                  sidebarLayout(
                                    sidebarPanel(width = 2,
+                                                actionButton('shooting_action',
+                                                             label = 'Apply filters'),
                                                 numericInput('shooting_minshots',
                                                              "Minimum shots:",
                                                              value = 0,

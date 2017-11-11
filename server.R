@@ -626,10 +626,11 @@ shinyServer(function(input, output) {
                 parse = TRUE,
                 color = 'black',
                 size = 7)
-
+    
     
   }, height = 500, width = 700)
   
+  # Glossary ####
   output$glossary <- renderDataTable({
     datatable(glossary %>% select(-Notes),
               rownames = F,
