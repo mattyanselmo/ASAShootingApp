@@ -594,6 +594,9 @@ shinyServer(function(input, output) {
       dt[['plotnames']] <- unlist(lapply(strsplit(dt$Player, " "), function(x) { return(x[length(x)]) }))
     }
     
+    xlim <- min(dt[[input$shooterplot_xvar]]) - 0.05*(max(dt[[input$shooterplot_xvar]]) - min(dt[[input$shooterplot_xvar]]))
+    ylim <- min(dt[[input$shooterplot_yvar]]) - 0.05*(max(dt[[input$shooterplot_yvar]]) - min(dt[[input$shooterplot_yvar]]))
+    
     p <- dt  %>%
       ggplot(
         aes_string(x = paste0('`', input$shooterplot_xvar, '`'), 
@@ -607,12 +610,14 @@ shinyServer(function(input, output) {
                 size = 5,
                 check_overlap = F,
                 color = '#ff3300') +
+      expand_limits(x = xlim,
+                    y = ylim) +
       theme(legend.position = "none",
             axis.text = element_text(size = 14),
             axis.title = element_text(size = 14))
     p + geom_smooth(method = 'lm', se = F) +
-      geom_text(x = min(dt[[input$shooterplot_xvar]]),
-                y = min(dt[[input$shooterplot_yvar]]),
+      geom_text(x = min(dt[[input$shooterplot_xvar]]) - 0.05*(max(dt[[input$shooterplot_xvar]]) - min(dt[[input$shooterplot_xvar]])),
+                y = min(dt[[input$shooterplot_yvar]]) - 0.05*(max(dt[[input$shooterplot_yvar]]) - min(dt[[input$shooterplot_yvar]])),
                 hjust = 0,
                 label = lm_eqn(dt, 
                                paste0('`', input$shooterplot_xvar, '`'), 

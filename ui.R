@@ -81,10 +81,9 @@ shinyUI(
                                                               value = T)),
                                    
                                    mainPanel(
-                                     h1('Player xGoals'),
+                                     div(style="display: inline-block;vertical-align:bottom; width: 250px;", h1('Player xGoals')),
+                                     div(style="display: inline-block;vertical-align:bottom; width: 250px;", downloadButton('player_download', 'Download CSV')),
                                      p(paste0('Updated through games on ', max(as.Date(playerxgoals$date)))),
-                                     downloadButton('player_download', 'Download CSV'),
-                                     br(),
                                      br(),
                                      tabsetPanel(
                                        tabPanel('Table',
@@ -324,15 +323,10 @@ shinyUI(
                                      )
                                    ))
                         )
-                                 #     h1('Keeper xGoals'),
-                                 #     p(paste0('Updated through games on ', max(as.Date(keeperxgoals$date)))),
-                                 #     downloadButton('keeper_download', 'Download CSV'),
-                                 #     br(),
-                                 #     br(),
-                                 #     DT::dataTableOutput('keepertable')
-                                 #   )
-                                 # ))
-                       
+                        #tabPanel('Glossary',
+                                 #SHOW THE GLOSSARY HERE
+                        #)
+             
              )
   )
 )
