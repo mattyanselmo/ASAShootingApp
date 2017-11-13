@@ -8,33 +8,145 @@
 library(shiny)
 
 shinyServer(function(input, output) {
+
+  ## Shooter reactive values ####
+  shooter_inputs <- reactiveValues(shooting_seasonordate = 'Season',
+                                   shooting_date1 = as.Date('2000-01-01'),
+                                   shooting_date2 = as.Date('9999-12-31'),
+                                   shooting_seasonfilter = max(playerxgoals$Season),
+                                   shooting_minshots = 0,
+                                   shooting_minkeypasses = 0,
+                                   shooting_byteams = F,
+                                   shooting_byseasons = T,
+                                   shooting_other = T,
+                                   shooting_fk = T,
+                                   shooting_pk = T,
+                                   shooterplot_xvar = 'xG',
+                                   shooterplot_yvar = 'xA')
   
+  observeEvent(input$shooting_action,
+               {
+                 shooter_inputs$shooting_seasonordate <- input$shooting_seasonordate
+                 shooter_inputs$shooting_date1 <- input$shooting_date1
+                 shooter_inputs$shooting_date2 <- input$shooting_date2
+                 shooter_inputs$shooting_seasonfilter <- input$shooting_seasonfilter
+                 shooter_inputs$shooting_minshots <- input$shooting_minshots
+                 shooter_inputs$shooting_minkeypasses <- input$shooting_minkeypasses
+                 shooter_inputs$shooting_byteams <- input$shooting_byteams
+                 shooter_inputs$shooting_byseasons <- input$shooting_byseasons
+                 shooter_inputs$shooting_other <- input$shooting_other
+                 shooter_inputs$shooting_fk <- input$shooting_fk
+                 shooter_inputs$shooting_pk <- input$shooting_pk
+                 shooter_inputs$shooterplot_xvar <- input$shooterplot_xvar
+                 shooter_inputs$shooterplot_yvar <- input$shooterplot_yvar
+               })
+
+  observeEvent(input$shooting_action, {print(shooter_inputs$shooting_seasonordate)})
+  
+  
+  # Shooter plots ####
+  output$shooterplot <- renderPlot({
+    
+    if(shooter_inputs$shooting_seasonordate == 'Season'){
+      dt <- shooterxgoals.func(playerxgoals,
+                               date1 = as.Date('2000-01-01'),
+                               date2 = as.Date('9999-12-31'),
+                               season = shooter_inputs$shooting_seasonfilter,
+                               shotfilter = shooter_inputs$shooting_minshots,
+                               keyfilter = shooter_inputs$shooting_minkeypasses,
+                               byteams = shooter_inputs$shooting_byteams,
+                               byseasons = shooter_inputs$shooting_byseasons,
+                               OtherShots = shooter_inputs$shooting_other,
+                               FK = shooter_inputs$shooting_fk,
+                               PK = shooter_inputs$shooting_pk) %>%
+        mutate(xGperShot = ifelse(Shots > 0, xG/Shots, 0),
+               xAperPass = ifelse(KeyP > 0, xA/KeyP, 0))
+    } else{
+      dt <- shooterxgoals.func(playerxgoals,
+                               date1 = shooter_inputs$shooting_date1,
+                               date2 = shooter_inputs$shooting_date2,
+                               season = min(playerxgoals$Season):max(playerxgoals$Season),
+                               shotfilter = shooter_inputs$shooting_minshots,
+                               keyfilter = shooter_inputs$shooting_minkeypasses,
+                               byteams = shooter_inputs$shooting_byteams,
+                               byseasons = shooter_inputs$shooting_byseasons,
+                               OtherShots = shooter_inputs$shooting_other,
+                               FK = shooter_inputs$shooting_fk,
+                               PK = shooter_inputs$shooting_pk) %>%
+        mutate(xGperShot = ifelse(Shots > 0, xG/Shots, 0),
+               xAperPass = ifelse(KeyP > 0, xA/KeyP, 0))
+    }
+    
+    dt[['extreme']] <- rank(dt[[shooter_inputs$shooterplot_xvar]]) + rank(dt[[shooter_inputs$shooterplot_yvar]])
+    if(length(unique(dt$Season)) > 1){
+      dt[['plotnames']] <- paste(unlist(lapply(strsplit(dt$Player, " "), function(x) { return(x[length(x)]) })), dt$Season)
+      
+    }else{
+      dt[['plotnames']] <- unlist(lapply(strsplit(dt$Player, " "), function(x) { return(x[length(x)]) }))
+    }
+    
+    xlim <- min(dt[[shooter_inputs$shooterplot_xvar]]) - 0.05*(max(dt[[shooter_inputs$shooterplot_xvar]]) - min(dt[[shooter_inputs$shooterplot_xvar]]))
+    ylim <- min(dt[[shooter_inputs$shooterplot_yvar]]) - 0.05*(max(dt[[shooter_inputs$shooterplot_yvar]]) - min(dt[[shooter_inputs$shooterplot_yvar]]))
+    
+    p <- dt  %>%
+      ggplot(
+        aes_string(x = paste0('`', shooter_inputs$shooterplot_xvar, '`'), 
+                   y = paste0('`', shooter_inputs$shooterplot_yvar, '`'))) +
+      geom_point(color = '#0000cc') +
+      geom_text(aes(label = ifelse(dt$extreme >= sort(dt$extreme, decreasing = T)[min(5, nrow(dt))] |
+                                     dt[[shooter_inputs$shooterplot_xvar]] == max(dt[[shooter_inputs$shooterplot_xvar]]) |
+                                     dt[[shooter_inputs$shooterplot_yvar]] == max(dt[[shooter_inputs$shooterplot_yvar]]),
+                                   dt$plotnames, ''), 
+                    hjust = 'inward'),
+                size = 5,
+                check_overlap = F,
+                color = '#ff3300') +
+      expand_limits(x = xlim,
+                    y = ylim) +
+      theme(legend.position = "none",
+            axis.text = element_text(size = 14),
+            axis.title = element_text(size = 14))
+    p + geom_smooth(method = 'lm', se = F) +
+      geom_text(x = min(dt[[shooter_inputs$shooterplot_xvar]]) - 0.05*(max(dt[[shooter_inputs$shooterplot_xvar]]) - min(dt[[shooter_inputs$shooterplot_xvar]])),
+                y = min(dt[[shooter_inputs$shooterplot_yvar]]) - 0.05*(max(dt[[shooter_inputs$shooterplot_yvar]]) - min(dt[[shooter_inputs$shooterplot_yvar]])),
+                hjust = 0,
+                label = lm_eqn(dt, 
+                               paste0('`', shooter_inputs$shooterplot_xvar, '`'), 
+                               paste0('`', shooter_inputs$shooterplot_yvar, '`')),
+                parse = TRUE,
+                color = 'black',
+                size = 7)
+    
+    
+  }, height = 500, width = 700)
+  
+  # Shooter tables ####
   output$shootertable <- DT::renderDataTable({
     
-    if(input$shooting_seasonordate == 'Season'){
+    if(shooter_inputs$shooting_seasonordate == 'Season'){
     dt <- shooterxgoals.func(playerxgoals,
                              date1 = as.Date('2000-01-01'),
                              date2 = as.Date('9999-12-31'),
-                             season = input$shooting_seasonfilter,
-                             shotfilter = input$shooting_minshots,
-                             keyfilter = input$shooting_minkeypasses,
-                             byteams = input$shooting_byteams,
-                             byseasons = input$shooting_byseasons,
-                             OtherShots = input$shooting_other,
-                             FK = input$shooting_fk,
-                             PK = input$shooting_pk)
+                             season = shooter_inputs$shooting_seasonfilter,
+                             shotfilter = shooter_inputs$shooting_minshots,
+                             keyfilter = shooter_inputs$shooting_minkeypasses,
+                             byteams = shooter_inputs$shooting_byteams,
+                             byseasons = shooter_inputs$shooting_byseasons,
+                             OtherShots = shooter_inputs$shooting_other,
+                             FK = shooter_inputs$shooting_fk,
+                             PK = shooter_inputs$shooting_pk)
     } else{
       dt <- shooterxgoals.func(playerxgoals,
-                               date1 = input$shooting_date1,
-                               date2 = input$shooting_date2,
+                               date1 = shooter_inputs$shooting_date1,
+                               date2 = shooter_inputs$shooting_date2,
                                season = min(playerxgoals$Season):max(playerxgoals$Season),
-                               shotfilter = input$shooting_minshots,
-                               keyfilter = input$shooting_minkeypasses,
-                               byteams = input$shooting_byteams,
-                               byseasons = input$shooting_byseasons,
-                               OtherShots = input$shooting_other,
-                               FK = input$shooting_fk,
-                               PK = input$shooting_pk)
+                               shotfilter = shooter_inputs$shooting_minshots,
+                               keyfilter = shooter_inputs$shooting_minkeypasses,
+                               byteams = shooter_inputs$shooting_byteams,
+                               byseasons = shooter_inputs$shooting_byseasons,
+                               OtherShots = shooter_inputs$shooting_other,
+                               FK = shooter_inputs$shooting_fk,
+                               PK = shooter_inputs$shooting_pk)
     }
       
     datatable(dt,
@@ -47,33 +159,34 @@ shinyServer(function(input, output) {
       formatPercentage(columns = c('Solo'), digits = 1)
   })
   
+  
   output$player_download <- downloadHandler(
     filename = 'ASAshootertable.csv',
     
     content = function(file){
-      if(input$shooting_seasonordate == 'Season'){
+      if(shooter_inputs$shooting_seasonordate == 'Season'){
         dt <- shooterxgoals.func(playerxgoals,
                                  date1 = as.Date('2000-01-01'),
                                  date2 = as.Date('9999-12-31'),
-                                 season = input$shooting_seasonfilter,
-                                 shotfilter = input$shooting_minshots,
-                                 keyfilter = input$shooting_minkeypasses,
-                                 byteams = input$shooting_byteams,
-                                 byseasons = input$shooting_byseasons,
-                                 FK = input$shooting_fk,
-                                 PK = input$shooting_pk)
+                                 season = shooter_inputs$shooting_seasonfilter,
+                                 shotfilter = shooter_inputs$shooting_minshots,
+                                 keyfilter = shooter_inputs$shooting_minkeypasses,
+                                 byteams = shooter_inputs$shooting_byteams,
+                                 byseasons = shooter_inputs$shooting_byseasons,
+                                 FK = shooter_inputs$shooting_fk,
+                                 PK = shooter_inputs$shooting_pk)
       } else{
         dt <- shooterxgoals.func(playerxgoals,
-                                 date1 = input$shooting_date1,
-                                 date2 = input$shooting_date2,
+                                 date1 = shooter_inputs$shooting_date1,
+                                 date2 = shooter_inputs$shooting_date2,
                                  season = min(playerxgoals$Season):max(playerxgoals$Season),
-                                 shotfilter = input$shooting_minshots,
-                                 keyfilter = input$shooting_minkeypasses,
-                                 byteams = input$shooting_byteams,
-                                 byseasons = input$shooting_byseasons,
-                                 OtherShots = input$shooting_other,
-                                 FK = input$shooting_fk,
-                                 PK = input$shooting_pk)
+                                 shotfilter = shooter_inputs$shooting_minshots,
+                                 keyfilter = shooter_inputs$shooting_minkeypasses,
+                                 byteams = shooter_inputs$shooting_byteams,
+                                 byseasons = shooter_inputs$shooting_byseasons,
+                                 OtherShots = shooter_inputs$shooting_other,
+                                 FK = shooter_inputs$shooting_fk,
+                                 PK = shooter_inputs$shooting_pk)
       }
       write.csv(dt, file, row.names = F)
     }
@@ -554,81 +667,6 @@ shinyServer(function(input, output) {
     }
   )
   
-  ## Shooter plots ####
-  output$shooterplot <- renderPlot({
-    
-    if(input$shooting_seasonordate == 'Season'){
-      dt <- shooterxgoals.func(playerxgoals,
-                               date1 = as.Date('2000-01-01'),
-                               date2 = as.Date('9999-12-31'),
-                               season = input$shooting_seasonfilter,
-                               shotfilter = input$shooting_minshots,
-                               keyfilter = input$shooting_minkeypasses,
-                               byteams = input$shooting_byteams,
-                               byseasons = input$shooting_byseasons,
-                               OtherShots = input$shooting_other,
-                               FK = input$shooting_fk,
-                               PK = input$shooting_pk) %>%
-        mutate(xGperShot = ifelse(Shots > 0, xG/Shots, 0),
-               xAperPass = ifelse(KeyP > 0, xA/KeyP, 0))
-    } else{
-      dt <- shooterxgoals.func(playerxgoals,
-                               date1 = input$shooting_date1,
-                               date2 = input$shooting_date2,
-                               season = min(playerxgoals$Season):max(playerxgoals$Season),
-                               shotfilter = input$shooting_minshots,
-                               keyfilter = input$shooting_minkeypasses,
-                               byteams = input$shooting_byteams,
-                               byseasons = input$shooting_byseasons,
-                               OtherShots = input$shooting_other,
-                               FK = input$shooting_fk,
-                               PK = input$shooting_pk) %>%
-        mutate(xGperShot = ifelse(Shots > 0, xG/Shots, 0),
-               xAperPass = ifelse(KeyP > 0, xA/KeyP, 0))
-    }
-    
-    dt[['extreme']] <- rank(dt[[input$shooterplot_xvar]]) + rank(dt[[input$shooterplot_yvar]])
-    if(length(unique(dt$Season)) > 1){
-      dt[['plotnames']] <- paste(unlist(lapply(strsplit(dt$Player, " "), function(x) { return(x[length(x)]) })), dt$Season)
-      
-    }else{
-      dt[['plotnames']] <- unlist(lapply(strsplit(dt$Player, " "), function(x) { return(x[length(x)]) }))
-    }
-    
-    xlim <- min(dt[[input$shooterplot_xvar]]) - 0.05*(max(dt[[input$shooterplot_xvar]]) - min(dt[[input$shooterplot_xvar]]))
-    ylim <- min(dt[[input$shooterplot_yvar]]) - 0.05*(max(dt[[input$shooterplot_yvar]]) - min(dt[[input$shooterplot_yvar]]))
-    
-    p <- dt  %>%
-      ggplot(
-        aes_string(x = paste0('`', input$shooterplot_xvar, '`'), 
-                   y = paste0('`', input$shooterplot_yvar, '`'))) +
-      geom_point(color = '#0000cc') +
-      geom_text(aes(label = ifelse(dt$extreme >= sort(dt$extreme, decreasing = T)[min(5, nrow(dt))] |
-                                     dt[[input$shooterplot_xvar]] == max(dt[[input$shooterplot_xvar]]) |
-                                     dt[[input$shooterplot_yvar]] == max(dt[[input$shooterplot_yvar]]),
-                                   dt$plotnames, ''), 
-                    hjust = 'inward'),
-                size = 5,
-                check_overlap = F,
-                color = '#ff3300') +
-      expand_limits(x = xlim,
-                    y = ylim) +
-      theme(legend.position = "none",
-            axis.text = element_text(size = 14),
-            axis.title = element_text(size = 14))
-    p + geom_smooth(method = 'lm', se = F) +
-      geom_text(x = min(dt[[input$shooterplot_xvar]]) - 0.05*(max(dt[[input$shooterplot_xvar]]) - min(dt[[input$shooterplot_xvar]])),
-                y = min(dt[[input$shooterplot_yvar]]) - 0.05*(max(dt[[input$shooterplot_yvar]]) - min(dt[[input$shooterplot_yvar]])),
-                hjust = 0,
-                label = lm_eqn(dt, 
-                               paste0('`', input$shooterplot_xvar, '`'), 
-                               paste0('`', input$shooterplot_yvar, '`')),
-                parse = TRUE,
-                color = 'black',
-                size = 7)
-    
-    
-  }, height = 500, width = 700)
   
   # Glossary ####
   output$glossary <- renderDataTable({

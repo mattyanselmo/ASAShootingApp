@@ -82,7 +82,7 @@ shinyUI(
                                                                      choices = sort(c('xG', 'xA', 'xG/Shot' = 'xGperShot', 
                                                                                  'xA/Pass' = 'xAperPass', 'Shots on target' = 'OnTarget',
                                                                                  'Shots', 'Key passes' = 'KeyP', 'Goals', 
-                                                                                 'Assists' = 'Assts', 'G-xG', 'A-xA', 'xPlacement')),
+                                                                                 'Assists' = 'Assts', 'G-xG', 'A-xA', 'xPlacement' = 'xPlace')),
                                                                      selected ='xG')),
                                                   column(4,
                                                          selectInput('shooterplot_yvar',
@@ -90,7 +90,7 @@ shinyUI(
                                                                      choices = sort(c('xG', 'xA', 'xG/Shot' = 'xGperShot', 
                                                                                       'xA/Pass' = 'xAperPass', 'Shots on target' = 'OnTarget',
                                                                                       'Shots', 'Key passes' = 'KeyP', 'Goals', 
-                                                                                      'Assists' = 'Assts', 'G-xG', 'A-xA', 'xPlacement')),
+                                                                                      'Assists' = 'Assts', 'G-xG', 'A-xA', 'xPlacement' = 'xPlace')),
                                                                      selected ='xA')),
                                                   plotOutput('shooterplot'))))
                                      )))),
