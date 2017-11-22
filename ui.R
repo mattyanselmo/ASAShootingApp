@@ -148,11 +148,11 @@ shinyUI(
                                                 downloadButton('team_download', 'Download CSV'),
                                                 br(),
                                                 br(),
-                                                div(id = 'west', conditionalPanel(condition = "team_inputs.team_seasonordate == 'Season' && team_inputs.team_seasonfilter.length == 1",
+                                                div(id = 'west', conditionalPanel(condition = "team_seasonordate_cond == 'Season' && team_seasonfilter_cond.length == 1",
                                                                                   h2('Western conference')),
                                                     DT::dataTableOutput('teamtotalxgoalswest')),
                                                 br(),
-                                                div(id = 'east', conditionalPanel(condition = "team_inputs.team_seasonordate == 'Season' && team_inputs.team_seasonfilter.length == 1",
+                                                div(id = 'east', conditionalPanel(condition = "team_seasonordate_cond == 'Season' && team_seasonfilter_cond.length == 1",
                                                                                   h2('Eastern conference'),
                                                                                   DT::dataTableOutput('teamtotalxgoalseast')))
                                        ),
@@ -160,13 +160,11 @@ shinyUI(
                                                 downloadButton('team_download_pergame', 'Download CSV'),
                                                 br(),
                                                 br(),
-                                                CONTINUE CHANGING INPUT.TEAM TO TEAM_INPUTS.TEAM
-                                                WHY IS THE TABLE EMPTY WHEN MULTIPLE SEASONS ARE SELECTED?
-                                                conditionalPanel(condition = "input.team_seasonordate == 'Season' && input.team_seasonfilter.length == 1",
+                                                conditionalPanel(condition = "team_seasonordate_cond == 'Season' && team_seasonfilter_cond.length == 1",
                                                                  h2('Western conference')),
                                                 div(DT::dataTableOutput('teampergamexgoalswest')),
                                                 br(),
-                                                conditionalPanel(condition = "input.team_seasonordate == 'Season' && input.team_seasonfilter.length == 1",
+                                                conditionalPanel(condition = "team_seasonordate_cond == 'Season' && team_seasonfilter_cond.length == 1",
                                                                  h2('Eastern conference'),
                                                                  div(DT::dataTableOutput('teampergamexgoalseast')))
                                        ),
@@ -315,10 +313,12 @@ shinyUI(
                                    ))
                         )
              ),
-             tabPanel('Glossary',
+             # Glossary ####
+             tabPanel(strong('Glossary'),
                       h1('Glossary'),
                       dataTableOutput('glossary')                        
              ),
+             # App info ####
              tabPanel(strong('App info'),
                       h1('App info'),
                       p("We built this interactive web application to give ASA's loyal readers more control over 
