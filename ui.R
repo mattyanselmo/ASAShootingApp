@@ -148,11 +148,11 @@ shinyUI(
                                                 downloadButton('team_download', 'Download CSV'),
                                                 br(),
                                                 br(),
-                                                div(id = 'west', conditionalPanel(condition = "team_seasonordate_cond == 'Season' && team_seasonfilter_cond.length == 1",
+                                                div(id = 'west', conditionalPanel(condition = "output.team_seasonordate == 'Season' && output.team_seasonfilter.length == 1",
                                                                                   h2('Western conference')),
                                                     DT::dataTableOutput('teamtotalxgoalswest')),
                                                 br(),
-                                                div(id = 'east', conditionalPanel(condition = "team_seasonordate_cond == 'Season' && team_seasonfilter_cond.length == 1",
+                                                div(id = 'east', conditionalPanel(condition = "output.team_seasonordate == 'Season' && output.team_seasonfilter.length == 1",
                                                                                   h2('Eastern conference'),
                                                                                   DT::dataTableOutput('teamtotalxgoalseast')))
                                        ),

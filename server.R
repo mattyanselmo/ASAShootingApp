@@ -332,9 +332,6 @@ shinyServer(function(input, output) {
                                 teamplot_xvar = 'xG',
                                 teamplot_yvar = 'xA')
   
-  team_seasonordate_cond <- 'Season'
-  team_seasonfilter_cond <- isolate(input$team_seasonfilter)
-  
   observeEvent(input$team_action,
                {
                  team_inputs$team_seasonordate <- input$team_seasonordate
@@ -348,15 +345,17 @@ shinyServer(function(input, output) {
                  team_inputs$team_evenstate <- input$team_evenstate
                  team_inputs$teamplot_xvar <- input$teamplot_xvar
                  team_inputs$teamplot_yvar <- input$teamplot_yvar
-                 team_seasonordate_cond <- isolate(input$team_seasonordate)
-                 team_seasonfilter_cond <- isolate(input$team_seasonfilter)
                  
                })
   
-  output$team_seasonordate <- team_seasonordate_cond
-  output$team_seasonfilter <- team_seasonfilter_cond
-  outputOptions(output, "team_seasonordate_cond", suspendWhenHidden = FALSE)  
-  outputOptions(output, "team_seasonfilter_cond", suspendWhenHidden = FALSE)  
+  output$team_seasonordate <- reactive({
+    team_inputs$team_seasonordate
+  })
+  output$team_seasonfilter <- reactive({
+    team_inputs$team_seasonfilter
+  })
+  outputOptions(output, "team_seasonordate", suspendWhenHidden = FALSE)  
+  outputOptions(output, "team_seasonfilter", suspendWhenHidden = FALSE)  
   
   
   # Team tables ####
