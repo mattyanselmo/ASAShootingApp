@@ -72,7 +72,7 @@ shinyUI(
                                      downloadButton('player_download', 'Download CSV'),
                                      br(),
                                      tabsetPanel(
-                                       tabPanel('Table',
+                                       tabPanel('Totals',
                                                 DT::dataTableOutput('shootertable')
                                        ),
                                        tabPanel('Visuals',
@@ -93,7 +93,29 @@ shinyUI(
                                                                                       'Shots', 'Key passes' = 'KeyP', 'Goals', 
                                                                                       'Assists' = 'Assts', 'G-xG', 'A-xA', 'xPlacement' = 'xPlace')),
                                                                      selected ='xA')),
-                                                  plotOutput('shooterplot'))))
+                                                  plotOutput('shooterplot')))),
+                                       tabPanel('Per 96',
+                                                DT::dataTableOutput('shootertable_per96')
+                                       ),
+                                       tabPanel('Visuals (per 96)',
+                                                fluidPage(fluidRow(
+                                                  column(4,
+                                                         selectInput('shooterplot_xvar_per96',
+                                                                     label = 'X-axis variable',
+                                                                     choices = sort(c('xG', 'xA', 'xG/Shot' = 'xGperShot', 
+                                                                                      'xA/Pass' = 'xAperPass', 'Shots on target' = 'OnTarget',
+                                                                                      'Shots', 'Key passes' = 'KeyP', 'Goals', 
+                                                                                      'Assists' = 'Assts', 'G-xG', 'A-xA', 'xPlacement' = 'xPlace')),
+                                                                     selected ='xG')),
+                                                  column(4,
+                                                         selectInput('shooterplot_yvar_per96',
+                                                                     label = 'Y-axis variable',
+                                                                     choices = sort(c('xG', 'xA', 'xG/Shot' = 'xGperShot', 
+                                                                                      'xA/Pass' = 'xAperPass', 'Shots on target' = 'OnTarget',
+                                                                                      'Shots', 'Key passes' = 'KeyP', 'Goals', 
+                                                                                      'Assists' = 'Assts', 'G-xG', 'A-xA', 'xPlacement' = 'xPlace')),
+                                                                     selected ='xA')),
+                                                  plotOutput('shooterplot_per96'))))
                                      )))),
                         # Team tab panel ####
                         tabPanel('Teams',
@@ -327,11 +349,17 @@ shinyUI(
                         If you have an idea for a feature that will make the app totes better,
                         then please don't hesitate to email Matthias (mkullowatz at gmail) with your idea."),
                       br(),
+                      p('We have been asked why we measure individual stats on a per-96-minute basis, rather than
+                        per 90 minutes. No, we are not trying to be hip for the sake of being hip. The average MLS game
+                        is 96 minutes long, including average stoppage times for each half, and thus our team per-game
+                        statistics are actually per-96-minute statistics. To maintain internal consistency of our data,
+                        we show player statistics on a per-96-minute basis, too, so that the average number of goals per game
+                        at the team level will be equal to the average number of goals per 96 minutes at the player level.'),
+                      br(),
                       p('Please note that the statistics displayed in this app are very similiar to, but not exactly
-                        the same as, those in our static tables. This is due to two things. 1) This app utilizes
-                        updated xGoal models, fit through 2016, with a better method of capturing penalty kicks. 2)
-                        We have not imported minutes data into this app yet. For this second reason, we will keep the 
-                        static tables up on the site to include per-minute based statistics.'))
+                        the same as, those in our static tables. This is because this app utilizes
+                        updated xGoal models, fit through 2016, with a better method of capturing penalty kicks. For most
+                        players the differences are negligible.'))
 
   )
 )

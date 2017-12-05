@@ -156,7 +156,9 @@ shinyServer(function(input, output) {
       formatPercentage(columns = c('Solo'), digits = 1)
   })
   
+  # output$shootertable_per96 <- renderDataTable({}) ####
   
+  # Player downloads ####
   output$player_download <- downloadHandler(
     filename = 'ASAshootertable.csv',
     
@@ -188,6 +190,8 @@ shinyServer(function(input, output) {
       write.csv(dt, file, row.names = F)
     }
   )
+  
+  # output$player_download_per96 <- downloadHandler() ####
   
   # Keeper tables ####
   output$keepertable <- DT::renderDataTable({
