@@ -1,15 +1,17 @@
-playerxgoals <- readRDS('IgnoreList/xGoalsByPlayer.rds') %>%
-  mutate(date = as.Date(date, format = '%m/%d/%Y'))
-date1 = as.Date('2000-01-01')
-date2 = as.Date('9999-12-31')
-season = 2011:2017
-shotfilter = 0
-keyfilter = 0
-byteams = T
-byseasons = T
-FK = T
-PK = T
-OtherShots = T
+# Test inputs
+# library(dplyr)
+# playerxgoals <- readRDS('IgnoreList/xGoalsByPlayer.rds') %>%
+#   mutate(date = as.Date(date, format = '%m/%d/%Y'))
+# date1 = as.Date('2000-01-01')
+# date2 = as.Date('9999-12-31')
+# season = 2011:2017
+# shotfilter = 0
+# keyfilter = 0
+# byteams = T
+# byseasons = T
+# FK = T
+# PK = T
+# OtherShots = T
 
 shooterxgoals_perminute <- function(playerxgoals = playerxgoals, 
                                date1 = as.Date('2000-01-01'), 
