@@ -5,6 +5,7 @@ library(shinyjs)
 library(ggplot2)
 
 playerxgoals <- readRDS('IgnoreList/xGoalsByPlayer.rds')
+minutesPlayed <- readRDS('IgnoreList/MinutesByGameID.rds')
 teamxgoals <- readRDS('IgnoreList/xGoalsByTeam.rds')
 xgbygame <- readRDS('IgnoreList/xGoalsByTeam_byGame.rds')
 keeperxgoals <- readRDS('IgnoreList/xGoalsByKeeper.rds')

@@ -156,42 +156,89 @@ shinyServer(function(input, output) {
       formatPercentage(columns = c('Solo'), digits = 1)
   })
   
-  # output$shootertable_per96 <- renderDataTable({}) ####
+  output$shootertable_per96 <- renderDataTable({
+    if(shooter_inputs$shooting_seasonordate == 'Season'){
+      dt <- shooterxgoals_perminute(playerxgoals,
+                                    minutes_df = minutesPlayed,
+                                    date1 = as.Date('2000-01-01'),
+                                    date2 = as.Date('9999-12-31'),
+                                    season = shooter_inputs$shooting_seasonfilter,
+                                    shotfilter = shooter_inputs$shooting_minshots,
+                                    keyfilter = shooter_inputs$shooting_minkeypasses,
+                                    minfilter = input$shooting_minfilter,
+                                    byseasons = shooter_inputs$shooting_byseasons,
+                                    OtherShots = shooter_inputs$shooting_other,
+                                    FK = shooter_inputs$shooting_fk,
+                                    PK = shooter_inputs$shooting_pk)
+    } else{
+      dt <- shooterxgoals_perminute(playerxgoals,
+                                    minutes_df = minutesPlayed,
+                                    date1 = shooter_inputs$shooting_date1,
+                                    date2 = shooter_inputs$shooting_date2,
+                                    season = min(playerxgoals$Season):max(playerxgoals$Season),
+                                    shotfilter = shooter_inputs$shooting_minshots,
+                                    keyfilter = shooter_inputs$shooting_minkeypasses,
+                                    minfilter = input$shooting_minfilter,
+                                    byseasons = shooter_inputs$shooting_byseasons,
+                                    OtherShots = shooter_inputs$shooting_other,
+                                    FK = shooter_inputs$shooting_fk,
+                                    PK = shooter_inputs$shooting_pk)
+    }
+    
+    datatable(dt,
+              rownames = F,
+              options(list(autoWidth = T,
+                           pageLength = 25,
+                           lengthMenu = seq(25, 100, 25)))) %>%
+      formatRound(columns = c('Shots', 'SoT', 'Goals', 'xG', 'G-xG', 'xPlace', 'KeyP', 'Assts', 'xA', 'A-xA', 'xG+xA'), 
+                  digits = 2)
+  })
   
   # Player downloads ####
   output$player_download <- downloadHandler(
     filename = 'ASAshootertable.csv',
     
     content = function(file){
-      if(shooter_inputs$shooting_seasonordate == 'Season'){
-        dt <- shooterxgoals.func(playerxgoals,
-                                 date1 = as.Date('2000-01-01'),
-                                 date2 = as.Date('9999-12-31'),
-                                 season = shooter_inputs$shooting_seasonfilter,
-                                 shotfilter = shooter_inputs$shooting_minshots,
-                                 keyfilter = shooter_inputs$shooting_minkeypasses,
-                                 byteams = shooter_inputs$shooting_byteams,
-                                 byseasons = shooter_inputs$shooting_byseasons,
-                                 FK = shooter_inputs$shooting_fk,
-                                 PK = shooter_inputs$shooting_pk)
-      } else{
-        dt <- shooterxgoals.func(playerxgoals,
-                                 date1 = shooter_inputs$shooting_date1,
-                                 date2 = shooter_inputs$shooting_date2,
-                                 season = min(playerxgoals$Season):max(playerxgoals$Season),
-                                 shotfilter = shooter_inputs$shooting_minshots,
-                                 keyfilter = shooter_inputs$shooting_minkeypasses,
-                                 byteams = shooter_inputs$shooting_byteams,
-                                 byseasons = shooter_inputs$shooting_byseasons,
-                                 OtherShots = shooter_inputs$shooting_other,
-                                 FK = shooter_inputs$shooting_fk,
-                                 PK = shooter_inputs$shooting_pk)
+      if(input$player_subtab %in% c('Per 96', 'Scatter plots (per 96)')){
+        dt <- shooterxgoals_perminute(playerxgoals,
+                                      minutes_df = minutesPlayed,
+                                      date1 = ifelse(shooter_inputs$shooting_seasonordate == 'Season', 
+                                                     as.Date('2000-01-01'),
+                                                     shooter_inputs$shooting_date1),
+                                      date2 = ifelse(shooter_inputs$shooting_seasonordate == 'Season', 
+                                                     as.Date('9999-12-31'),
+                                                     shooter_inputs$shooting_date2),
+                                      season = ifelse(shooter_inputs$shooting_seasonordate == 'Season',
+                                                      shooter_inputs$shooting_seasonfilter,
+                                                      min(playerxgoals$Season):max(playerxgoals$Season)),
+                                      shotfilter = shooter_inputs$shooting_minshots,
+                                      keyfilter = shooter_inputs$shooting_minkeypasses,
+                                      minfilter = input$shooting_minfilter,
+                                      byseasons = shooter_inputs$shooting_byseasons,
+                                      OtherShots = shooter_inputs$shooting_other,
+                                      FK = shooter_inputs$shooting_fk,
+                                      PK = shooter_inputs$shooting_pk)
+        } else{
+          dt <- shooterxgoals.func(playerxgoals,
+                                   date1 = ifelse(shooter_inputs$shooting_seasonordate == 'Season', 
+                                                  as.Date('2000-01-01'),
+                                                  shooter_inputs$shooting_date1),
+                                   date2 = ifelse(shooter_inputs$shooting_seasonordate == 'Season', 
+                                                  as.Date('9999-12-31'),
+                                                  shooter_inputs$shooting_date2),
+                                   season = ifelse(shooter_inputs$shooting_seasonordate == 'Season',
+                                                   shooter_inputs$shooting_seasonfilter,
+                                                   min(playerxgoals$Season):max(playerxgoals$Season)),
+                                   shotfilter = shooter_inputs$shooting_minshots,
+                                   keyfilter = shooter_inputs$shooting_minkeypasses,
+                                   byteams = shooter_inputs$shooting_byteams,
+                                   byseasons = shooter_inputs$shooting_byseasons,
+                                   FK = shooter_inputs$shooting_fk,
+                                   PK = shooter_inputs$shooting_pk)
       }
       write.csv(dt, file, row.names = F)
     }
   )
-  
-  # output$player_download_per96 <- downloadHandler() ####
   
   # Keeper tables ####
   output$keepertable <- DT::renderDataTable({
@@ -323,6 +370,240 @@ shinyServer(function(input, output) {
     
   }, height = 500, width = 700)
   
+  # Team tables ####
+  output$teamtotalxgoalswest <- DT::renderDataTable({
+    if(input$team_seasonordate == 'Season'){
+      dt <- teamxgoals.func(teamxgoals, 
+                            date1 = as.Date('2000-01-01'), 
+                            date2 = as.Date('9999-12-31'),
+                            season = input$team_seasonfilter,
+                            even = input$team_evenstate,
+                            pattern = input$team_pattern,
+                            pergame = F,
+                            advanced = ifelse(input$team_advanced == 'Basic stats', F, T),
+                            venue = input$team_home,
+                            byseasons = input$team_byseasons)
+      
+    } else{
+      dt <- teamxgoals.func(teamxgoals, 
+                            date1 = input$team_date1, 
+                            date2 = input$team_date2,
+                            season = min(teamxgoals$Season):max(teamxgoals$Season),
+                            even = input$team_evenstate,
+                            pattern = input$team_pattern,
+                            pergame = F,
+                            advanced = ifelse(input$team_advanced == 'Basic stats', F, T),
+                            venue = input$team_home,
+                            byseasons = input$team_byseasons)
+    }
+    
+    is.num <- sapply(dt, is.numeric)
+    dt[is.num] <- lapply(dt[is.num], round, 2)
+    
+    if('Conf' %in% names(dt)){
+      dt <- dt %>%
+        filter(Conf == 'west') %>%
+        select(-Conf)
+    }
+    
+    datatable(dt,
+              rownames = F,
+              options(list(autoWidth = T,
+                           pageLength = nrow(dt),
+                           dom = 't')))
+  })
+  
+  output$teamtotalxgoalseast <- DT::renderDataTable({
+    if(input$team_seasonordate == 'Season'){
+      dt <- teamxgoals.func(teamxgoals, 
+                            date1 = as.Date('2000-01-01'), 
+                            date2 = as.Date('9999-12-31'),
+                            season = input$team_seasonfilter,
+                            even = input$team_evenstate,
+                            pattern = input$team_pattern,
+                            pergame = F,
+                            advanced = ifelse(input$team_advanced == 'Basic stats', F, T),
+                            venue = input$team_home,
+                            byseasons = input$team_byseasons)
+      
+    } else{
+      dt <- teamxgoals.func(teamxgoals, 
+                            date1 = input$team_date1, 
+                            date2 = input$team_date2,
+                            season = min(teamxgoals$Season):max(teamxgoals$Season),
+                            even = input$team_evenstate,
+                            pattern = input$team_pattern,
+                            pergame = F,
+                            advanced = ifelse(input$team_advanced == 'Basic stats', F, T),
+                            venue = input$team_home,
+                            byseasons = input$team_byseasons)
+    }
+    
+    is.num <- sapply(dt, is.numeric)
+    dt[is.num] <- lapply(dt[is.num], round, 2)
+    
+    if('Conf' %in% names(dt)){
+      dt <- dt %>%
+        filter(Conf == 'east') %>%
+        select(-Conf)
+    }
+    
+    datatable(dt,
+              rownames = F,
+              options(list(autoWidth = T,
+                           pageLength = nrow(dt),
+                           dom = 't')))
+  })
+  
+  output$team_download <- downloadHandler(
+    filename = 'ASAteamtable_total.csv',
+    
+    content = function(file){
+      if(input$team_seasonordate == 'Season'){
+        dt <- teamxgoals.func(teamxgoals, 
+                              date1 = as.Date('2000-01-01'), 
+                              date2 = as.Date('9999-12-31'),
+                              season = input$team_seasonfilter,
+                              even = input$team_evenstate,
+                              pattern = input$team_pattern,
+                              pergame = F,
+                              advanced = ifelse(input$team_advanced == 'Basic stats', F, T),
+                              venue = input$team_home,
+                              byseasons = input$team_byseasons)
+        
+      } else{
+        dt <- teamxgoals.func(teamxgoals, 
+                              date1 = input$team_date1, 
+                              date2 = input$team_date2,
+                              season = min(teamxgoals$Season):max(teamxgoals$Season),
+                              even = input$team_evenstate,
+                              pattern = input$team_pattern,
+                              pergame = F,
+                              advanced = ifelse(input$team_advanced == 'Basic stats', F, T),
+                              venue = input$team_home,
+                              byseasons = input$team_byseasons)
+      }
+      
+      write.csv(dt, file, row.names = F)
+    }
+  )
+  
+  output$teampergamexgoalswest <- DT::renderDataTable({
+    if(input$team_seasonordate == 'Season'){
+      dt <- teamxgoals.func(teamxgoals, 
+                            date1 = as.Date('2000-01-01'), 
+                            date2 = as.Date('9999-12-31'),
+                            season = input$team_seasonfilter,
+                            even = input$team_evenstate,
+                            pattern = input$team_pattern,
+                            pergame = T,
+                            advanced = ifelse(input$team_advanced == 'Basic stats', F, T),
+                            venue = input$team_home,
+                            byseasons = input$team_byseasons)
+      
+    } else{
+      dt <- teamxgoals.func(teamxgoals, 
+                            date1 = input$team_date1, 
+                            date2 = input$team_date2,
+                            season = min(teamxgoals$Season):max(teamxgoals$Season),
+                            even = input$team_evenstate,
+                            pattern = input$team_pattern,
+                            pergame = T,
+                            advanced = ifelse(input$team_advanced == 'Basic stats', F, T),
+                            venue = input$team_home,
+                            byseasons = input$team_byseasons)
+    }
+    
+    is.num <- sapply(dt, is.numeric)
+    dt[is.num] <- lapply(dt[is.num], round, 2)
+    
+    if('Conf' %in% names(dt)){
+      dt <- dt %>%
+        filter(Conf == 'west') %>%
+        select(-Conf)
+    }
+    
+    datatable(dt,
+              rownames = F,
+              options(list(autoWidth = T,
+                           pageLength = nrow(dt),
+                           dom = 't')))
+  })
+  
+  output$teampergamexgoalseast <- DT::renderDataTable({
+    if(input$team_seasonordate == 'Season'){
+      dt <- teamxgoals.func(teamxgoals, 
+                            date1 = as.Date('2000-01-01'), 
+                            date2 = as.Date('9999-12-31'),
+                            season = input$team_seasonfilter,
+                            even = input$team_evenstate,
+                            pattern = input$team_pattern,
+                            pergame = T,
+                            advanced = ifelse(input$team_advanced == 'Basic stats', F, T),
+                            venue = input$team_home,
+                            byseasons = input$team_byseasons)
+      
+    } else{
+      dt <- teamxgoals.func(teamxgoals, 
+                            date1 = input$team_date1, 
+                            date2 = input$team_date2,
+                            season = min(teamxgoals$Season):max(teamxgoals$Season),
+                            even = input$team_evenstate,
+                            pattern = input$team_pattern,
+                            pergame = T,
+                            advanced = ifelse(input$team_advanced == 'Basic stats', F, T),
+                            venue = input$team_home,
+                            byseasons = input$team_byseasons)
+    }
+    
+    is.num <- sapply(dt, is.numeric)
+    dt[is.num] <- lapply(dt[is.num], round, 2)
+    
+    if('Conf' %in% names(dt)){
+      dt <- dt %>%
+        filter(Conf == 'east') %>%
+        select(-Conf)
+    }
+    
+    datatable(dt,
+              rownames = F,
+              options(list(autoWidth = T,
+                           pageLength = nrow(dt),
+                           dom = 't')))
+  })
+  
+  output$team_download_pergame <- downloadHandler(
+    filename = 'ASAteamtable_pergame.csv',
+    
+    content = function(file){
+      if(input$team_seasonordate == 'Season'){
+        dt <- teamxgoals.func(teamxgoals, 
+                              date1 = as.Date('2000-01-01'), 
+                              date2 = as.Date('9999-12-31'),
+                              season = input$team_seasonfilter,
+                              even = input$team_evenstate,
+                              pattern = input$team_pattern,
+                              pergame = T,
+                              advanced = ifelse(input$team_advanced == 'Basic stats', F, T),
+                              venue = input$team_home,
+                              byseasons = input$team_byseasons)
+        
+      } else{
+        dt <- teamxgoals.func(teamxgoals, 
+                              date1 = input$team_date1, 
+                              date2 = input$team_date2,
+                              season = min(teamxgoals$Season):max(teamxgoals$Season),
+                              even = input$team_evenstate,
+                              pattern = input$team_pattern,
+                              pergame = T,
+                              advanced = ifelse(input$team_advanced == 'Basic stats', F, T),
+                              venue = input$team_home,
+                              byseasons = input$team_byseasons)
+      }
+      write.csv(dt, file, row.names = F)
+    }
+  )
+  
   # Team reactive values ####
   team_inputs <- reactiveValues(team_seasonordate = 'Season',
                                 team_date1 = as.Date('2000-01-01'),
@@ -352,255 +633,7 @@ shinyServer(function(input, output) {
                  
                })
   
-  output$team_seasonordate <- reactive({
-    team_inputs$team_seasonordate
-  })
-  output$team_seasonfilter <- reactive({
-    team_inputs$team_seasonfilter
-  })
-  outputOptions(output, "team_seasonordate", suspendWhenHidden = FALSE)  
-  outputOptions(output, "team_seasonfilter", suspendWhenHidden = FALSE)  
-  
-  
-  # Team tables ####
-  output$teamtotalxgoalswest <- DT::renderDataTable({
-    if(team_inputs$team_seasonordate == 'Season'){
-      dt <- teamxgoals.func(teamxgoals, 
-                            date1 = as.Date('2000-01-01'), 
-                            date2 = as.Date('9999-12-31'),
-                            season = team_inputs$team_seasonfilter,
-                            even = team_inputs$team_evenstate,
-                            pattern = team_inputs$team_pattern,
-                            pergame = F,
-                            advanced = ifelse(team_inputs$team_advanced == 'Basic stats', F, T),
-                            venue = team_inputs$team_home,
-                            byseasons = team_inputs$team_byseasons)
-      
-    } else{
-      dt <- teamxgoals.func(teamxgoals, 
-                            date1 = team_inputs$team_date1, 
-                            date2 = team_inputs$team_date2,
-                            season = min(teamxgoals$Season):max(teamxgoals$Season),
-                            even = team_inputs$team_evenstate,
-                            pattern = team_inputs$team_pattern,
-                            pergame = F,
-                            advanced = ifelse(team_inputs$team_advanced == 'Basic stats', F, T),
-                            venue = team_inputs$team_home,
-                            byseasons = team_inputs$team_byseasons)
-    }
-    
-    is.num <- sapply(dt, is.numeric)
-    dt[is.num] <- lapply(dt[is.num], round, 2)
-    
-    if('Conf' %in% names(dt)){
-      dt <- dt %>%
-        filter(Conf == 'west') %>%
-        select(-Conf)
-    }
-    
-    datatable(dt,
-              rownames = F,
-              options(list(autoWidth = T,
-                           pageLength = nrow(dt),
-                           dom = 't')))
-  })
-  
-  output$teamtotalxgoalseast <- DT::renderDataTable({
-    if(team_inputs$team_seasonordate == 'Season'){
-      dt <- teamxgoals.func(teamxgoals, 
-                            date1 = as.Date('2000-01-01'), 
-                            date2 = as.Date('9999-12-31'),
-                            season = team_inputs$team_seasonfilter,
-                            even = team_inputs$team_evenstate,
-                            pattern = team_inputs$team_pattern,
-                            pergame = F,
-                            advanced = ifelse(team_inputs$team_advanced == 'Basic stats', F, T),
-                            venue = team_inputs$team_home,
-                            byseasons = team_inputs$team_byseasons)
-      
-    } else{
-      dt <- teamxgoals.func(teamxgoals, 
-                            date1 = team_inputs$team_date1, 
-                            date2 = team_inputs$team_date2,
-                            season = min(teamxgoals$Season):max(teamxgoals$Season),
-                            even = team_inputs$team_evenstate,
-                            pattern = team_inputs$team_pattern,
-                            pergame = F,
-                            advanced = ifelse(team_inputs$team_advanced == 'Basic stats', F, T),
-                            venue = team_inputs$team_home,
-                            byseasons = team_inputs$team_byseasons)
-    }
-    
-    is.num <- sapply(dt, is.numeric)
-    dt[is.num] <- lapply(dt[is.num], round, 2)
-    
-    if('Conf' %in% names(dt)){
-      dt <- dt %>%
-        filter(Conf == 'east') %>%
-        select(-Conf)
-    }
-    
-    datatable(dt,
-              rownames = F,
-              options(list(autoWidth = T,
-                           pageLength = nrow(dt),
-                           dom = 't')))
-  })
-  
-  output$team_download <- downloadHandler(
-    filename = 'ASAteamtable_total.csv',
-    
-    content = function(file){
-      if(team_inputs$team_seasonordate == 'Season'){
-        dt <- teamxgoals.func(teamxgoals, 
-                              date1 = as.Date('2000-01-01'), 
-                              date2 = as.Date('9999-12-31'),
-                              season = team_inputs$team_seasonfilter,
-                              even = team_inputs$team_evenstate,
-                              pattern = team_inputs$team_pattern,
-                              pergame = F,
-                              advanced = ifelse(team_inputs$team_advanced == 'Basic stats', F, T),
-                              venue = team_inputs$team_home,
-                              byseasons = team_inputs$team_byseasons)
-        
-      } else{
-        dt <- teamxgoals.func(teamxgoals, 
-                              date1 = team_inputs$team_date1, 
-                              date2 = team_inputs$team_date2,
-                              season = min(teamxgoals$Season):max(teamxgoals$Season),
-                              even = team_inputs$team_evenstate,
-                              pattern = team_inputs$team_pattern,
-                              pergame = F,
-                              advanced = ifelse(team_inputs$team_advanced == 'Basic stats', F, T),
-                              venue = team_inputs$team_home,
-                              byseasons = team_inputs$team_byseasons)
-      }
-      
-      write.csv(dt, file, row.names = F)
-    }
-  )
-  
-  output$teampergamexgoalswest <- DT::renderDataTable({
-    if(team_inputs$team_seasonordate == 'Season'){
-      dt <- teamxgoals.func(teamxgoals, 
-                            date1 = as.Date('2000-01-01'), 
-                            date2 = as.Date('9999-12-31'),
-                            season = team_inputs$team_seasonfilter,
-                            even = team_inputs$team_evenstate,
-                            pattern = team_inputs$team_pattern,
-                            pergame = T,
-                            advanced = ifelse(team_inputs$team_advanced == 'Basic stats', F, T),
-                            venue = team_inputs$team_home,
-                            byseasons = team_inputs$team_byseasons)
-      
-    } else{
-      dt <- teamxgoals.func(teamxgoals, 
-                            date1 = team_inputs$team_date1, 
-                            date2 = team_inputs$team_date2,
-                            season = min(teamxgoals$Season):max(teamxgoals$Season),
-                            even = team_inputs$team_evenstate,
-                            pattern = team_inputs$team_pattern,
-                            pergame = T,
-                            advanced = ifelse(team_inputs$team_advanced == 'Basic stats', F, T),
-                            venue = team_inputs$team_home,
-                            byseasons = team_inputs$team_byseasons)
-    }
-    
-    is.num <- sapply(dt, is.numeric)
-    dt[is.num] <- lapply(dt[is.num], round, 2)
-    
-    if('Conf' %in% names(dt)){
-      dt <- dt %>%
-        filter(Conf == 'west') %>%
-        select(-Conf)
-    }
-    
-    datatable(dt,
-              rownames = F,
-              options(list(autoWidth = T,
-                           pageLength = nrow(dt),
-                           dom = 't')))
-  })
-  
-  output$teampergamexgoalseast <- DT::renderDataTable({
-    if(team_inputs$team_seasonordate == 'Season'){
-      dt <- teamxgoals.func(teamxgoals, 
-                            date1 = as.Date('2000-01-01'), 
-                            date2 = as.Date('9999-12-31'),
-                            season = team_inputs$team_seasonfilter,
-                            even = team_inputs$team_evenstate,
-                            pattern = team_inputs$team_pattern,
-                            pergame = T,
-                            advanced = ifelse(team_inputs$team_advanced == 'Basic stats', F, T),
-                            venue = team_inputs$team_home,
-                            byseasons = team_inputs$team_byseasons)
-      
-    } else{
-      dt <- teamxgoals.func(teamxgoals, 
-                            date1 = team_inputs$team_date1, 
-                            date2 = team_inputs$team_date2,
-                            season = min(teamxgoals$Season):max(teamxgoals$Season),
-                            even = team_inputs$team_evenstate,
-                            pattern = team_inputs$team_pattern,
-                            pergame = T,
-                            advanced = ifelse(team_inputs$team_advanced == 'Basic stats', F, T),
-                            venue = team_inputs$team_home,
-                            byseasons = team_inputs$team_byseasons)
-    }
-    
-    is.num <- sapply(dt, is.numeric)
-    dt[is.num] <- lapply(dt[is.num], round, 2)
-    
-    if('Conf' %in% names(dt)){
-      dt <- dt %>%
-        filter(Conf == 'east') %>%
-        select(-Conf)
-    }
-    
-    datatable(dt,
-              rownames = F,
-              options(list(autoWidth = T,
-                           pageLength = nrow(dt),
-                           dom = 't')))
-  })
-  
-  output$team_download_pergame <- downloadHandler(
-    filename = 'ASAteamtable_pergame.csv',
-    
-    content = function(file){
-      if(team_inputs$team_seasonordate == 'Season'){
-        dt <- teamxgoals.func(teamxgoals, 
-                              date1 = as.Date('2000-01-01'), 
-                              date2 = as.Date('9999-12-31'),
-                              season = team_inputs$team_seasonfilter,
-                              even = team_inputs$team_evenstate,
-                              pattern = team_inputs$team_pattern,
-                              pergame = T,
-                              advanced = ifelse(team_inputs$team_advanced == 'Basic stats', F, T),
-                              venue = team_inputs$team_home,
-                              byseasons = team_inputs$team_byseasons)
-        
-      } else{
-        dt <- teamxgoals.func(teamxgoals, 
-                              date1 = team_inputs$team_date1, 
-                              date2 = team_inputs$team_date2,
-                              season = min(teamxgoals$Season):max(teamxgoals$Season),
-                              even = team_inputs$team_evenstate,
-                              pattern = team_inputs$team_pattern,
-                              pergame = T,
-                              advanced = ifelse(team_inputs$team_advanced == 'Basic stats', F, T),
-                              venue = team_inputs$team_home,
-                              byseasons = team_inputs$team_byseasons)
-      }
-      write.csv(dt, file, row.names = F)
-    }
-  )
-  
   # Team plots ####
-  
-  # Consider the following:
-  ## Indent dropdown inputs
-  ## Include trend line or labeled quadrants
   output$teamplot <- renderPlot({
     if(team_inputs$team_seasonordate == 'Season'){
       dt <- teamxgoals.func(teamxgoals, 
