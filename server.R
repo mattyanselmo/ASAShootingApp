@@ -42,6 +42,9 @@ shinyServer(function(input, output) {
                })
   
   # Shooter plots ####
+  # INCLUDE PER 96 PLOT AND MAKE TABLES ONLY ONCE
+  # output$shooterplot_per96 <- renderPlot({}) ####
+  
   output$shooterplot <- renderPlot({
     
     if(shooter_inputs$shooting_seasonordate == 'Season'){

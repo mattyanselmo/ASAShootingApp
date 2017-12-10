@@ -103,11 +103,7 @@ shinyUI(
                                        ),
                                        tabPanel('Scatter plots (per 96)',
                                                 fluidPage(fluidRow(
-                                                  numericInput('shooting_minfilter_plot',
-                                                               label = 'Minimum minutes:',
-                                                               value = 0,
-                                                               min = 0, max = 3000, step = 250),
-                                                  column(4,
+                                                  column(3,
                                                          selectInput('shooterplot_xvar_per96',
                                                                      label = 'X-axis variable',
                                                                      choices = sort(c('xG', 'xA', 'xG/Shot' = 'xGperShot', 
@@ -115,7 +111,7 @@ shinyUI(
                                                                                       'Shots', 'Key passes' = 'KeyP', 'Goals', 
                                                                                       'Assists' = 'Assts', 'G-xG', 'A-xA', 'xPlacement' = 'xPlace')),
                                                                      selected ='xG')),
-                                                  column(4,
+                                                  column(3,
                                                          selectInput('shooterplot_yvar_per96',
                                                                      label = 'Y-axis variable',
                                                                      choices = sort(c('xG', 'xA', 'xG/Shot' = 'xGperShot', 
@@ -123,6 +119,11 @@ shinyUI(
                                                                                       'Shots', 'Key passes' = 'KeyP', 'Goals', 
                                                                                       'Assists' = 'Assts', 'G-xG', 'A-xA', 'xPlacement' = 'xPlace')),
                                                                      selected ='xA')),
+                                                  column(3,
+                                                         numericInput('shooting_minfilter_plot',
+                                                                      label = 'Minimum minutes:',
+                                                                      value = 0,
+                                                                      min = 0, max = 3000, step = 250)),
                                                   plotOutput('shooterplot_per96'))))
                                      )))),
                         # Team tab panel ####
