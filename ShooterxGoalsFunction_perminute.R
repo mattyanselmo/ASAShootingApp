@@ -90,12 +90,11 @@ shooterxgoals_perminute <- function(playerxgoals = playerxgoals,
   
 }
 
-# shooterxgoals_perminute(playerxgoals = readRDS('IgnoreList/xGoalsByPlayer.rds') %>%
-#                      mutate(date = as.Date(date, format = '%m/%d/%Y')),
+# shooterxgoals_perminute(playerxgoals = readRDS('IgnoreList/xGoalsByPlayer.rds'),
 #                    minutes_df = minutesPlayed,
 #                    date1 = as.Date('2000-01-01'),
 #                    date2 = as.Date('9999-12-31'),
-#                    season = 2016:2017,
+#                    season = 2017,
 #                    shotfilter = 0,
 #                    keyfilter = 0,
 #                    minfilter = 0,

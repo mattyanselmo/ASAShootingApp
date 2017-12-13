@@ -11,8 +11,8 @@ xgbygame <- readRDS('IgnoreList/xGoalsByTeam_byGame.rds')
 keeperxgoals <- readRDS('IgnoreList/xGoalsByKeeper.rds')
 conferences <- read.csv('teamsbyconferencebyseason.csv')
 glossary <- read.csv('Glossary.csv')
-pred.data <- readRDS('IgnoreList/TeamPredictionsData_week35.rds')
-load('IgnoreList/UnivariatePoissonModels.Rdata')
+#pred.data <- readRDS('IgnoreList/TeamPredictionsData_week35.rds')
+#load('IgnoreList/UnivariatePoissonModels.Rdata')
 
 lm_eqn <- function(df, x, y){
   m <- lm(formula(paste0(y, ' ~ ', x)), df);
