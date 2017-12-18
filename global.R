@@ -24,5 +24,6 @@ lm_eqn <- function(df, x, y){
 }
 
 source('ShooterxGoalsFunction.R')
+source('ShooterxGoalsFunction_perminute.R')
 source('TeamxGoalsFunction.R')
 source('KeeperxGoalsFunction.R')

@@ -165,7 +165,7 @@ shinyServer(function(input, output) {
   # Player table - totals
   output$shootertable <- DT::renderDataTable({
     
-    datatable(dt_total() %>% select(-c(xGperShot, xGperShot, extreme, plotnames)),
+    datatable(dt_total() %>% select(-c(xGperShot, xAperPass, extreme, plotnames)),
               rownames = F,
               options(list(autoWidth = T,
                            pageLength = 25,
