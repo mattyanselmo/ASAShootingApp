@@ -41,8 +41,6 @@ shinyServer(function(input, output) {
                                          shooterplot_per96_xvar = 'Min',
                                          shooterplot_per96_yvar = 'xG')
   
-  observe({print(reactiveValuesToList(shooter_per96_inputs))})
-  
   # Updated values
   observeEvent(input$shooting_action,
                {
@@ -281,34 +279,69 @@ shinyServer(function(input, output) {
     }
   )
   
+  # Keeper reactive values ####
+  
+  # Initial values
+  keeper_inputs <- reactiveValues(keeper_minshots = 0,
+                                  keeper_date1 = as.Date('2000-01-01'),
+                                  keeper_date2 = as.Date('9999-12-31'),
+                                  keeper_seasonfilter = max(keeperxgoals$Season),
+                                  keeper_seasonordate = 'Season',
+                                  keeper_byseasons = T,
+                                  keeper_byteams = F,
+                                  keeper_pk = T,
+                                  keeper_fk = T,
+                                  keeper_othershots = T,
+                                  keeperplot_xvar = 'xG',
+                                  keeperplot_yvar = 'G-xG')
+  
+  # Updated values
+  observeEvent(input$keeper_action,
+               {
+                 keeper_inputs$keeper_minshots <- input$keeper_minshots
+                 keeper_inputs$keeper_date1 <- input$keeper_date1
+                 keeper_inputs$keeper_date2 <- input$keeper_date2
+                 keeper_inputs$keeper_seasonfilter <- input$keeper_seasonfilter
+                 keeper_inputs$keeper_seasonordate <- input$keeper_seasonordate
+                 keeper_inputs$keeper_byseasons <- input$keeper_byseasons
+                 keeper_inputs$keeper_byteams <- input$keeper_byteams
+                 keeper_inputs$keeper_pk <- input$keeper_pk
+                 keeper_inputs$keeper_fk <- input$keeper_fk
+                 keeper_inputs$keeper_othershots <- input$keeper_othershots
+                 keeper_inputs$keeperplot_xvar <- input$keeperplot_xvar
+                 keeper_inputs$keeperplot_yvar <- input$keeperplot_yvar
+               })
+  
   # Keeper tables ####
-  output$keepertable <- DT::renderDataTable({
-    
-    if(input$keeper_seasonordate == 'Season'){
-      dt <- keeperxgoals.func(keeperxgoals,
+  dt_keeper <- reactive({
+    if(keeper_inputs$keeper_seasonordate == 'Season'){
+      dt_keeper <- keeperxgoals.func(keeperxgoals,
                               date1 = as.Date('2000-01-01'),
                               date2 = as.Date('9999-12-31'),
-                              season = input$keeper_seasonfilter,
-                              shotfilter = input$keeper_minshots,
-                              byteams = input$keeper_byteams,
-                              byseasons = input$keeper_byseasons,
-                              OtherShots = input$keeper_othershots,
-                              FK = input$keeper_fk,
-                              PK = input$keeper_pk)
+                              season = keeper_inputs$keeper_seasonfilter,
+                              shotfilter = keeper_inputs$keeper_minshots,
+                              byteams = keeper_inputs$keeper_byteams,
+                              byseasons = keeper_inputs$keeper_byseasons,
+                              OtherShots = keeper_inputs$keeper_othershots,
+                              FK = keeper_inputs$keeper_fk,
+                              PK = keeper_inputs$keeper_pk)
     } else{
-      dt <- keeperxgoals.func(keeperxgoals,
-                              date1 = input$keeper_date1,
-                              date2 = input$keeper_date2,
+      dt_keeper <- keeperxgoals.func(keeperxgoals,
+                              date1 = keeper_inputs$keeper_date1,
+                              date2 = keeper_inputs$keeper_date2,
                               season = min(playerxgoals$Season):max(playerxgoals$Season),
-                              shotfilter = input$keeper_minshots,
-                              byteams = input$keeper_byteams,
-                              byseasons = input$keeper_byseasons,
-                              OtherShots = input$keeper_othershots,
-                              FK = input$keeper_fk,
-                              PK = input$keeper_pk)
+                              shotfilter = keeper_inputs$keeper_minshots,
+                              byteams = keeper_inputs$keeper_byteams,
+                              byseasons = keeper_inputs$keeper_byseasons,
+                              OtherShots = keeper_inputs$keeper_othershots,
+                              FK = keeper_inputs$keeper_fk,
+                              PK = keeper_inputs$keeper_pk)
     }
+  })
+  
+  output$keepertable <- DT::renderDataTable({
     
-    datatable(dt,
+    datatable(dt_keeper(),
               rownames = F,
               options(list(autoWidth = T,
                            pageLength = 25,
@@ -323,66 +356,23 @@ shinyServer(function(input, output) {
     filename = 'ASAkeepertable.csv',
     
     content = function(file){
-      if(input$keeper_seasonordate == 'Season'){
-        dt <- keeperxgoals.func(keeperxgoals,
-                                date1 = as.Date('2000-01-01'),
-                                date2 = as.Date('9999-12-31'),
-                                season = input$keeper_seasonfilter,
-                                shotfilter = input$keeper_minshots,
-                                byteams = input$keeper_byteams,
-                                byseasons = input$keeper_byseasons,
-                                OtherShots = input$keeper_othershots,
-                                FK = input$keeper_fk,
-                                PK = input$keeper_pk)
-      } else{
-        dt <- keeperxgoals.func(keeperxgoals,
-                                date1 = input$keeper_date1,
-                                date2 = input$keeper_date2,
-                                season = min(playerxgoals$Season):max(playerxgoals$Season),
-                                shotfilter = input$keeper_minshots,
-                                byteams = input$keeper_byteams,
-                                byseasons = input$keeper_byseasons,
-                                OtherShots = input$keeper_othershots,
-                                FK = input$keeper_fk,
-                                PK = input$keeper_pk)
-      }
-      write.csv(dt, file, row.names = F)
+      write.csv(dt_keeper(), file, row.names = F)
     }
   )
   
   # Keeper plots ####
   #Figure out how to label these guys better!
   output$keeperplot <- renderPlot({
-    if(input$keeper_seasonordate == 'Season'){
-      dt <- keeperxgoals.func(keeperxgoals,
-                              date1 = as.Date('2000-01-01'),
-                              date2 = as.Date('9999-12-31'),
-                              season = input$keeper_seasonfilter,
-                              shotfilter = input$keeper_minshots,
-                              byteams = input$keeper_byteams,
-                              byseasons = input$keeper_byseasons,
-                              OtherShots = input$keeper_othershots,
-                              FK = input$keeper_fk,
-                              PK = input$keeper_pk) %>%
+
+   dt <- dt_keeper() %>%
         mutate(GAperShot = Goals/Shots, 
                xGperShot = xG/Shots,
                GmxGperShot = `G-xG`/Shots)
-    } else{
-      dt <- keeperxgoals.func(keeperxgoals,
-                              date1 = input$keeper_date1,
-                              date2 = input$keeper_date2,
-                              season = min(playerxgoals$Season):max(playerxgoals$Season),
-                              shotfilter = input$keeper_minshots,
-                              byteams = input$keeper_byteams,
-                              byseasons = input$keeper_byseasons,
-                              OtherShots = input$keeper_othershots,
-                              FK = input$keeper_fk,
-                              PK = input$keeper_pk) %>%
-        mutate(GAperShot = Goals/Shots, 
-               xGperShot = xG/Shots,
-               GmxGperShot = `G-xG`/Shots)
-    }
-    dt[['extreme']] <- rank(dt[[input$keeperplot_xvar]]) + rank(dt[[input$keeperplot_yvar]])
+   
+   xlim <- min(dt[[keeper_inputs$keeperplot_xvar]]) - 0.05*(max(dt[[keeper_inputs$keeperplot_xvar]]) - min(dt[[keeper_inputs$keeperplot_xvar]]))
+   ylim <- min(dt[[keeper_inputs$keeperplot_yvar]]) - 0.05*(max(dt[[keeper_inputs$keeperplot_yvar]]) - min(dt[[keeper_inputs$keeperplot_yvar]]))
+   
+    dt[['extreme']] <- rank(dt[[keeper_inputs$keeperplot_yvar]]) # Only show most extreme across y-axis
     if(length(unique(dt$Season)) > 1){
       dt[['plotnames']] <- paste(unlist(lapply(strsplit(dt$Keeper, " "), function(x) { return(x[length(x)]) })), dt$Season)
       
@@ -392,22 +382,34 @@ shinyServer(function(input, output) {
     
     p <- dt  %>%
       ggplot(
-        aes_string(x = paste0('`', input$keeperplot_xvar, '`'), 
-                   y = paste0('`', input$keeperplot_yvar, '`'))) +
+        aes_string(x = paste0('`', keeper_inputs$keeperplot_xvar, '`'), 
+                   y = paste0('`', keeper_inputs$keeperplot_yvar, '`'))) +
       geom_point(color = '#0000cc') +
       geom_text(aes(label = ifelse(dt$extreme >= sort(dt$extreme, decreasing = T)[min(3, nrow(dt))] |
                                      dt$extreme <= sort(dt$extreme)[min(3, nrow(dt))] |
-                                     dt[[input$keeperplot_xvar]] == max(dt[[input$keeperplot_xvar]]) |
-                                     dt[[input$keeperplot_yvar]] == max(dt[[input$keeperplot_yvar]]),
+                                     dt[[keeper_inputs$keeperplot_xvar]] == max(dt[[keeper_inputs$keeperplot_xvar]]) |
+                                     dt[[keeper_inputs$keeperplot_yvar]] == max(dt[[keeper_inputs$keeperplot_yvar]]),
                                    dt$plotnames, ''), 
                     hjust = 'inward'),
                 size = 5,
                 check_overlap = F,
                 color = '#ff3300') +
+      expand_limits(x = xlim,
+                    y = ylim) +
       theme(legend.position = "none",
             axis.text = element_text(size = 14),
             axis.title = element_text(size = 14))
-    p
+    
+    p + geom_smooth(method = 'lm', se = F) +
+      geom_text(x = min(dt[[keeper_inputs$keeperplot_xvar]]) - 0.05*(max(dt[[keeper_inputs$keeperplot_xvar]]) - min(dt[[keeper_inputs$keeperplot_xvar]])),
+                y = min(dt[[keeper_inputs$keeperplot_yvar]]) - 0.05*(max(dt[[keeper_inputs$keeperplot_yvar]]) - min(dt[[keeper_inputs$keeperplot_yvar]])),
+                hjust = 0,
+                label = lm_eqn(dt, 
+                               paste0('`', keeper_inputs$keeperplot_xvar, '`'), 
+                               paste0('`', keeper_inputs$keeperplot_yvar, '`')),
+                parse = TRUE,
+                color = 'black',
+                size = 7)
     
   }, height = 500, width = 700)
   

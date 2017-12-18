@@ -322,9 +322,12 @@ shinyUI(
                                    )
                                  )
                         ),
+                        # Keepers tab panel ####
                         tabPanel('Keepers',
                                  sidebarLayout(
                                    sidebarPanel(width = 2,
+                                                actionButton('keeper_action',
+                                                             label = 'Apply filters'),
                                                 numericInput('keeper_minshots',
                                                              "Minimum shots faced:",
                                                              value = 0,
@@ -351,7 +354,7 @@ shinyUI(
                                                                            max = max(playerxgoals$date),
                                                                            format = 'mm/dd/yyyy')
                                                 ),                  
-                                                
+                                                h5(HTML('<b>Other filters:</b>')),
                                                 checkboxInput('keeper_byteams',
                                                               label = 'Split by teams',
                                                               value = F),
@@ -377,7 +380,7 @@ shinyUI(
                                                 br(),
                                                 br(),
                                                 DT::dataTableOutput('keepertable')),
-                                       tabPanel('Visuals',
+                                       tabPanel('Scatter plots',
                                                 fluidPage(fluidRow(
                                                   column(4,
                                                          selectInput('keeperplot_xvar',
@@ -387,7 +390,7 @@ shinyUI(
                                                                                  'G-xG/shot' = 'GmxGperShot',
                                                                                  '%Shots headed' = 'Header%', 'Avg. distance' = 'Dist',
                                                                                  'xG faced' = 'xG', 'GA above average' = 'G-xG'),
-                                                                     selected = 'xGF')),
+                                                                     selected = 'xG')),
                                                   column(4,
                                                          selectInput('keeperplot_yvar',
                                                                      label = 'Y-axis variable',
@@ -396,7 +399,7 @@ shinyUI(
                                                                                  'G-xG/shot' = 'GmxGperShot',
                                                                                  '%Shots headed' = 'Header%', 'Avg. distance' = 'Dist',
                                                                                  'xG faced' = 'xG', 'GA above average' = 'G-xG'),
-                                                                     selected = 'xGperShot')),
+                                                                     selected = 'G-xG')),
                                                   plotOutput('keeperplot')))
                                        )
                                      )
