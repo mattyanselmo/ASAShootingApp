@@ -6,12 +6,12 @@ teamnames <- read.csv('TeamNameLinks.csv', stringsAsFactors = F)
 
 if(file.exists('C:/Users/Matthias')){
   temp <- read.csv('C:/Users/Matthias/Dropbox/ASA Blog Data/2017 Stats/shots with xG.csv')
-  write.csv(temp, 'C:/Users/Matthias/Documents/GitHub/ASAShootingApp/IgnoreList/shots with xG.csv')
+  write.csv(temp, 'C:/Users/Matthias/Documents/GitHub/ASAShootingApp_development/IgnoreList/shots with xG.csv')
   rm(temp)
   gc()
 } else if(file.exists('C:/Users/Matthias.Kullowatz')){
   temp <- read.csv('C:/Users/Matthias.Kullowatz/Dropbox/ASA Blog Data/2017 Stats/shots with xG.csv')
-  write.csv(temp, 'C:/Users/Matthias.Kullowatz/Documents/GitHub/ASAShootingApp/IgnoreList/shots with xG.csv')
+  write.csv(temp, 'C:/Users/Matthias.Kullowatz/Documents/GitHub/ASAShootingApp_development/IgnoreList/shots with xG.csv')
   rm(temp)
   gc()
 }
@@ -49,7 +49,8 @@ shooting14 <- bind_rows(lapply(paste0('IgnoreList/', grep('shotdata with xgoals'
          Time = floor(Time) + (Time - floor(Time))/0.6)
 
 shooting14 <- shooting14 %>%
-  select(date = Date, time = Time, half = Half, shooter = Shooter,
+  mutate(gameID = 0) %>%
+  select(date = Date, time = Time, half = Half, shooter = Shooter, gameID,
          team, goalie = Keeper, team.1, passer = Passer, assisted = Assisted,
          through = Through, cross = Cross, distance = Distance, angle = Angle,
          available = Available, keepreach = KeepReach, dive = Dive, gmlocz = GMLocZ,

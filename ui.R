@@ -11,9 +11,12 @@ shinyUI(
   navbarPage(title = HTML('<b>ASA Database</b>'),
              theme = 'bootstrap_edited.css',
              navbarMenu(strong('xGoals'),
-                        tabPanel('Players',
+                        # Players totals tab panel ####
+                        tabPanel('Players: totals',
                                  sidebarLayout(
                                    sidebarPanel(width = 2,
+                                                actionButton('shooting_action',
+                                                             label = 'Apply filters'),
                                                 numericInput('shooting_minshots',
                                                              "Minimum shots:",
                                                              value = 0,
@@ -44,7 +47,7 @@ shinyUI(
                                                                            max = max(playerxgoals$date),
                                                                            format = 'mm/dd/yyyy')
                                                 ),                  
-                                                
+                                                h5(HTML('<b>Other filters:</b>')),
                                                 checkboxInput('shooting_byteams',
                                                               label = 'Split players by teams',
                                                               value = F),
@@ -68,30 +71,122 @@ shinyUI(
                                      p(paste0('Updated through games on ', max(as.Date(playerxgoals$date)))),
                                      downloadButton('player_download', 'Download CSV'),
                                      br(),
-                                     tabsetPanel(
-                                       tabPanel('Table',
-                                                DT::dataTableOutput('shootertable')
-                                       ),
-                                       tabPanel('Visuals',
-                                                fluidPage(fluidRow(
-                                                  column(4,
-                                                         selectInput('shooterplot_xvar',
-                                                                     label = 'X-axis variable',
-                                                                     choices = sort(c('xG', 'xA', 'xG/Shot' = 'xGperShot', 
-                                                                                 'xA/Pass' = 'xAperPass', 'Shots on target' = 'OnTarget',
-                                                                                 'Shots', 'Key passes' = 'KeyP', 'Goals', 
-                                                                                 'Assists' = 'Assts', 'G-xG', 'A-xA', 'xPlacement')),
-                                                                     selected ='xG')),
-                                                  column(4,
-                                                         selectInput('shooterplot_yvar',
-                                                                     label = 'Y-axis variable',
-                                                                     choices = sort(c('xG', 'xA', 'xG/Shot' = 'xGperShot', 
-                                                                                      'xA/Pass' = 'xAperPass', 'Shots on target' = 'OnTarget',
-                                                                                      'Shots', 'Key passes' = 'KeyP', 'Goals', 
-                                                                                      'Assists' = 'Assts', 'G-xG', 'A-xA', 'xPlacement')),
-                                                                     selected ='xA')),
-                                                  plotOutput('shooterplot'))))
+                                     tabsetPanel(id = 'player_subtab',
+                                                 tabPanel('Totals',
+                                                          DT::dataTableOutput('shootertable')
+                                                 ),
+                                                 tabPanel('Scatter plots',
+                                                          fluidPage(fluidRow(
+                                                            column(3,
+                                                                   selectInput('shooterplot_xvar',
+                                                                               label = 'X-axis variable',
+                                                                               choices = sort(c('xG', 'xA', 'xG/Shot' = 'xGperShot', 
+                                                                                                'xA/Pass' = 'xAperPass', 'Shots on target' = 'OnTarget',
+                                                                                                'Shots', 'Key passes' = 'KeyP', 'Goals', 'G-xG/Shot' = 'GmxGperShot',
+                                                                                                'Assists' = 'Assts', 'G-xG', 'A-xA', 'xPlacement' = 'xPlace')),
+                                                                               selected ='xG')),
+                                                            column(3,
+                                                                   selectInput('shooterplot_yvar',
+                                                                               label = 'Y-axis variable',
+                                                                               choices = sort(c('xG', 'xA', 'xG/Shot' = 'xGperShot', 
+                                                                                                'xA/Pass' = 'xAperPass', 'Shots on target' = 'OnTarget',
+                                                                                                'Shots', 'Key passes' = 'KeyP', 'Goals', 'G-xG/Shot' = 'GmxGperShot',
+                                                                                                'Assists' = 'Assts', 'G-xG', 'A-xA', 'xPlacement' = 'xPlace')),
+                                                                               selected ='xG/Shot')),
+                                                            plotOutput('shooterplot'))))
                                      )))),
+                        # Players per 96 tab ####
+                        tabPanel('Players: per 96',
+                                 sidebarLayout(
+                                   sidebarPanel(width = 2,
+                                                actionButton('shooting_per96_action',
+                                                             label = 'Apply filters'),
+                                                numericInput('shooting_per96_minfilter',
+                                                             label = 'Minimum minutes:',
+                                                             value = 0,
+                                                             min = 0, max = 3000, step = 250),
+                                                numericInput('shooting_per96_minshots',
+                                                             "Minimum shots:",
+                                                             value = 0,
+                                                             min = 0, max = 100, step = 10),
+                                                numericInput('shooting_per96_minkeypasses',
+                                                             'Minimum key passes:',
+                                                             value = 0,
+                                                             min = 0, max = 100, step = 10),
+                                                radioButtons('shooting_per96_seasonordate',
+                                                             'Filter by:',
+                                                             choices = c('Season', 'Date')),
+                                                conditionalPanel(condition = "input.shooting_per96_seasonordate == 'Season'",
+                                                                 checkboxGroupInput('shooting_per96_seasonfilter',
+                                                                                    'Select seasons:',
+                                                                                    choices = 2015:max(playerxgoals$Season), # No minutes before 2015 yet
+                                                                                    selected = max(playerxgoals$Season))),
+                                                conditionalPanel(condition = "input.shooting_per96_seasonordate == 'Date'",
+                                                                 dateInput('shooting_per96_date1',
+                                                                           'From:',
+                                                                           value = min(playerxgoals$date[playerxgoals$Season == max(playerxgoals$Season)]),
+                                                                           min = min(playerxgoals$date[playerxgoals$Season > 2014]),
+                                                                           max = max(playerxgoals$date[playerxgoals$Season > 2014]), # No minutes before 2015 yet
+                                                                           format = 'mm/dd/yyyy'),
+                                                                 dateInput('shooting_per96_date2',
+                                                                           'To:',
+                                                                           value = max(playerxgoals$date),
+                                                                           min = min(playerxgoals$date[playerxgoals$Season > 2014]),
+                                                                           max = max(playerxgoals$date[playerxgoals$Season > 2014]),
+                                                                           format = 'mm/dd/yyyy')
+                                                ),                  
+                                                # We don't have teams in the per-minute data yet
+                                                # checkboxInput('shooting_per96_byteams',
+                                                #               label = 'Split players by teams',
+                                                #               value = F),
+                                                h5(HTML('<b>Other filters:</b>')),
+                                                checkboxInput('shooting_per96_byseasons',
+                                                              label = 'Split players by seasons',
+                                                              value = T),
+                                                checkboxInput('shooting_per96_other',
+                                                              label = 'Include non PK/FK',
+                                                              value = T),
+                                                checkboxInput('shooting_per96_pk',
+                                                              label = 'Include PKs',
+                                                              value = T),
+                                                checkboxInput('shooting_per96_fk',
+                                                              label = 'Include FKs',
+                                                              value = T)),
+                                   
+                                   mainPanel(
+                                     # div(style="display: inline-block;vertical-align:bottom; width: 250px;", h1('Player xGoals')),
+                                     # div(style="display: inline-block;vertical-align:bottom; width: 250px;", downloadButton('player_download', 'Download CSV')),
+                                     h1('Player xGoals: per 96 minutes'),
+                                     p(paste0('Updated through games on ', max(as.Date(playerxgoals$date)))),
+                                     downloadButton('player_per96_download', 'Download CSV'),
+                                     br(),
+                                     tabsetPanel(id = 'player_per96_subtab',
+                                                 tabPanel('Tables',
+                                                          DT::dataTableOutput('shootertable_per96')
+                                                 ),
+                                                 tabPanel('Scatter plots',
+                                                          fluidPage(fluidRow(
+                                                            column(3,
+                                                                   selectInput('shooterplot_per96_xvar',
+                                                                               label = 'X-axis variable',
+                                                                               choices = sort(c('xG', 'xA', 'Minutes' = 'Min',
+                                                                                                'Shots on target' = 'SoT',
+                                                                                                'Shots', 'Key passes' = 'KeyP', 'Goals', 
+                                                                                                'Assists' = 'Assts', 'G-xG', 'A-xA', 
+                                                                                                'xG+xA', 'xPlacement' = 'xPlace')),
+                                                                               selected ='Min')),
+                                                            column(3,
+                                                                   selectInput('shooterplot_per96_yvar',
+                                                                               label = 'Y-axis variable',
+                                                                               choices = sort(c('xG', 'xA', 'xG/Shot' = 'xGperShot', 
+                                                                                                'xA/Pass' = 'xAperPass', 'Shots on target' = 'OnTarget',
+                                                                                                'Shots', 'Key passes' = 'KeyP', 'Goals', 
+                                                                                                'Assists' = 'Assts', 'G-xG', 'A-xA', 'xPlacement' = 'xPlace')),
+                                                                               selected ='G-xG')),
+                                                           
+                                                            plotOutput('shooterplot_per96'))))
+                                     )))),
+                        # Team tab panel ####
                         tabPanel('Teams',
                                  sidebarLayout(
                                    sidebarPanel(width = 2,
@@ -137,56 +232,58 @@ shinyUI(
                                    mainPanel(
                                      h1('Team shots data'),
                                      p(paste0('Updated through games on ', max(as.Date(teamxgoals$date)))),
-                                     tabsetPanel(
-                                       tabPanel('Totals',
-                                                downloadButton('team_download', 'Download CSV'),
-                                                br(),
-                                                br(),
-                                                div(id = 'west', conditionalPanel(condition = "input.team_seasonordate == 'Season' && input.team_seasonfilter.length == 1",
-                                                                                  h2('Western conference')),
-                                                    DT::dataTableOutput('teamtotalxgoalswest')),
-                                                br(),
-                                                div(id = 'east', conditionalPanel(condition = "input.team_seasonordate == 'Season' && input.team_seasonfilter.length == 1",
-                                                                                  h2('Eastern conference'),
-                                                                                  DT::dataTableOutput('teamtotalxgoalseast')))
-                                       ),
-                                       tabPanel('Per game',
-                                                downloadButton('team_download_pergame', 'Download CSV'),
-                                                br(),
-                                                br(),
-                                                conditionalPanel(condition = "input.team_seasonordate == 'Season' && input.team_seasonfilter.length == 1",
-                                                                 h2('Western conference')),
-                                                div(DT::dataTableOutput('teampergamexgoalswest')),
-                                                br(),
-                                                conditionalPanel(condition = "input.team_seasonordate == 'Season' && input.team_seasonfilter.length == 1",
-                                                                 h2('Eastern conference'),
-                                                                 div(DT::dataTableOutput('teampergamexgoalseast')))
-                                       ),
-                                       tabPanel('Visuals',
-                                                p(div(HTML("<i> All statistics on a per game basis. Not all teams labeled. </i>"))),
-                                                fluidPage(fluidRow(
-                                                  column(4,
-                                                         selectInput('teamplot_xvar',
-                                                                     label = 'X-axis variable',
-                                                                     choices = c('Shots for' = 'ShtF', 'Shots against' = 'ShtA',
-                                                                                 'Unassisted % for' = 'Solo%F',
-                                                                                 'Unassisted % against' = 'Solo%A',
-                                                                                 'Cross % for' = 'CrossPctF', 'Cross % against' = 'CrossPctA',
-                                                                                 'Shots on target for' = 'OnTargetF', 'Shots on target against' = 'OnTargetA',
-                                                                                 'GF', 'GA', 'GD', 'xGF', 'xGA', 'xGD', 'TSR', 'PDO', 'Points' = 'Pts'),
-                                                                     selected = 'xGF')),
-                                                  column(4,
-                                                         selectInput('teamplot_yvar',
-                                                                     label = 'Y-axis variable',
-                                                                     choices = c('Shots for' = 'ShtF', 'Shots against' = 'ShtA',
-                                                                                 'Unassisted % for' = 'Solo%F',
-                                                                                 'Unassisted % against' = 'Solo%A',
-                                                                                 'Cross % for' = 'CrossPctF', 'Cross % against' = 'CrossPctA',
-                                                                                 'Shots on target for' = 'OnTargetF', 'Shots on target against' = 'OnTargetA',
-                                                                                 'GF', 'GA', 'GD', 'xGF', 'xGA', 'xGD', 'TSR', 'PDO', 'Points' = 'Pts'),
-                                                                     selected = 'xGA')),
-                                                  plotOutput('teamplot')))
-                                       )
+                                     tabsetPanel(id = 'team_subtab',
+                                                 tabPanel('Totals',
+                                                          downloadButton('team_download', 'Download CSV'),
+                                                          br(),
+                                                          br(),
+                                                          div(id = 'west', conditionalPanel(condition = "input.team_seasonordate == 'Season' && input.team_seasonfilter.length == 1",
+                                                                                            h2('Western conference')),
+                                                              DT::dataTableOutput('teamtotalxgoalswest')),
+                                                          br(),
+                                                          div(id = 'east', conditionalPanel(condition = "input.team_seasonordate == 'Season' && input.team_seasonfilter.length == 1",
+                                                                                            h2('Eastern conference'),
+                                                                                            DT::dataTableOutput('teamtotalxgoalseast')))
+                                                 ),
+                                                 tabPanel('Per game',
+                                                          downloadButton('team_download_pergame', 'Download CSV'),
+                                                          br(),
+                                                          br(),
+                                                          conditionalPanel(condition = "input.team_seasonordate == 'Season' && input.team_seasonfilter.length == 1",
+                                                                           h2('Western conference')),
+                                                          div(DT::dataTableOutput('teampergamexgoalswest')),
+                                                          br(),
+                                                          conditionalPanel(condition = "input.team_seasonordate == 'Season' && input.team_seasonfilter.length == 1",
+                                                                           h2('Eastern conference'),
+                                                                           div(DT::dataTableOutput('teampergamexgoalseast')))
+                                                 ),
+                                                 tabPanel('Scatter plots',
+                                                          p(div(HTML("<i> All statistics on a per game basis. Not all teams labeled. </i>"))),
+                                                          actionButton('team_action', 
+                                                                       label = 'Apply filters'),
+                                                          fluidPage(fluidRow(
+                                                            column(4,
+                                                                   selectInput('teamplot_xvar',
+                                                                               label = 'X-axis variable',
+                                                                               choices = c('Shots for' = 'ShtF', 'Shots against' = 'ShtA',
+                                                                                           'Unassisted % for' = 'Solo%F',
+                                                                                           'Unassisted % against' = 'Solo%A',
+                                                                                           'Cross % for' = 'CrossPctF', 'Cross % against' = 'CrossPctA',
+                                                                                           'Shots on target for' = 'OnTargetF', 'Shots on target against' = 'OnTargetA',
+                                                                                           'GF', 'GA', 'GD', 'xGF', 'xGA', 'xGD', 'TSR', 'PDO', 'Points' = 'Pts'),
+                                                                               selected = 'xGF')),
+                                                            column(4,
+                                                                   selectInput('teamplot_yvar',
+                                                                               label = 'Y-axis variable',
+                                                                               choices = c('Shots for' = 'ShtF', 'Shots against' = 'ShtA',
+                                                                                           'Unassisted % for' = 'Solo%F',
+                                                                                           'Unassisted % against' = 'Solo%A',
+                                                                                           'Cross % for' = 'CrossPctF', 'Cross % against' = 'CrossPctA',
+                                                                                           'Shots on target for' = 'OnTargetF', 'Shots on target against' = 'OnTargetA',
+                                                                                           'GF', 'GA', 'GD', 'xGF', 'xGA', 'xGD', 'TSR', 'PDO', 'Points' = 'Pts'),
+                                                                               selected = 'xGA')),
+                                                            plotOutput('teamplot')))
+                                                 )
                                      )
                                    )
                                  )
@@ -226,9 +323,12 @@ shinyUI(
                                    )
                                  )
                         ),
+                        # Keepers tab panel ####
                         tabPanel('Keepers',
                                  sidebarLayout(
                                    sidebarPanel(width = 2,
+                                                actionButton('keeper_action',
+                                                             label = 'Apply filters'),
                                                 numericInput('keeper_minshots',
                                                              "Minimum shots faced:",
                                                              value = 0,
@@ -255,7 +355,7 @@ shinyUI(
                                                                            max = max(playerxgoals$date),
                                                                            format = 'mm/dd/yyyy')
                                                 ),                  
-                                                
+                                                h5(HTML('<b>Other filters:</b>')),
                                                 checkboxInput('keeper_byteams',
                                                               label = 'Split by teams',
                                                               value = F),
@@ -281,7 +381,7 @@ shinyUI(
                                                 br(),
                                                 br(),
                                                 DT::dataTableOutput('keepertable')),
-                                       tabPanel('Visuals',
+                                       tabPanel('Scatter plots',
                                                 fluidPage(fluidRow(
                                                   column(4,
                                                          selectInput('keeperplot_xvar',
@@ -291,7 +391,7 @@ shinyUI(
                                                                                  'G-xG/shot' = 'GmxGperShot',
                                                                                  '%Shots headed' = 'Header%', 'Avg. distance' = 'Dist',
                                                                                  'xG faced' = 'xG', 'GA above average' = 'G-xG'),
-                                                                     selected = 'xGF')),
+                                                                     selected = 'xG')),
                                                   column(4,
                                                          selectInput('keeperplot_yvar',
                                                                      label = 'Y-axis variable',
@@ -300,17 +400,19 @@ shinyUI(
                                                                                  'G-xG/shot' = 'GmxGperShot',
                                                                                  '%Shots headed' = 'Header%', 'Avg. distance' = 'Dist',
                                                                                  'xG faced' = 'xG', 'GA above average' = 'G-xG'),
-                                                                     selected = 'xGperShot')),
+                                                                     selected = 'G-xG')),
                                                   plotOutput('keeperplot')))
                                        )
                                      )
                                    ))
                         )
              ),
-             tabPanel('Glossary',
+             # Glossary ####
+             tabPanel(strong('Glossary'),
                       h1('Glossary'),
                       dataTableOutput('glossary')                        
              ),
+             # App info ####
              tabPanel(strong('App info'),
                       h1('App info'),
                       p("We built this interactive web application to give ASA's loyal readers more control over 
@@ -319,11 +421,17 @@ shinyUI(
                         If you have an idea for a feature that will make the app totes better,
                         then please don't hesitate to email Matthias (mkullowatz at gmail) with your idea."),
                       br(),
+                      p('We have been asked why we measure individual stats on a per-96-minute basis, rather than
+                        per 90 minutes. No, we are not trying to be hip for the sake of being hip. The average MLS game
+                        is 96 minutes long, including average stoppage times for each half, and thus our team per-game
+                        statistics are actually per-96-minute statistics. To maintain internal consistency of our data,
+                        we show player statistics on a per-96-minute basis, too, so that the average number of goals per game
+                        at the team level will be equal to the average number of goals per 96 minutes at the player level.'),
+                      br(),
                       p('Please note that the statistics displayed in this app are very similiar to, but not exactly
-                        the same as, those in our static tables. This is due to two things. 1) This app utilizes
-                        updated xGoal models, fit through 2016, with a better method of capturing penalty kicks. 2)
-                        We have not imported minutes data into this app yet. For this second reason, we will keep the 
-                        static tables up on the site to include per-minute based statistics.'))
-
+                        the same as, those in our static tables. This is because this app utilizes
+                        updated xGoal models, fit through 2016, with a better method of capturing penalty kicks. For most
+                        players the differences are negligible.'))
+             
   )
 )
