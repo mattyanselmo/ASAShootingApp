@@ -93,7 +93,9 @@ shinyServer(function(input, output) {
                                      FK = shooter_inputs$shooting_fk,
                                      PK = shooter_inputs$shooting_pk) %>%
         mutate(xGperShot = ifelse(Shots > 0, xG/Shots, 0),
-               xAperPass = ifelse(KeyP > 0, xA/KeyP, 0))
+               xAperPass = ifelse(KeyP > 0, xA/KeyP, 0),
+               GmxGperShot = ifelse(Shots > 0, `G-xG`/Shots, 0),
+               AmxAperPass = ifelse(KeyP > 0, `A-xA`/KeyP, 0))
     } else{
       dt_total <- shooterxgoals.func(playerxgoals,
                                      date1 = shooter_inputs$shooting_date1,
@@ -107,7 +109,9 @@ shinyServer(function(input, output) {
                                      FK = shooter_inputs$shooting_fk,
                                      PK = shooter_inputs$shooting_pk) %>%
         mutate(xGperShot = ifelse(Shots > 0, xG/Shots, 0),
-               xAperPass = ifelse(KeyP > 0, xA/KeyP, 0))
+               xAperPass = ifelse(KeyP > 0, xA/KeyP, 0),
+               GmxGperShot = ifelse(Shots > 0, `G-xG`/Shots, 0),
+               AmxAperPass = ifelse(KeyP > 0, `A-xA`/KeyP, 0))
     }
     
     dt_total[['extreme']] <- rank(dt_total[[shooter_inputs$shooterplot_xvar]]) + rank(dt_total[[shooter_inputs$shooterplot_yvar]])
@@ -165,18 +169,18 @@ shinyServer(function(input, output) {
   # Player table - totals
   output$shootertable <- DT::renderDataTable({
     
-    datatable(dt_total() %>% select(-c(xGperShot, xAperPass, extreme, plotnames)),
+    datatable(dt_total() %>% select(-c(Dist.key, xGperShot, xAperPass, GmxGperShot, AmxAperPass, extreme, plotnames)),
               rownames = F,
               options(list(autoWidth = T,
                            pageLength = 25,
                            lengthMenu = seq(25, 100, 25)))) %>%
-      formatRound(columns = c('Dist', 'xG', 'G-xG', 'xPlace', 'Dist.key', 'xA', 'A-xA', 'xG+xA'), 
+      formatRound(columns = c('Dist', 'xG', 'G-xG', 'xPlace', 'xA', 'A-xA', 'xG+xA'), 
                   digits = 1) %>%
       formatPercentage(columns = c('Solo'), digits = 1)
   })
   
   # Player table - per96
-  output$shootertable_per96 <- renderDataTable({
+  output$shootertable_per96 <- DT::renderDataTable({
     
     
     datatable(dt_per96() %>% select(-c(extreme, plotnames)),
@@ -324,7 +328,10 @@ shinyServer(function(input, output) {
                               byseasons = keeper_inputs$keeper_byseasons,
                               OtherShots = keeper_inputs$keeper_othershots,
                               FK = keeper_inputs$keeper_fk,
-                              PK = keeper_inputs$keeper_pk)
+                              PK = keeper_inputs$keeper_pk) %>%
+        mutate(GAperShot = Goals/Shots, 
+               xGperShot = xG/Shots,
+               GmxGperShot = `G-xG`/Shots)
     } else{
       dt_keeper <- keeperxgoals.func(keeperxgoals,
                               date1 = keeper_inputs$keeper_date1,
@@ -335,13 +342,25 @@ shinyServer(function(input, output) {
                               byseasons = keeper_inputs$keeper_byseasons,
                               OtherShots = keeper_inputs$keeper_othershots,
                               FK = keeper_inputs$keeper_fk,
-                              PK = keeper_inputs$keeper_pk)
+                              PK = keeper_inputs$keeper_pk) %>%
+        mutate(GAperShot = Goals/Shots, 
+               xGperShot = xG/Shots,
+               GmxGperShot = `G-xG`/Shots)
     }
+    
+    dt_keeper[['extreme']] <- rank(dt_keeper[[keeper_inputs$keeperplot_yvar]]) # Only show most extreme across y-axis
+    if(length(unique(dt_keeper$Season)) > 1){
+      dt_keeper[['plotnames']] <- paste(unlist(lapply(strsplit(dt_keeper$Keeper, " "), function(x) { return(x[length(x)]) })), dt_keeper$Season)
+      
+    }else{
+      dt_keeper[['plotnames']] <- unlist(lapply(strsplit(dt_keeper$Keeper, " "), function(x) { return(x[length(x)]) }))
+    }
+    dt_keeper
   })
   
   output$keepertable <- DT::renderDataTable({
     
-    datatable(dt_keeper(),
+    datatable(dt_keeper() %>% select(-c(GAperShot, xGperShot, GmxGperShot, extreme, plotnames)),
               rownames = F,
               options(list(autoWidth = T,
                            pageLength = 25,
@@ -356,40 +375,27 @@ shinyServer(function(input, output) {
     filename = 'ASAkeepertable.csv',
     
     content = function(file){
-      write.csv(dt_keeper(), file, row.names = F)
+      write.csv(dt_keeper() %>% select(-c(extreme, plotnames)), file, row.names = F)
     }
   )
   
   # Keeper plots ####
   #Figure out how to label these guys better!
   output$keeperplot <- renderPlot({
-
-   dt <- dt_keeper() %>%
-        mutate(GAperShot = Goals/Shots, 
-               xGperShot = xG/Shots,
-               GmxGperShot = `G-xG`/Shots)
    
-   xlim <- min(dt[[keeper_inputs$keeperplot_xvar]]) - 0.05*(max(dt[[keeper_inputs$keeperplot_xvar]]) - min(dt[[keeper_inputs$keeperplot_xvar]]))
-   ylim <- min(dt[[keeper_inputs$keeperplot_yvar]]) - 0.05*(max(dt[[keeper_inputs$keeperplot_yvar]]) - min(dt[[keeper_inputs$keeperplot_yvar]]))
-   
-    dt[['extreme']] <- rank(dt[[keeper_inputs$keeperplot_yvar]]) # Only show most extreme across y-axis
-    if(length(unique(dt$Season)) > 1){
-      dt[['plotnames']] <- paste(unlist(lapply(strsplit(dt$Keeper, " "), function(x) { return(x[length(x)]) })), dt$Season)
-      
-    }else{
-      dt[['plotnames']] <- unlist(lapply(strsplit(dt$Keeper, " "), function(x) { return(x[length(x)]) }))
-    }
+   xlim <- min(dt_keeper()[[keeper_inputs$keeperplot_xvar]]) - 0.05*(max(dt_keeper()[[keeper_inputs$keeperplot_xvar]]) - min(dt_keeper()[[keeper_inputs$keeperplot_xvar]]))
+   ylim <- min(dt_keeper()[[keeper_inputs$keeperplot_yvar]]) - 0.05*(max(dt_keeper()[[keeper_inputs$keeperplot_yvar]]) - min(dt_keeper()[[keeper_inputs$keeperplot_yvar]]))
     
-    p <- dt  %>%
+    p <- dt_keeper()  %>%
       ggplot(
         aes_string(x = paste0('`', keeper_inputs$keeperplot_xvar, '`'), 
                    y = paste0('`', keeper_inputs$keeperplot_yvar, '`'))) +
       geom_point(color = '#0000cc') +
-      geom_text(aes(label = ifelse(dt$extreme >= sort(dt$extreme, decreasing = T)[min(3, nrow(dt))] |
-                                     dt$extreme <= sort(dt$extreme)[min(3, nrow(dt))] |
-                                     dt[[keeper_inputs$keeperplot_xvar]] == max(dt[[keeper_inputs$keeperplot_xvar]]) |
-                                     dt[[keeper_inputs$keeperplot_yvar]] == max(dt[[keeper_inputs$keeperplot_yvar]]),
-                                   dt$plotnames, ''), 
+      geom_text(aes(label = ifelse(dt_keeper()$extreme >= sort(dt_keeper()$extreme, decreasing = T)[min(3, nrow(dt_keeper()))] |
+                                     dt_keeper()$extreme <= sort(dt_keeper()$extreme)[min(3, nrow(dt_keeper()))] |
+                                     dt_keeper()[[keeper_inputs$keeperplot_xvar]] == max(dt_keeper()[[keeper_inputs$keeperplot_xvar]]) |
+                                     dt_keeper()[[keeper_inputs$keeperplot_yvar]] == max(dt_keeper()[[keeper_inputs$keeperplot_yvar]]),
+                                   dt_keeper()$plotnames, ''), 
                     hjust = 'inward'),
                 size = 5,
                 check_overlap = F,
@@ -401,10 +407,10 @@ shinyServer(function(input, output) {
             axis.title = element_text(size = 14))
     
     p + geom_smooth(method = 'lm', se = F) +
-      geom_text(x = min(dt[[keeper_inputs$keeperplot_xvar]]) - 0.05*(max(dt[[keeper_inputs$keeperplot_xvar]]) - min(dt[[keeper_inputs$keeperplot_xvar]])),
-                y = min(dt[[keeper_inputs$keeperplot_yvar]]) - 0.05*(max(dt[[keeper_inputs$keeperplot_yvar]]) - min(dt[[keeper_inputs$keeperplot_yvar]])),
+      geom_text(x = min(dt_keeper()[[keeper_inputs$keeperplot_xvar]]) - 0.05*(max(dt_keeper()[[keeper_inputs$keeperplot_xvar]]) - min(dt_keeper()[[keeper_inputs$keeperplot_xvar]])),
+                y = min(dt_keeper()[[keeper_inputs$keeperplot_yvar]]) - 0.05*(max(dt_keeper()[[keeper_inputs$keeperplot_yvar]]) - min(dt_keeper()[[keeper_inputs$keeperplot_yvar]])),
                 hjust = 0,
-                label = lm_eqn(dt, 
+                label = lm_eqn(dt_keeper(), 
                                paste0('`', keeper_inputs$keeperplot_xvar, '`'), 
                                paste0('`', keeper_inputs$keeperplot_yvar, '`')),
                 parse = TRUE,
@@ -739,7 +745,7 @@ shinyServer(function(input, output) {
   }, height = 500, width = 700)
   
   ## XGoals by game ####
-  output$teamxgoalsbygame <- renderDataTable({
+  output$teamxgoalsbygame <- DT::renderDataTable({
     if(input$teambygame_seasonordate == 'Season'){
       dt <- xgbygame %>%
         filter(Season %in% input$teambygame_seasonfilter) %>%
@@ -785,7 +791,7 @@ shinyServer(function(input, output) {
   
   
   # Glossary ####
-  output$glossary <- renderDataTable({
+  output$glossary <- DT::renderDataTable({
     datatable(glossary %>% select(-Notes),
               rownames = F,
               options(list(autoWidth = T,

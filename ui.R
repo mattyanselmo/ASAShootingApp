@@ -47,7 +47,7 @@ shinyUI(
                                                                            max = max(playerxgoals$date),
                                                                            format = 'mm/dd/yyyy')
                                                 ),                  
-                                                
+                                                h5(HTML('<b>Other filters:</b>')),
                                                 checkboxInput('shooting_byteams',
                                                               label = 'Split players by teams',
                                                               value = F),
@@ -82,7 +82,7 @@ shinyUI(
                                                                                label = 'X-axis variable',
                                                                                choices = sort(c('xG', 'xA', 'xG/Shot' = 'xGperShot', 
                                                                                                 'xA/Pass' = 'xAperPass', 'Shots on target' = 'OnTarget',
-                                                                                                'Shots', 'Key passes' = 'KeyP', 'Goals', 
+                                                                                                'Shots', 'Key passes' = 'KeyP', 'Goals', 'G-xG/Shot' = 'GmxGperShot',
                                                                                                 'Assists' = 'Assts', 'G-xG', 'A-xA', 'xPlacement' = 'xPlace')),
                                                                                selected ='xG')),
                                                             column(3,
@@ -90,7 +90,7 @@ shinyUI(
                                                                                label = 'Y-axis variable',
                                                                                choices = sort(c('xG', 'xA', 'xG/Shot' = 'xGperShot', 
                                                                                                 'xA/Pass' = 'xAperPass', 'Shots on target' = 'OnTarget',
-                                                                                                'Shots', 'Key passes' = 'KeyP', 'Goals', 
+                                                                                                'Shots', 'Key passes' = 'KeyP', 'Goals', 'G-xG/Shot' = 'GmxGperShot',
                                                                                                 'Assists' = 'Assts', 'G-xG', 'A-xA', 'xPlacement' = 'xPlace')),
                                                                                selected ='xG/Shot')),
                                                             plotOutput('shooterplot'))))
