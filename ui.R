@@ -139,6 +139,7 @@ shinyUI(
                                                 # checkboxInput('shooting_per96_byteams',
                                                 #               label = 'Split players by teams',
                                                 #               value = F),
+                                                h5(HTML('<b>Other filters:</b>')),
                                                 checkboxInput('shooting_per96_byseasons',
                                                               label = 'Split players by seasons',
                                                               value = T),
