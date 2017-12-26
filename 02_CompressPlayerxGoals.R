@@ -47,4 +47,8 @@ playerxgoals <- shooterxgoals %>%
                          ifelse(gameID_shooter == 0, gameID_passer, gameID_shooter), 0)) %>%
   select(-c(gameID_passer, gameID_shooter))
 
+playerxgoals <- playerxgoals %>%
+  mutate(shooter = gsub('Jorge Villafaña', 'Jorge Villafana', shooter),
+         player = shooter)
+
 saveRDS(playerxgoals, file = 'IgnoreList/xGoalsByPlayer.rds')
