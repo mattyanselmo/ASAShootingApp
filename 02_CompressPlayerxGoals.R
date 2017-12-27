@@ -40,7 +40,7 @@ playerxgoals <- shooterxgoals %>%
   ungroup() %>%
   mutate(player = shooter) %>%
   mutate_at(.funs = funs(((function(x) {ifelse(is.na(x), 0, as.numeric(x))})(.))), 
-            .cols = vars(-c(shooter, type, meddist, meddist.pass, player, date, team))) %>%
+            .vars = vars(-c(shooter, type, meddist, meddist.pass, player, date, team))) %>%
   filter(!is.na(date)) %>%
   mutate(Season = as.numeric(format(date, '%Y')),
          gameID = ifelse(Season >= 2015,
