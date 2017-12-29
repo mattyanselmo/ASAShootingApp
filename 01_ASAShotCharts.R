@@ -109,6 +109,14 @@ shooting[['xGKeeper']][shooting$result %in% c('Goal', 'Saved')] <- predict(xgoal
 source('TeamxGoalAdjustmentFunction.R')
 shooting <- team.xgoal.adj(shooting, 5/60)
 
+shooting <- shooting %>%
+  mutate(shooter = str_replace_all(shooter, 
+                                   c('Kazaishvili' = 'Qazaishvili', 
+                                     'Jorge Villafaña' = 'Jorge Villafana')),
+         passer = str_replace_all(passer, 
+                                  c('Kazaishvili' = 'Qazaishvili', 
+                                    'Jorge Villafaña' = 'Jorge Villafana')))
+
 saveRDS(shooting, 'IgnoreList/AllShotsData2011-2017.rds')
 
 # library(xtable)
