@@ -1,6 +1,7 @@
 # File to create shot tables for Shiny app
 
 library(dplyr)
+library(stringr)
 teamnames <- read.csv('TeamNameLinks.csv', stringsAsFactors = F)
 #load in the requisite data
 
@@ -95,6 +96,8 @@ xgoal.model.keeper <- glm(result == 'Goal' ~
                                    result == 'Goal' | result == 'Saved'),
                           family = binomial)
 
+save(xgoal.model, xgoal.model.keeper, file = paste0('IgnoreList/UpdatedModels_', Sys.Date(), '.Rdata'))
+     
 # Tested interaction between free kicks and distance: worse fit on holdout 2015 - 2017
 
 shooting[['xGShooter']] <- predict(xgoal.model, shooting, type = 'response')
