@@ -52,7 +52,7 @@ merged.passes <- left_join(passes,
 # This merge above isn't quite exact. Somehow I wind up with like 50 more passes - because of the double counting of key2 - so I don't know where that's coming in
 
 # Engineer features
-merged.passes <- merged.passes %>%
+merged.passes <- merged.passes %>% # include first pass of half indicator?
   mutate(endX = endX*115/100,
          x = x*115/100,
          endY = endY*80/100,
