@@ -110,7 +110,6 @@ shooting[['xGTeam']] <- predict(xgoal.model, shooting %>%
 shooting[['xGKeeper']][shooting$result %in% c('Goal', 'Saved')] <- predict(xgoal.model.keeper, 
                                                                            shooting[shooting$result %in% c('Goal', 'Saved'),], 
                                                                            type = 'response')
-## Think about order of operations...PK adjustment first or second?
 source('TeamxGoalAdjustmentFunction.R')
 shooting <- team.xgoal.adj(shooting, 5/60)
 
