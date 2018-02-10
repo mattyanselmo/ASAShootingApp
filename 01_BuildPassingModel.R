@@ -60,9 +60,18 @@ merged.passes <- merged.passes %>% # include first pass of half indicator?
          distance = sqrt((endX - x)^2 + (endY - y)^2),
          angle = atan((endY - y)/(endX - x)) + pi*ifelse(endX < x & endY < y, -1, ifelse(endX < x & endY > y, 1, 0)),
          year = as.numeric(as.character(year)),
-         playerdiff = ifelse(team == hteam, hplayers - aplayers, aplayers - hplayers)) %>%
+         playerdiff = ifelse(team == hteam, hplayers - aplayers, aplayers - hplayers),
+         minute.temp = unlist(sapply(strsplit(time, ":"), function(x) as.numeric(x[1]))),
+         second.temp = unlist(sapply(strsplit(time, ":"), function(x) as.numeric(x[2]))),
+         minute = minute.temp + second.temp/60) %>%
   mutate_at(.vars = names(merged.passes)[sapply(merged.passes, class) == "character"],
-            .funs = factor)
+            .funs = factor) %>%
+  group_by(gameID, half) %>%
+  arrange(minute) %>%
+  mutate(first.pass = ifelse(row_number() == 1, 1, 0),
+         second.pass = ifelse(row_number() == 2, 1, 0)) %>%
+  select(-c(minute.temp, second.temp)) %>%
+  ungroup()
 
 # Build terminal x,y prediction model ####
 
@@ -113,14 +122,14 @@ library(gbm)
 set.seed(17)
 success.gbm <- gbm(success ~ home + playerdiff + x + y + angle + Position + 
                   freekick + headpass + longball + throwin + throughball + 
-                  cross + corner + playerdiff + distance,
+                  cross + corner + playerdiff + distance + first.pass,
                 data = merged.passes,
                 distribution = "bernoulli",
                 n.trees = 1000,
                 interaction.depth = 5,
-                shrinkage = 0.08,
+                shrinkage = 0.1,
                 n.minobsinnode = 20, 
-                train.fraction = 0.7,
+                train.fraction = 1,
                 keep.data = F)
 
 saveRDS(success.gbm, "IgnoreList/xPassModel.rds")
@@ -129,7 +138,7 @@ merged.passes[["success.pred"]] <- predict(success.gbm, merged.passes, type = "r
 merged.passes <- merged.passes %>%
   select(-c(eventID, hteam, ateam, final, hplayers, aplayers, 
             teamEventId, Key2, position, Formation, Player, players,
-            Key1, distance.pred, max.dist, distance.adj))
+            Key1))
 saveRDS(merged.passes, "IgnoreList/AllPassingData.rds")
 
 
