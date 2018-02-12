@@ -120,22 +120,39 @@ merged.passes <- merged.passes %>% # include first pass of half indicator?
 # Include first pass of the half indicator!
 library(gbm)
 set.seed(17)
+success.gbm.distance <- gbm(success ~ home + playerdiff + x + y + angle + Position + 
+                              freekick + headpass + longball + throwin + throughball + 
+                              cross + corner + playerdiff + distance + first.pass,
+                            data = merged.passes,
+                            distribution = "bernoulli",
+                            n.trees = 1000,
+                            interaction.depth = 5,
+                            shrinkage = 0.1,
+                            n.minobsinnode = 20, 
+                            train.fraction = 1,
+                            keep.data = F)
+
+set.seed(21)
 success.gbm <- gbm(success ~ home + playerdiff + x + y + angle + Position + 
-                  freekick + headpass + longball + throwin + throughball + 
-                  cross + corner + playerdiff + distance + first.pass,
-                data = merged.passes,
-                distribution = "bernoulli",
-                n.trees = 1000,
-                interaction.depth = 5,
-                shrinkage = 0.1,
-                n.minobsinnode = 20, 
-                train.fraction = 1,
-                keep.data = F)
+                     freekick + headpass + longball + throwin + throughball + 
+                     cross + corner + playerdiff + first.pass,
+                   data = merged.passes,
+                   distribution = "bernoulli",
+                   n.trees = 1000,
+                   interaction.depth = 5,
+                   shrinkage = 0.1,
+                   n.minobsinnode = 20, 
+                   train.fraction = 1,
+                   keep.data = F)
 
 saveRDS(success.gbm, "IgnoreList/xPassModel.rds")
+saveRDS(success.gbm.distance, "IgnoreList/xPassModel_withDistance.rds")
 
-merged.passes[["success.pred"]] <- predict(success.gbm, merged.passes, type = "response", n.trees = 1000)
+merged.passes[["success.pred.distance"]] <- predict(success.gbm.distance, merged.passes, type = "response", n.trees = 1000)
+merged.passes[["success.pred.nodistance"]] <- predict(success.gbm, merged.passes, type = "response", n.trees = 1000)
+
 merged.passes <- merged.passes %>%
+  mutate(success.pred = ifelse(longball == 1 & distance < 40, success.pred.nodistance, success.pred.distance)) %>%
   select(-c(eventID, hteam, ateam, final, hplayers, aplayers, 
             teamEventId, Key2, position, Formation, Player, players,
             Key1))
