@@ -411,6 +411,12 @@ shinyUI(
                                    ))
                         )
              ),
+             # Passing navbar ####
+             navbarMenu(strong('xPasses'),
+                        # Players totals tab panel ####
+                        tabPanel('Players: totals',
+                                 sidebarLayout(
+                                   sidebarPanel())),
              # Glossary ####
              tabPanel(strong('Glossary'),
                       h1('Glossary'),
