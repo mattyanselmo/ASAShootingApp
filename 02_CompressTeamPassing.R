@@ -1,40 +1,50 @@
-# File to create shot tables for Shiny app
+# Condense player passing data for web app
 
-library(dplyr)
+# Read dataset ####
+passing <- readRDS("IgnoreList/AllPassingData.rds")
 
-#load in the requisite data
-shooting <- bind_rows(lapply(paste0("IgnoreList/", grep('shots with xG', list.files("IgnoreList/"), value = T)), 
-                             function(x) read.csv(x, stringsAsFactors = F)))
-minutesPlayed <- bind_rows(lapply(paste0("IgnoreList/", grep('minutes played by game', list.files("IgnoreList/"), value = T)),
-                                  function(x) read.csv(x, stringsAsFactors = F)))
-touches <- bind_rows(lapply(paste0("IgnoreList/", grep('touches', list.files("IgnoreList/"), value = T)),
-                            function(x) read.csv(x, stringsAsFactors = F)))
-passes <- bind_rows(lapply(paste0("IgnoreList/", grep('raw passes', list.files("IgnoreList/"), value = T)),
-                           function(x) read.csv(x, stringsAsFactors = F)))
+## balance predictions to actual by zone
+passing <- passing %>%
+  mutate(section = ifelse(x < 115/3, "Def",
+                          ifelse(x < 115*2/3, "Mid", "Att")))
 
-#########################################################
+team.stats.offense <- passing %>%
+  group_by(team, year) %>%
+  summarize(N = n(),
+            `Comp%` = sum(success)/N,
+            `Exp%` = mean(success.pred),
+            Score = `Comp%` - `Exp%`,
+            `N(Def)` = sum(section == "Def"),
+            `%(Def)` = sum(success[section == "Def"])/`N(Def)`,
+            `Exp%(Def)` = mean(success.pred[section == "Def"]),
+            `Score(Def)` = `%(Def)` - `Exp%(Def)`,
+            `N(Mid)` = sum(section == "Mid"),
+            `%(Mid)` = sum(success[section == "Mid"])/`N(Mid)`,
+            `Exp%(Mid)` = mean(success.pred[section == "Mid"]),
+            `Score(Mid)` = `%(Mid)` - `Exp%(Mid)`,
+            `N(Att)` = sum(section == "Att"),
+            `%(Att)` = sum(success[section == "Att"])/`N(Att)`,
+            `Exp%(Att)` = mean(success.pred[section == "Att"]),
+            `Score(Att)` = `%(Att)` - `Exp%(Att)`)
 
-# Now get passing ratio numbers for each team
-#passes <- data.frame(read.csv('raw passes.csv'))
-#passPercFor <- group_by(passes, team) %>%
-#   summarize(finalThirdPer = sum((x > 66.7 | endX > 66.7) & success == 1)/sum(success == 1))
+team.stats.defense <- passing %>%
+  group_by(team.1, year) %>%
+  summarize(N = n(),
+            `Comp%` = sum(success)/N,
+            `Exp%` = mean(success.pred),
+            Score = `Comp%` - `Exp%`,
+            `N(Def)` = sum(section == "Def"),
+            `%(Def)` = sum(success[section == "Def"])/`N(Def)`,
+            `Exp%(Def)` = mean(success.pred[section == "Def"]),
+            `Score(Def)` = `%(Def)` - `Exp%(Def)`,
+            `N(Mid)` = sum(section == "Mid"),
+            `%(Mid)` = sum(success[section == "Mid"])/`N(Mid)`,
+            `Exp%(Mid)` = mean(success.pred[section == "Mid"]),
+            `Score(Mid)` = `%(Mid)` - `Exp%(Mid)`,
+            `N(Att)` = sum(section == "Att"),
+            `%(Att)` = sum(success[section == "Att"])/`N(Att)`,
+            `Exp%(Att)` = mean(success.pred[section == "Att"]),
+            `Score(Att)` = `%(Att)` - `Exp%(Att)`)
 
-#passPercAgainst <- group_by(passes, team.1) %>%
-#    summarize(finalThirdAPer = sum((x > 66.7 | endX > 66.7) & success == 1)/sum(success == 1))
-
-
-#write.csv(passPerc, 'passing_percentages.csv')x
-
-
-# Now handle the team pages
-teamStatsFor <- group_by(shooting, team) %>%
-  summarise(gp = length(unique(gameID)), xGF = sum(xGvalueP), gf = sum(result == 'Goal'))
-
-teamStatsAgainst <- group_by(shooting, team.1) %>%
-  summarise(xGA = sum(xGvalueP), ga = sum(result == 'Goal'))
-
-teamStats <- merge(teamStatsFor, teamStatsAgainst, by.x = 'team', by.y = 'team.1')
-
-teamStats <- mutate(teamStats, xGD = xGF - xGA, gd = gf - ga, gdMinusxGD = gd - xGD)[, c('team','gp','xGF','xGA','xGD','gf','ga','gd','gdMinusxGD')]
-
-write.csv(teamStats, 'team_table.csv')
+saveRDS(team.stats.offense, "xPassingByTeamOffense.rds")
+saveRDS(team.stats.defense, "xPassingByTeamDefense.rds")
