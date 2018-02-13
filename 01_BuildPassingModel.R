@@ -148,14 +148,21 @@ success.gbm <- gbm(success ~ home + playerdiff + x + y + angle + Position +
 saveRDS(success.gbm, "IgnoreList/xPassModel.rds")
 saveRDS(success.gbm.distance, "IgnoreList/xPassModel_withDistance.rds")
 
-merged.passes[["success.pred.distance"]] <- predict(success.gbm.distance, merged.passes, type = "response", n.trees = 1000)
-merged.passes[["success.pred.nodistance"]] <- predict(success.gbm, merged.passes, type = "response", n.trees = 1000)
+#merged.passes[["success.pred.distance"]] <- predict(success.gbm.distance, merged.passes, type = "response", n.trees = 1000)
+merged.passes[["success.pred"]] <- predict(success.gbm, merged.passes, type = "response", n.trees = 1000)
 
 merged.passes <- merged.passes %>%
-  mutate(success.pred = ifelse(longball == 1 & distance < 40, success.pred.nodistance, success.pred.distance)) %>%
   select(-c(eventID, hteam, ateam, final, hplayers, aplayers, 
             teamEventId, Key2, position, Formation, Player, players,
-            Key1))
+            Key1, second.pass))
+
+library(stringr)
+merged.passes <- merged.passes %>%
+  mutate(passer = str_replace_all(passer, 
+                                  c('Kazaishvili' = 'Qazaishvili', 
+                                    'Jorge Villafaña' = 'Jorge Villafana',
+                                    "Antonio Mlinar Dalamea" = "Antonio Mlinar Delamea")))
+
 saveRDS(merged.passes, "IgnoreList/AllPassingData.rds")
 
 
