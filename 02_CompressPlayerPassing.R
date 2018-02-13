@@ -8,9 +8,8 @@ passing <- passing %>%
   mutate(section = ifelse(x < 115/3, "Def",
                           ifelse(x < 115*2/3, "Mid", "Att")))
 
-# force probabilities to line up by third?
 player.stats <- passing %>%
-  group_by(passer) %>%
+  group_by(passer, year, team) %>%
   summarize(N = n(),
             `Comp%` = sum(success)/N,
             `Exp%` = mean(success.pred),
@@ -28,3 +27,4 @@ player.stats <- passing %>%
             `Exp%(Att)` = mean(success.pred[section == "Att"]),
             `Score(Att)` = `%(Att)` - `Exp%(Att)`)
 
+saveRDS(player.stats, "IgnoreList/xPassingByPlayer.rds")
