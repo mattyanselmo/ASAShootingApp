@@ -4,9 +4,16 @@
 
 source('01_ASAShotCharts.R')
 source("01_VerticalLineups")
+source("01_ASAPassCharts.R")
+
 source('02_CompressPlayerxGoals.R')
 source('02_AddMinutesToShotCharts.R')
 source('02_CompressTeamxGoals.R')
+
+source('02_CompressPlayerPassing.R')
+source('02_AddMinutesToPassCharts.R')
+source('02_CompressTeamPassing.R')
+
 # Construct predictive model dataset
 # source('03_TeamPMData.R')
 # source('03_TeamPredictiveModelFunction.R')
