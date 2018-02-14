@@ -183,7 +183,7 @@ shinyUI(
                                                                                                 'Shots', 'Key passes' = 'KeyP', 'Goals', 
                                                                                                 'Assists' = 'Assts', 'G-xG', 'A-xA', 'xPlacement' = 'xPlace')),
                                                                                selected ='G-xG')),
-                                                           
+                                                            
                                                             plotOutput('shooterplot_per96'))))
                                      )))),
                         # Team tab panel ####
@@ -413,10 +413,57 @@ shinyUI(
              ),
              # Passing navbar ####
              navbarMenu(strong('xPasses'),
-                        # Players totals tab panel ####
+                        # Passing: Players totals tab panel ####
                         tabPanel('Players: totals',
                                  sidebarLayout(
-                                   sidebarPanel())),
+                                   sidebarPanel(width = 2,
+                                                actionButton('passing_action',
+                                                             label = 'Apply filters'),
+                                                numericInput('passing_minshots',
+                                                             "Minimum passes:",
+                                                             value = 0,
+                                                             min = 0, max = 1000, step = 50),
+                                                checkboxGroupInput('passing_seasonfilter',
+                                                                   'Select seasons:',
+                                                                   choices = min(playerpassing$year):max(playerpassing$year),
+                                                                   selected = max(playerpassing$year)),                  
+                                                h5(HTML('<b>Other filters:</b>')),
+                                                checkboxInput('passing_byteams',
+                                                              label = 'Split players by teams',
+                                                              value = F),
+                                                checkboxInput('passing_byseasons',
+                                                              label = 'Split players by seasons',
+                                                              value = T)),
+                                   mainPanel(h1('Player passing'),
+                                             # p(paste0('Updated through games on ', max(as.Date(playerpassing$year)))), # not segmented by game (yet)
+                                             downloadButton('passing_download', 'Download CSV'),
+                                             br(),
+                                             tabsetPanel(id = 'passing_subtab',
+                                                         tabPanel('Defensive third',
+                                                                  DT::dataTableOutput('passingtable_def')
+                                                         ),
+                                                         tabPanel('Middle third',
+                                                                  DT::dataTableOutput('passingtable_mid')
+                                                         ),
+                                                         tabPanel('Attacking third',
+                                                                  DT::dataTableOutput('passingtable_att')
+                                                         ),
+                                                         tabPanel('Scatter plots',
+                                                                  fluidPage(fluidRow(
+                                                                    column(3,
+                                                                           selectInput('passerplot_xvar',
+                                                                                       label = 'X-axis variable',
+                                                                                       choices = sort(c()),
+                                                                                       selected = '')),
+                                                                    column(3,
+                                                                           selectInput('passerplot_yvar',
+                                                                                       label = 'Y-axis variable',
+                                                                                       choices = sort(c()),
+                                                                                       selected ='')),
+                                                                    plotOutput('passerplot'))))
+                                             ))))
+                        # New passing tab panel ####
+             ),
              # Glossary ####
              tabPanel(strong('Glossary'),
                       h1('Glossary'),
