@@ -3,4 +3,4 @@
 passer.xpasses <- function(minpasses,
                            seasonfilter,
                            byteams,
-                           byseasons)
+                           byseasons){}
