@@ -1,6 +1,8 @@
 # File to create shot tables for Shiny app
 
 library(dplyr)
+library(gbm)
+library(stringr)
 
 #load in the requisite data
 passes <- bind_rows(lapply(paste0("IgnoreList/", grep('raw passes', list.files("IgnoreList/"), value = T)),
@@ -73,8 +75,6 @@ merged.passes <- merged.passes %>% # include first pass of half indicator?
   select(-c(minute.temp, second.temp)) %>%
   ungroup()
 
-
-library(gbm)
 success.gbm <- readRDS("IgnoreList/xPassModel.rds")
 merged.passes[["success.pred"]] <- predict(success.gbm, merged.passes, type = "response", n.trees = 1000)
 
@@ -83,7 +83,6 @@ merged.passes <- merged.passes %>%
             teamEventId, Key2, position, Formation, Player, players,
             Key1, second.pass))
 
-library(stringr)
 merged.passes <- merged.passes %>%
   mutate(passer = str_replace_all(passer, 
                                   c('Kazaishvili' = 'Qazaishvili', 
