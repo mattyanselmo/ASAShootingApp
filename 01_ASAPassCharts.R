@@ -8,7 +8,7 @@ library(stringr)
 passes <- bind_rows(lapply(paste0("IgnoreList/", grep('raw passes', list.files("IgnoreList/"), value = T)),
                            function(x) read.csv(x, stringsAsFactors = F))) %>%
   mutate(date = as.Date(date, format = "%m/%d/%Y"),
-         year = format(date, "%Y"))
+         year = as.numeric(format(date, "%Y")))
 
 vertical.lineups <- read.csv('IgnoreList/vertical starting lineups.csv', stringsAsFactors = FALSE)
 jy.starting.lineups <- read.csv('IgnoreList/Starting Lineups editedJY.csv', stringsAsFactors = FALSE)
@@ -61,7 +61,6 @@ merged.passes <- merged.passes %>% # include first pass of half indicator?
          y = y*80/100,
          distance = sqrt((endX - x)^2 + (endY - y)^2),
          angle = atan((endY - y)/(endX - x)) + pi*ifelse(endX < x & endY < y, -1, ifelse(endX < x & endY > y, 1, 0)),
-         year = as.numeric(as.character(year)),
          playerdiff = ifelse(team == hteam, hplayers - aplayers, aplayers - hplayers),
          minute.temp = unlist(sapply(strsplit(time, ":"), function(x) as.numeric(x[1]))),
          second.temp = unlist(sapply(strsplit(time, ":"), function(x) as.numeric(x[2]))),
