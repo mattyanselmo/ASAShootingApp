@@ -9,7 +9,7 @@ library(shiny)
 
 shinyServer(function(input, output) {
   
-  # Player reactive values ####
+  # Shooter reactive values ####
   
   # Initial values
   shooter_inputs <- reactiveValues(shooting_seasonordate = 'Season',
@@ -78,7 +78,7 @@ shinyServer(function(input, output) {
                })
   
   
-  # Player tables ####
+  # Shooter tables ####
   dt_total <- reactive({
     if(shooter_inputs$shooting_seasonordate == 'Season'){
       dt_total <- shooterxgoals.func(playerxgoals,
@@ -192,7 +192,7 @@ shinyServer(function(input, output) {
                   digits = 2)
   })
   
-  # Player plots ####
+  # Shooter plots ####
   output$shooterplot <- renderPlot({
     xlim <- min(dt_total()[[shooter_inputs$shooterplot_xvar]]) - 0.05*(max(dt_total()[[shooter_inputs$shooterplot_xvar]]) - min(dt_total()[[shooter_inputs$shooterplot_xvar]]))
     ylim <- min(dt_total()[[shooter_inputs$shooterplot_yvar]]) - 0.05*(max(dt_total()[[shooter_inputs$shooterplot_yvar]]) - min(dt_total()[[shooter_inputs$shooterplot_yvar]]))
@@ -264,7 +264,7 @@ shinyServer(function(input, output) {
   }, height = 500, width = 700)
   
   
-  # Player downloads ####
+  # Shooter downloads ####
   output$player_download <- downloadHandler(
     filename = 'ASAplayertable_totals.csv',
     
@@ -282,6 +282,59 @@ shinyServer(function(input, output) {
       write.csv(dt_per96() %>% select(-c(extreme, plotnames)), file, row.names = F)
     }
   )
+  
+  # Passer reactive values ####
+  
+  # Initial values
+  passer_inputs <- reactiveValues(passing_seasonfilter = max(playerxgoals$Season),
+                                   passing_minpasses = 0,
+                                   passing_byteams = F,
+                                   passing_byseasons = T,
+                                   passerplot_xvar = 'xG',
+                                   passerplot_yvar = 'G-xG')
+  
+  # passer_per96_inputs <- reactiveValues(passing_seasonfilter = max(playerxgoals$Season),
+  #                                 passing_per96_minpasses = 0,
+  #                                 passing_per96_minfilter = 0,
+  #                                 passing_per96_byteams = F,
+  #                                 passing_per96_byseasons = T,
+  #                                 passerplot_per96_xvar = 'xG',
+  #                                 passerplot_per96_yvar = 'G-xG')
+  
+  # Updated values
+  observeEvent(input$passing_action,
+               {
+                 passer_inputs$passing_seasonfilter <- input$passing_seasonfilter
+                 passer_inputs$passing_minpasses <- input$passing_minpasses
+                 passer_inputs$passing_byteams <- input$passing_byteams
+                 passer_inputs$passing_byseasons <- input$passing_byseasons
+                 passer_inputs$passerplot_xvar <- input$passerplot_xvar
+                 passer_inputs$passerplot_yvar <- input$passerplot_yvar
+               })
+  
+  # observeEvent(input$passing_per96_action,
+  #              {
+  #                passer_per96_inputs$passing_per96_seasonfilter <- input$passing_per96_seasonfilter
+  #                passer_per96_inputs$passing_per96_minpasses <- input$passing_per96_minpasses
+  #                passer_per96_inputs$passing_per96_minfilter <- input$passing_per96_minfilter
+  #                passer_per96_inputs$passing_per96_byteams <- input$passing_per96_byteams
+  #                passer_per96_inputs$passing_per96_byseasons <- input$passing_per96_byseasons
+  #                passer_per96_inputs$passerplot_per96_xvar <- input$passerplot_per96_xvar
+  #                passer_per96_inputs$passerplot_per96_yvar <- input$passerplot_per96_yvar
+  #              })
+
+  # Passer tables ####
+  dt <- reactive({
+    # NEW PASSING FUNCTION(minpasses, seasonfilter, byteams, byseasons)
+  })
+  
+  dt_per96 <- reactive({
+    # NEW PASSING FUNCTION(minfilter, minpasses, seasonfilter, byteams, byseasons)
+  })
+  
+  # Passer plots ####
+  
+  # Passer downloads ####
   
   # Keeper reactive values ####
   
