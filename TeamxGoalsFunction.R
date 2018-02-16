@@ -59,7 +59,7 @@ teamxgoals.func <- function(teamxgoals = teamxgoals,
                   xGA = sum(xGA)/Games,
                   xGD = xGF - xGA,
                   GD = (sum(goals) - sum(goalsA))/Games,
-                  TSR = sum(shots)/sum(shotsA),
+                  TSR = sum(shots)/sum(shotsA + shots),
                   PDO = 1000*(sum(goals)/sum(shots) + 1 - sum(goalsA)/sum(shotsA))) %>%
         ungroup()
       }else{
@@ -80,7 +80,7 @@ teamxgoals.func <- function(teamxgoals = teamxgoals,
                     xGA = sum(xGA)/Games,
                     xGD = xGF - xGA,
                     GD = (sum(goals) - sum(goalsA))/Games,
-                    TSR = sum(shots)/sum(shotsA),
+                    TSR = sum(shots)/sum(shotsA + shots),
                     PDO = 1000*(sum(goals)/sum(shots) + 1 - sum(goalsA)/sum(shotsA))) %>%
           ungroup()
       }
@@ -113,7 +113,7 @@ teamxgoals.func <- function(teamxgoals = teamxgoals,
                   xGA = sum(xGA),
                   xGD = xGF - xGA,
                   GD = sum(goals) - sum(goalsA),
-                  TSR = sum(shots)/sum(shotsA),
+                  TSR = sum(shots)/sum(shotsA + shots),
                   PDO = 1000*(sum(goals)/sum(shots) + 1 - sum(goalsA)/sum(shotsA)))
     }else{
       aggdata <- tempdat %>%
