@@ -15,3 +15,4 @@ player.stats <- passing %>%
             exp = sum(success.pred))
 
 saveRDS(player.stats, "IgnoreList/xPassingByPlayer.rds")
+write.csv(player.stats, "IgnoreList/xPassingByPlayer.csv", row.names = F)

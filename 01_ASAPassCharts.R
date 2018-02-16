@@ -89,6 +89,6 @@ merged.passes <- merged.passes %>%
                                     "Antonio Mlinar Dalamea" = "Antonio Mlinar Delamea")))
 
 saveRDS(merged.passes, "IgnoreList/AllPassingData.rds")
-
+write.csv(merged.passes, "IgnoreList/AllPassingData.csv", row.names = F)
 
 

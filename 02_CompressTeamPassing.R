@@ -22,3 +22,6 @@ team.stats.defense <- passing %>%
 
 saveRDS(team.stats.offense, "IgnoreList/xPassingByTeamOffense.rds")
 saveRDS(team.stats.defense, "IgnoreList/xPassingByTeamDefense.rds")
+
+write.csv(team.stats.offense, "IgnoreList/xPassingByTeamOffense.csv", row.names = F)
+write.csv(team.stats.defense, "IgnoreList/xPassingByTeamDefense.csv", row.names = F)
