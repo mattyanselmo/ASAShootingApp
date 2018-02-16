@@ -419,7 +419,7 @@ shinyUI(
                                    sidebarPanel(width = 2,
                                                 actionButton('passing_action',
                                                              label = 'Apply filters'),
-                                                numericInput('passing_minshots',
+                                                numericInput('passing_minpasses',
                                                              "Minimum passes:",
                                                              value = 0,
                                                              min = 0, max = 1000, step = 50),
