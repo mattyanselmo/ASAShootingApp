@@ -292,7 +292,7 @@ shinyServer(function(input, output) {
                                    passing_byseasons = T,
                                    passerplot_xvar = 'xG',
                                    passerplot_yvar = 'G-xG')
-  
+
   # passer_per96_inputs <- reactiveValues(passing_seasonfilter = max(playerxgoals$Season),
   #                                 passing_per96_minpasses = 0,
   #                                 passing_per96_minfilter = 0,
@@ -324,12 +324,32 @@ shinyServer(function(input, output) {
   #              })
 
   # Passer tables ####
-  dt <- reactive({
-    # NEW PASSING FUNCTION(minpasses, seasonfilter, byteams, byseasons)
+  dt_passer <- reactive({
+    dt <- passer.xpasses(playerpassing,
+                   minpasses = passer_inputs$passing_minpasses,
+                   seasonfilter = passer_inputs$passing_seasonfilter,
+                   byteams = passer_inputs$passing_byteams,
+                   byseasons = passer_inputs$passing_byseasons,
+                   third.filter = c("Att", "Mid", "Def")[c("Attacking third", "Middle third", "Defensive third") == input$passing_subtab])
+    
+    dt
+    # Append passer names and extreme obs for plotting?
+      })
+  
+  dt_passer_per96 <- reactive({
+    # NEW PASSING FUNCTION(minfilter, minpasses, seasonfilter, byteams, byseasons)
   })
   
-  dt_per96 <- reactive({
-    # NEW PASSING FUNCTION(minfilter, minpasses, seasonfilter, byteams, byseasons)
+  output$passingtable_att <- DT::renderDataTable({
+    DT::datatable(dt_passer(),
+              rownames = F,
+              options(list(autoWidth = T,
+                           pageLength = 25,
+                           lengthMenu = seq(25, 100, 25)))) %>%
+      formatRound(columns = c("Score", "Per100", "Score ", "Per100 "), 
+                  digits = 1) %>%
+      formatPercentage(columns = c("PassPct", "xPass", "PassPct ", "xPass "), 
+                       digits = 1)
   })
   
   # Passer plots ####
