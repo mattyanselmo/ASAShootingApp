@@ -11,8 +11,11 @@ passing <- passing %>%
 player.stats <- passing %>%
   group_by(passer, year, team, third) %>%
   summarize(N = n(),
-            success = sum(success),
-            exp = sum(success.pred))
+            successes = sum(success),
+            exp = sum(success.pred),
+            Position = typical.pos[1],
+            Distance = sum(distance[success == 1]),
+            Vert.Dist = sum((endX - x)[success == 1]))
 
 saveRDS(player.stats, "IgnoreList/xPassingByPlayer.rds")
 write.csv(player.stats, "IgnoreList/xPassingByPlayer.csv", row.names = F)
