@@ -1,12 +1,15 @@
-# File to create shot tables for Shiny app
+# File to create pass models for shiny app
 
 library(dplyr)
+library(gbm)
+library(stringr)
+teamnames <- read.csv('TeamNameLinks.csv', stringsAsFactors = F)
 
 #load in the requisite data
 passes <- bind_rows(lapply(paste0("IgnoreList/", grep('raw passes', list.files("IgnoreList/"), value = T)),
                            function(x) read.csv(x, stringsAsFactors = F))) %>%
   mutate(date = as.Date(date, format = "%m/%d/%Y"),
-         year = format(date, "%Y"))
+         year = as.numeric(format(date, "%Y")))
 
 vertical.lineups <- read.csv('IgnoreList/vertical starting lineups.csv', stringsAsFactors = FALSE)
 jy.starting.lineups <- read.csv('IgnoreList/Starting Lineups editedJY.csv', stringsAsFactors = FALSE)
@@ -51,8 +54,32 @@ merged.passes <- left_join(passes,
                            by = "Key2")
 # This merge above isn't quite exact. Somehow I wind up with like 50 more passes - because of the double counting of key2 - so I don't know where that's coming in
 
-# Engineer features
-merged.passes <- merged.passes %>% # include first pass of half indicator?
+merged.passes <- merged.passes %>%
+  mutate(passer = str_replace_all(passer, 
+                                  c('Kazaishvili' = 'Qazaishvili', 
+                                    'Jorge Villafaña' = 'Jorge Villafana',
+                                    "Antonio Mlinar Dalamea" = "Antonio Mlinar Delamea"))) %>%
+  left_join(teamnames, by = c('team' = 'FullName')) %>%
+  left_join(teamnames, by = c('team.1' = 'FullName')) %>%
+  mutate(team = Abbr.x,
+         team.1 = Abbr.y) %>%
+  select(-c(Abbr.x, Abbr.y))
+
+# Engineer features ####
+
+# Fill NA positions
+Mode <- function(x) {
+  ux <- unique(x)
+  ux[which.max(tabulate(match(x, ux)))]
+}
+
+merged.passes <- merged.passes %>%
+  group_by(passer) %>%
+  mutate(Position = ifelse(is.na(Position) | Position == "S", na.omit(c(Mode(Position[Position != "S"]), "S"))[1], Position)) %>%
+  ungroup() %>%
+  mutate(Position.model = factor(ifelse(Position == "G", "GK", "Field")))
+
+merged.passes <- merged.passes %>%
   mutate(endX = endX*115/100,
          x = x*115/100,
          endY = endY*80/100,
@@ -120,7 +147,7 @@ merged.passes <- merged.passes %>% # include first pass of half indicator?
 # Include first pass of the half indicator!
 library(gbm)
 set.seed(17)
-success.gbm.distance <- gbm(success ~ home + playerdiff + x + y + angle + Position + 
+success.gbm.distance <- gbm(success ~ home + playerdiff + x + y + angle + Position.model + 
                               freekick + headpass + longball + throwin + throughball + 
                               cross + corner + playerdiff + distance + first.pass,
                             data = merged.passes,
@@ -133,7 +160,7 @@ success.gbm.distance <- gbm(success ~ home + playerdiff + x + y + angle + Positi
                             keep.data = F)
 
 set.seed(21)
-success.gbm <- gbm(success ~ home + playerdiff + x + y + angle + Position + 
+success.gbm <- gbm(success ~ home + playerdiff + x + y + angle + Position.model + 
                      freekick + headpass + longball + throwin + throughball + 
                      cross + corner + playerdiff + first.pass,
                    data = merged.passes,
