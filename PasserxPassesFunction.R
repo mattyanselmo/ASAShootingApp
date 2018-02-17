@@ -36,7 +36,8 @@ passer.xpasses <- function(playerpassing,
     filter(third %in% third.filter) %>%
     select(-third)
   }
-  return(playerpassing.temp)
+  return(playerpassing.temp %>%
+           arrange(desc(Score)))
   
 }
 
