@@ -419,6 +419,11 @@ shinyUI(
                                    sidebarPanel(width = 2,
                                                 actionButton('passing_action',
                                                              label = 'Apply filters'),
+                                                radioButtons('passing_third',
+                                                             label = "Third:",
+                                                             inline = T,
+                                                             choices = c("All", "Attacking" = "Att", "Middle" = "Mid", "Defensive" = "Def"),
+                                                             selected = "All"),
                                                 numericInput('passing_minpasses',
                                                              "Minimum passes:",
                                                              value = 0,
@@ -439,28 +444,23 @@ shinyUI(
                                              downloadButton('passing_download', 'Download CSV'),
                                              br(),
                                              tabsetPanel(id = 'passing_subtab',
-                                                         tabPanel('Defensive third',
-                                                                  DT::dataTableOutput('passingtable_def')
-                                                         ),
-                                                         tabPanel('Middle third',
-                                                                  DT::dataTableOutput('passingtable_mid')
-                                                         ),
-                                                         tabPanel('Attacking third',
-                                                                  DT::dataTableOutput('passingtable_att')
-                                                         ),
-                                                         tabPanel('Scatter plots',
-                                                                  fluidPage(fluidRow(
-                                                                    column(3,
-                                                                           selectInput('passerplot_xvar',
-                                                                                       label = 'X-axis variable',
-                                                                                       choices = sort(c()),
-                                                                                       selected = '')),
-                                                                    column(3,
-                                                                           selectInput('passerplot_yvar',
-                                                                                       label = 'Y-axis variable',
-                                                                                       choices = sort(c()),
-                                                                                       selected ='')),
-                                                                    plotOutput('passerplot'))))
+                                                         tabPanel('xPassing',
+                                                                  DT::dataTableOutput('passingtable_player'))
+                                                        
+                                                         # ,
+                                                         # tabPanel('Scatter plots',
+                                                         #          fluidPage(fluidRow(
+                                                         #            column(3,
+                                                         #                   selectInput('passerplot_xvar',
+                                                         #                               label = 'X-axis variable',
+                                                         #                               choices = sort(c()),
+                                                         #                               selected = '')),
+                                                         #            column(3,
+                                                         #                   selectInput('passerplot_yvar',
+                                                         #                               label = 'Y-axis variable',
+                                                         #                               choices = sort(c()),
+                                                         #                               selected ='')),
+                                                         #            plotOutput('passerplot'))))
                                              ))))
                         # New passing tab panel ####
              ),
