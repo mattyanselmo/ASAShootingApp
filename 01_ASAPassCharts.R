@@ -54,14 +54,39 @@ merged.passes <- left_join(passes,
                            by = "Key2")
 # This merge above isn't quite exact. Somehow I wind up with like 50 more passes - because of the double counting of key2 - so I don't know where that's coming in
 
-# Engineer features
-merged.passes <- merged.passes %>% # include first pass of half indicator?
+merged.passes <- merged.passes %>%
+  mutate(passer = str_replace_all(passer, 
+                                  c('Kazaishvili' = 'Qazaishvili', 
+                                    'Jorge Villafaña' = 'Jorge Villafana',
+                                    "Antonio Mlinar Dalamea" = "Antonio Mlinar Delamea"))) %>%
+  left_join(teamnames, by = c('team' = 'FullName')) %>%
+  left_join(teamnames, by = c('team.1' = 'FullName')) %>%
+  mutate(team = Abbr.x,
+         team.1 = Abbr.y) %>%
+  select(-c(Abbr.x, Abbr.y))
+
+# Engineer features ####
+
+# Fill NA positions
+Mode <- function(x) {
+  ux <- unique(x)
+  ux[which.max(tabulate(match(x, ux)))]
+}
+
+merged.passes <- merged.passes %>%
+  group_by(passer) %>%
+  mutate(Position = ifelse(is.na(Position) | Position == "S", na.omit(c(Mode(Position[Position != "S"]), "S"))[1], Position)) %>%
+  ungroup() %>%
+  mutate(Position.model = factor(ifelse(Position == "G", "GK", "Field")))
+
+merged.passes <- merged.passes %>%
   mutate(endX = endX*115/100,
          x = x*115/100,
          endY = endY*80/100,
          y = y*80/100,
          distance = sqrt((endX - x)^2 + (endY - y)^2),
          angle = atan((endY - y)/(endX - x)) + pi*ifelse(endX < x & endY < y, -1, ifelse(endX < x & endY > y, 1, 0)),
+         year = as.numeric(as.character(year)),
          playerdiff = ifelse(team == hteam, hplayers - aplayers, aplayers - hplayers),
          minute.temp = unlist(sapply(strsplit(time, ":"), function(x) as.numeric(x[1]))),
          second.temp = unlist(sapply(strsplit(time, ":"), function(x) as.numeric(x[2]))),
@@ -75,24 +100,19 @@ merged.passes <- merged.passes %>% # include first pass of half indicator?
   select(-c(minute.temp, second.temp)) %>%
   ungroup()
 
+
 success.gbm <- readRDS("IgnoreList/xPassModel.rds")
 merged.passes[["success.pred"]] <- predict(success.gbm, merged.passes, type = "response", n.trees = 1000)
 
 merged.passes <- merged.passes %>%
   select(-c(eventID, hteam, ateam, final, hplayers, aplayers, 
             teamEventId, Key2, position, Formation, Player, players,
-            Key1, second.pass))
+            Key1, second.pass)) %>%
+  group_by(passer) %>%
+  mutate(typical.pos = Mode(Position)) %>%
+  ungroup()
 
-merged.passes <- merged.passes %>%
-  mutate(passer = str_replace_all(passer, 
-                                  c('Kazaishvili' = 'Qazaishvili', 
-                                    'Jorge Villafaña' = 'Jorge Villafana',
-                                    "Antonio Mlinar Dalamea" = "Antonio Mlinar Delamea"))) %>%
-  left_join(teamnames, by = c('team' = 'FullName')) %>%
-  left_join(teamnames, by = c('team.1' = 'FullName')) %>%
-  mutate(team = Abbr.x,
-         team.1 = Abbr.y) %>%
-  select(-c(Abbr.x, Abbr.y))
+
 
 saveRDS(merged.passes, "IgnoreList/AllPassingData.rds")
 write.csv(merged.passes, "IgnoreList/AllPassingData.csv", row.names = F)
