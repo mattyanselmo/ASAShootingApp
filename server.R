@@ -286,7 +286,8 @@ shinyServer(function(input, output) {
   # Passer reactive values ####
   
   # Initial values
-  passer_inputs <- reactiveValues(passing_third = "All",
+  passer_inputs <- reactiveValues(passing_position = c("G", "D", "B", "M", "A", "F", "S"),
+                                  passing_third = "All",
                                   passing_seasonfilter = max(playerxgoals$Season),
                                   passing_minpasses = 0,
                                   passing_byteams = F,
@@ -305,6 +306,7 @@ shinyServer(function(input, output) {
   # Updated values
   observeEvent(input$passing_action,
                {
+                 passer_inputs$passing_position <- input$passing_position
                  passer_inputs$passing_third <- input$passing_third
                  passer_inputs$passing_seasonfilter <- input$passing_seasonfilter
                  passer_inputs$passing_minpasses <- input$passing_minpasses
@@ -332,7 +334,8 @@ shinyServer(function(input, output) {
                    seasonfilter = passer_inputs$passing_seasonfilter,
                    byteams = passer_inputs$passing_byteams,
                    byseasons = passer_inputs$passing_byseasons,
-                   third.filter = passer_inputs$passing_third)
+                   third.filter = passer_inputs$passing_third,
+                   pos.filter = passer_inputs$passing_position)
     
     dt
     # Append passer names and extreme obs for plotting?
@@ -357,7 +360,23 @@ shinyServer(function(input, output) {
   # Passer plots ####
   
   # Passer downloads ####
+  output$passing_download <- downloadHandler(
+    filename = 'ASApassertable_totals.csv',
+    
+    content = function(file){
+      
+      write.csv(dt_passer(), file, row.names = F)
+    }
+  )
   
+  # output$passer_per96_download <- downloadHandler(
+  #   filename = 'ASApassertable_per96.csv',
+  #   
+  #   content = function(file){
+  #     
+  #     write.csv(dt_passer_per96(), file, row.names = F)
+  #   }
+  # )
   # Keeper reactive values ####
   
   # Initial values
@@ -839,11 +858,11 @@ shinyServer(function(input, output) {
   
   # Glossary ####
   output$glossary <- DT::renderDataTable({
-    datatable(glossary %>% select(-Notes),
+    DT::datatable(glossary %>% select(c(1, 2, 3)),
               rownames = F,
               options(list(autoWidth = T,
-                           pageLength = nrow(glossary),
-                           dom = 'ft')))
+                           pageLength = 20,
+                           lengthMenu = c(10, 20, 30, 40, 50))))
   })
   
 })
