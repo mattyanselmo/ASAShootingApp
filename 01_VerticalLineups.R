@@ -3,7 +3,7 @@
 
 library(dplyr)
 
-lineups <- bind_rows(lapply(paste0("IgnoreList/", grep('Starting Lineups', list.files("IgnoreList/"), value = T)), 
+lineups <- bind_rows(lapply(paste0("IgnoreList/", grep('Starting Lineups [[:digit:]]', list.files("IgnoreList/"), value = T)), 
                  function(x) read.csv(x, stringsAsFactors = F) %>% mutate(formation = as.character(formation))))
 
 # store the info that will be used in every row
