@@ -183,13 +183,6 @@ merged.passes <- merged.passes %>%
             teamEventId, Key2, position, Formation, Player, players,
             Key1, second.pass))
 
-library(stringr)
-merged.passes <- merged.passes %>%
-  mutate(passer = str_replace_all(passer, 
-                                  c('Kazaishvili' = 'Qazaishvili', 
-                                    'Jorge Villafaña' = 'Jorge Villafana',
-                                    "Antonio Mlinar Dalamea" = "Antonio Mlinar Delamea")))
-
 saveRDS(merged.passes, "IgnoreList/AllPassingData.rds")
 
 
