@@ -3,7 +3,7 @@
 # setwd('C:/Users/Matthias.Kullowatz/Dropbox/ASA Blog Data/ShootingShinyApp')
 
 source('01_ASAShotCharts.R')
-source("01_VerticalLineups")
+source("01_VerticalLineups.R")
 source("01_ASAPassCharts.R")
 
 source('02_CompressPlayerxGoals.R')
