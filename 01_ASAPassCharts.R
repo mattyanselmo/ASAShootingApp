@@ -116,5 +116,3 @@ merged.passes <- merged.passes %>%
 
 saveRDS(merged.passes, "IgnoreList/AllPassingData.rds")
 write.csv(merged.passes, "IgnoreList/AllPassingData.csv", row.names = F)
-
-
