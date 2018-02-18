@@ -539,12 +539,24 @@ shinyServer(function(input, output) {
         select(-Conf)
     }
     
+    if(input$team_advanced == "Basic stats"){
+      columns.perc1 <- c('SoT%F', 'SoT%A', 'Finish%F', 'Finish%A')
+      columns.dec1 <- c()
+      columns.dec2 <- c()
+    } else{
+      columns.perc1 <- c("Solo%F", "Solo%A")
+      columns.dec1 <- c("xGF", "xGA", "xGD", "PDO")
+      columns.dec2 <- c("TSR")
+    }
+    
     DT::datatable(dt,
               rownames = F,
               options(list(autoWidth = T,
                            pageLength = 25,
                            dom = 't'))) %>%
-      formatPercentage(columns = c('SoT%F', 'SoT%A', 'Finish%F', 'Finish%A'), digits = 1)
+      formatPercentage(columns = columns.perc1, digits = 1) %>%
+      formatRound(columns = columns.dec1, digits = 1) %>%
+      formatRound(columns = columns.dec2, digits = 2)
   })
   
   output$teamtotalxgoalseast <- DT::renderDataTable({
@@ -556,12 +568,24 @@ shinyServer(function(input, output) {
         select(-Conf)
     }
     
+    if(input$team_advanced == "Basic stats"){
+      columns.perc1 <- c('SoT%F', 'SoT%A', 'Finish%F', 'Finish%A')
+      columns.dec1 <- c()
+      columns.dec2 <- c()
+    } else{
+      columns.perc1 <- c("Solo%F", "Solo%A")
+      columns.dec1 <- c("xGF", "xGA", "xGD", "PDO")
+      columns.dec2 <- c("TSR")
+    }
+    
     DT::datatable(dt,
               rownames = F,
               options(list(autoWidth = T,
                            pageLength = 25,
                            dom = 't'))) %>%
-      formatPercentage(columns = c('SoT%F', 'SoT%A', 'Finish%F', 'Finish%A'), digits = 1)
+      formatPercentage(columns = columns.perc1, digits = 1) %>%
+      formatRound(columns = columns.dec1, digits = 1) %>%
+      formatRound(columns = columns.dec2, digits = 2)
   })
   
   output$team_download <- downloadHandler(
@@ -616,14 +640,24 @@ shinyServer(function(input, output) {
       dt <- dt_team_pergame()
     }
     
+    if(input$team_advanced == "Basic stats"){
+      columns.perc1 <- c('SoT%F', 'SoT%A', 'Finish%F', 'Finish%A')
+      columns.dec1 <- c("ShtF", "ShtA", "SoTF", "SoTA")
+      columns.dec2 <- c("GF", "GA", "GD", "Pts")
+    } else{
+      columns.perc1 <- c("Solo%F", "Solo%A")
+      columns.dec1 <- c("ShtF", "ShtA","PDO")
+      columns.dec2 <- c("xGF", "xGA", "xGD", "GD", "TSR", "Pts")
+    }
+    
     datatable(dt,
               rownames = F,
               options(list(autoWidth = T,
                            pageLength = 25,
                            dom = 't'))) %>%
-      formatPercentage(columns = c('SoT%F', 'SoT%A', 'Finish%F', 'Finish%A'), digits = 1) %>%
-      formatRound(columns = c('ShtF', 'ShtA', 'SoTF', 'SoTA'), digits = 1) %>%
-      formatRound(columns = c('GF', 'GA', 'GD', 'Pts'), digits = 2)
+      formatPercentage(columns = columns.perc1, digits = 1) %>%
+      formatRound(columns = columns.dec1, digits = 1) %>%
+      formatRound(columns = columns.dec2, digits = 2)
   })
   
   output$teampergamexgoalseast <- DT::renderDataTable({
@@ -636,14 +670,24 @@ shinyServer(function(input, output) {
       dt <- dt_team_pergame()
     }
     
+    if(input$team_advanced == "Basic stats"){
+      columns.perc1 <- c('SoT%F', 'SoT%A', 'Finish%F', 'Finish%A')
+      columns.dec1 <- c("ShtF", "ShtA", "SoTF", "SoTA")
+      columns.dec2 <- c("GF", "GA", "GD", "Pts")
+    } else{
+      columns.perc1 <- c("Solo%F", "Solo%A")
+      columns.dec1 <- c("ShtF", "ShtA","PDO")
+      columns.dec2 <- c("xGF", "xGA", "xGD", "GD", "TSR", "Pts")
+    }
+    
     datatable(dt,
               rownames = F,
               options(list(autoWidth = T,
                            pageLength = 25,
                            dom = 't'))) %>%
-      formatPercentage(columns = c('SoT%F', 'SoT%A', 'Finish%F', 'Finish%A'), digits = 1)%>%
-      formatRound(columns = c('ShtF', 'ShtA', 'SoTF', 'SoTA'), digits = 1) %>%
-      formatRound(columns = c('GF', 'GA', 'GD', 'Pts'), digits = 2)
+      formatPercentage(columns = columns.perc1, digits = 1) %>%
+      formatRound(columns = columns.dec1, digits = 1) %>%
+      formatRound(columns = columns.dec2, digits = 2)
   })
   
   output$team_download_pergame <- downloadHandler(
@@ -654,7 +698,7 @@ shinyServer(function(input, output) {
     }
   )
   
-  # Team reactive values ####
+  # Team reactive values #### Unused
   team_inputs <- reactiveValues(team_seasonordate = 'Season',
                                 team_date1 = as.Date('2000-01-01'),
                                 team_date2 = as.Date('9999-12-31'),
@@ -665,8 +709,8 @@ shinyServer(function(input, output) {
                                 team_home = c('Home', 'Away'),
                                 team_pattern =  'All',
                                 team_evenstate = F,
-                                teamplot_xvar = 'xG',
-                                teamplot_yvar = 'xA')
+                                teamplot_xvar = 'xGF',
+                                teamplot_yvar = 'xGA')
   
   observeEvent(input$team_action,
                {
