@@ -32,7 +32,7 @@ shooterxgoals_perminute <- function(playerxgoals = playerxgoals,
            Season %in% season,
            type %in% c('Other'[OtherShots], 'FK'[FK], 'PK'[PK]))
   
-  tempmins <- minutesPlayed %>%
+  tempmins <- minutes_df %>%
     filter(date >= date1 & date <= date2,
            Season %in% season) %>%
     group_by_(.dots = c('player', 'Season')[c(TRUE, byseasons)]) %>%
