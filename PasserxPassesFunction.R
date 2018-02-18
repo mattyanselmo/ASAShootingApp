@@ -12,14 +12,17 @@ passer.xpasses <- function(playerpassing,
                            seasonfilter,
                            byteams,
                            byseasons,
-                           third.filter = c("All", "Att", "Def", "Mid")){
+                           third.filter = "All", # options = c("All", "Att", "Def", "Mid"),
+                           pos.filter = c("G", "D", "B", "M", "A", "F", "S")){
  
   
   playerpassing.temp <- playerpassing %>%
     ungroup() %>%
-    filter(year %in% seasonfilter) %>%
+    filter(year %in% seasonfilter,
+           Position %in% pos.filter) %>%
     group_by_(.dots = c("Player" = "passer", "Season" = "year", "team", "third")[c(T, byseasons, byteams, third.filter != "All")]) %>%
     summarize(Team = paste(unique(team), collapse = ", "),
+              Pos = Position[1],
               Passes = sum(N),
               PassPct = sum(successes)/Passes,
               xPassPct = sum(exp)/Passes,
