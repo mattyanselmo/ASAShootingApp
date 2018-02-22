@@ -2,9 +2,9 @@
 #convert horizontal lineups file to be vertical, for easy merging with passing data
 
 library(dplyr)
-
+library(stringr)
 lineups <- bind_rows(lapply(paste0("IgnoreList/", grep('Starting Lineups [[:digit:]]', list.files("IgnoreList/"), value = T)), 
-                 function(x) read.csv(x, stringsAsFactors = F) %>% mutate(formation = as.character(formation))))
+                            function(x) read.csv(x, stringsAsFactors = F) %>% mutate(formation = as.character(formation))))
 
 # store the info that will be used in every row
 infoVars <- c('gameID','team','home','formation')
@@ -23,5 +23,11 @@ eighteenGameInfo <- gameInfo[rep(seq_len(nrow(gameInfo)),each=18),]
 eighteenGameInfo$position <- rep(positions,nrow(gameInfo))
 #now append the players
 eighteenGameInfo$players <- players
+
+eighteenGameInfo <- eighteenGameInfo %>%
+  mutate(players = str_replace_all(players, 
+                                   c('Kazaishvili' = 'Qazaishvili', 
+                                     'Jorge Villafaña' = 'Jorge Villafana',
+                                     "Antonio Mlinar Dalamea" = "Antonio Mlinar Delamea")))
 
 write.csv(eighteenGameInfo, 'IgnoreList/vertical starting lineups.csv', row.names = F)
