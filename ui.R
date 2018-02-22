@@ -186,7 +186,7 @@ shinyUI(
                                                             
                                                             plotOutput('shooterplot_per96'))))
                                      )))),
-                        # Team tab panel ####
+                        # Team xG tab panel ####
                         tabPanel('Teams',
                                  sidebarLayout(
                                    sidebarPanel(width = 2,
@@ -457,7 +457,7 @@ shinyUI(
                                              tabsetPanel(id = 'passing_subtab',
                                                          tabPanel('Totals',
                                                                   DT::dataTableOutput('passingtable_player'))
-                                                        
+                                                         
                                                          # ,
                                                          # tabPanel('Scatter plots',
                                                          #          fluidPage(fluidRow(
@@ -472,8 +472,116 @@ shinyUI(
                                                          #                               choices = sort(c()),
                                                          #                               selected ='')),
                                                          #            plotOutput('passerplot'))))
-                                             ))))
-                        # New passing tab panel ####
+                                             )))),
+                        # Passing: Teams ####
+                        tabPanel('Teams',
+                                 sidebarLayout(
+                                   sidebarPanel(width = 2,
+                                                # conditionalPanel("input.team_seasonordate == 'Season' && input.team_seasonfilter.length == 1",
+                                                #                  checkboxInput('team_conferenceview',
+                                                #                                'By conference',
+                                                #                                value = T)),
+                                                # radioButtons('team_seasonordate',
+                                                #              'Filter by:',
+                                                #              choices = c('Season', 'Date')),
+                                                checkboxGroupInput('teampassing_seasonfilter',
+                                                                   label = 'Select seasons:',
+                                                                   choices = min(teampassing.offense$year):max(teampassing.offense$year),
+                                                                   selected = max(teampassing.offense$year)),
+                                                checkboxGroupInput("teampassing_thirdfilter",
+                                                                   label = "Third:",
+                                                                   choices = c("Defensive" = "Def", "Middle" = "Mid", "Attacking" = "Att"),
+                                                                   selected = c("Def", "Mid", "Att")),
+                                                # conditionalPanel(condition = "input.team_seasonordate == 'Season'",
+                                                #                  checkboxGroupInput('team_seasonfilter',
+                                                #                                     'Select seasons:',
+                                                #                                     choices = min(teamxgoals$Season):max(teamxgoals$Season),
+                                                #                                     selected = max(teamxgoals$Season))),
+                                                # conditionalPanel(condition = "input.team_seasonordate == 'Date'",
+                                                #                  dateInput('team_date1',
+                                                #                            'From:',
+                                                #                            value = min(teamxgoals$date[teamxgoals$Season == max(teamxgoals$Season)]),
+                                                #                            min = min(teamxgoals$date),
+                                                #                            max = max(teamxgoals$date),
+                                                #                            format = 'mm/dd/yyyy'),
+                                                #                  dateInput('team_date2',
+                                                #                            'To:',
+                                                #                            value = max(teamxgoals$date),
+                                                #                            min = min(teamxgoals$date),
+                                                #                            max = max(teamxgoals$date),
+                                                #                            format = 'mm/dd/yyyy')
+                                                # ),
+                                                checkboxInput('teampassing_byseasons',
+                                                              label = 'Split teams by seasons',
+                                                              value = T)
+                                                #,
+                                                # selectInput('teampassing_type',
+                                                #             'Pattern of play:',
+                                                #             choices = c('All', sort(unique(teamxgoals$patternOfPlay.model))),
+                                                #             selected = 'All'),
+                                                # checkboxInput('team_evenplayer',
+                                                #               label = 'Even gamesate only',
+                                                #               value = F),
+                                                # checkboxGroupInput('team_home',
+                                                #                    label = 'Venue:',
+                                                #                    choices = c('Home', 'Away'),
+                                                #                    selected = c('Home', 'Away'))),
+                                   ),
+                                   mainPanel(
+                                     h1('Team passing data'),
+                                     # p(paste0('Updated through games on ', max(as.Date(???)))),
+                                     tabsetPanel(id = 'teampassing_subtab',
+                                                 tabPanel('Totals',
+                                                          downloadButton('teampassing_download', 'Download CSV'),
+                                                          br(),
+                                                          br(),
+                                                          DT::dataTableOutput("teampassing_total")
+                                                 ),
+                                                 tabPanel('Per game',
+                                                          p("This tab is currently under construction!")
+                                                          # downloadButton('team_download_pergame', 'Download CSV'),
+                                                          # br(),
+                                                          # br(),
+                                                          # conditionalPanel(condition = "input.team_seasonordate == 'Season' && input.team_seasonfilter.length == 1",
+                                                          #                  h2('Western conference')),
+                                                          # div(DT::dataTableOutput('teampergamexgoalswest')),
+                                                          # br(),
+                                                          # conditionalPanel(condition = "input.team_seasonordate == 'Season' && input.team_seasonfilter.length == 1",
+                                                          #                  h2('Eastern conference'),
+                                                          #                  div(DT::dataTableOutput('teampergamexgoalseast')))
+                                                 ),
+                                                 tabPanel('Scatter plots',
+                                                          p("This tab is currently under construction!")
+                                                          # p(div(HTML("<i> All statistics on a per game basis. Not all teams labeled. </i>"))),
+                                                          # actionButton('team_action',
+                                                          #              label = 'Apply filters'),
+                                                          # fluidPage(fluidRow(
+                                                          #   column(4,
+                                                          #          selectInput('teamplot_xvar',
+                                                          #                      label = 'X-axis variable',
+                                                          #                      choices = c('Shots for' = 'ShtF', 'Shots against' = 'ShtA',
+                                                          #                                  'Unassisted % for' = 'Solo%F',
+                                                          #                                  'Unassisted % against' = 'Solo%A',
+                                                          #                                  'Cross % for' = 'CrossPctF', 'Cross % against' = 'CrossPctA',
+                                                          #                                  'Shots on target for' = 'OnTargetF', 'Shots on target against' = 'OnTargetA',
+                                                          #                                  'GF', 'GA', 'GD', 'xGF', 'xGA', 'xGD', 'TSR', 'PDO', 'Points' = 'Pts'),
+                                                          #                      selected = 'xGF')),
+                                                          #   column(4,
+                                                          #          selectInput('teamplot_yvar',
+                                                          #                      label = 'Y-axis variable',
+                                                          #                      choices = c('Shots for' = 'ShtF', 'Shots against' = 'ShtA',
+                                                          #                                  'Unassisted % for' = 'Solo%F',
+                                                          #                                  'Unassisted % against' = 'Solo%A',
+                                                          #                                  'Cross % for' = 'CrossPctF', 'Cross % against' = 'CrossPctA',
+                                                          #                                  'Shots on target for' = 'OnTargetF', 'Shots on target against' = 'OnTargetA',
+                                                          #                                  'GF', 'GA', 'GD', 'xGF', 'xGA', 'xGD', 'TSR', 'PDO', 'Points' = 'Pts'),
+                                                          #                      selected = 'xGA')),
+                                                          #   plotOutput('teamplot')))
+                                                 )
+                                     )
+                                   )
+                                 )
+                        )
              ),
              # Glossary ####
              tabPanel(strong('Glossary'),
