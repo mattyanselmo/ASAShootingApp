@@ -108,6 +108,9 @@ merged.passes <- merged.passes %>%
   select(-c(eventID, hteam, ateam, final, hplayers, aplayers, 
             teamEventId, Key2, position, Formation, Player, players,
             Key1, second.pass)) %>%
+#   mutate(type = ifelse(ifelse(throughball == 1, "through",
+#                               ifelse(freekick == 1, "freekick",
+#                                      ifelse(corner == 1, "corner", )))))
   group_by(passer) %>%
   mutate(typical.pos = Mode(Position)) %>%
   ungroup()
