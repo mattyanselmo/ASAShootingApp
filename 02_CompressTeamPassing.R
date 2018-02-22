@@ -11,14 +11,18 @@ passing <- passing %>%
 team.stats.offense <- passing %>%
   group_by(year, team, third) %>%
   summarize(N = n(),
-            success = sum(success),
-            exp = sum(success.pred))
+            successes = sum(success),
+            exp = sum(success.pred),
+            Distance = sum(distance[success == 1]),
+            Vert.Dist = sum((endX - x)[success == 1]))
 
 team.stats.defense <- passing %>%
   group_by(year, team.1, third) %>%
   summarize(N = n(),
-            success = sum(success),
-            exp = sum(success.pred))
+            successes = sum(success),
+            exp = sum(success.pred),
+            Distance = sum(distance[success == 1]),
+            Vert.Dist = sum((endX - x)[success == 1]))
 
 saveRDS(team.stats.offense, "IgnoreList/xPassingByTeamOffense.rds")
 saveRDS(team.stats.defense, "IgnoreList/xPassingByTeamDefense.rds")
