@@ -2,7 +2,7 @@
 # library(dplyr)
 # playerxgoals <- readRDS('IgnoreList/xGoalsByPlayer.rds') %>%
 #   mutate(date = as.Date(date, format = '%m/%d/%Y'))
-# minutesPlayed <- readRDS('IgnoreList/MinutesByGameID.rds')
+# minutes_df <- readRDS('IgnoreList/MinutesByGameID.rds')
 # date1 = as.Date('2000-01-01')
 # date2 = as.Date('9999-12-31')
 # season = 2015:2017
@@ -10,6 +10,7 @@
 # keyfilter = 0
 # minfilter = 0
 # byseasons = T
+# byteams = T
 # FK = T
 # PK = T
 # OtherShots = T
@@ -23,6 +24,7 @@ shooterxgoals_perminute <- function(playerxgoals = playerxgoals,
                                     shotfilter = 0, 
                                     keyfilter = 0,
                                     byseasons = T,
+                                    byteams = T,
                                     OtherShots = T,
                                     FK = T,
                                     PK = T){
@@ -34,13 +36,11 @@ shooterxgoals_perminute <- function(playerxgoals = playerxgoals,
   
   tempmins <- minutes_df %>%
     filter(date >= date1 & date <= date2,
-           Season %in% season) %>%
-    group_by_(.dots = c('player', 'Season')[c(TRUE, byseasons)]) %>%
-    summarize(minutes = sum(minutes))
-  
-  if(byseasons){
+           Season %in% season)
+  # Make byteams splits also, copy from non96 shooterxgoals function
+  if(byseasons & byteams){
     aggdata <- tempdat %>%
-      group_by(player, Season) %>%
+      group_by(player, Team = team, Season) %>%
       summarize(Shots = sum(shots),
                 SoT = sum(ontarget),
                 Goals = sum(goals),
@@ -55,15 +55,68 @@ shooterxgoals_perminute <- function(playerxgoals = playerxgoals,
       ungroup() %>%
       filter(Shots >= shotfilter,
              KeyP >= keyfilter) %>%
-      left_join(tempmins, by = c('player', 'Season')) %>%
-      mutate_at(.cols = vars(Shots:`xG+xA`),
-                .funs = funs(.*96/minutes)) %>%
-      select(Player = player, Season, Min = minutes, Shots:`xG+xA`) %>%
+      left_join(tempmins %>%
+                  group_by(player, Team = team, Season) %>%
+                  summarize(Min = sum(minutes)), 
+                by = c('player', "Team", 'Season')) %>%
+      mutate_at(.vars = vars(Shots:`xG+xA`),
+                .funs = funs(.*96/Min)) %>%
+      select(Player = player, Team, Season, Min, Shots:`xG+xA`) %>%
       filter(Min >= minfilter)
+    
+  } else if(byteams & !byseasons){
+    aggdata <- tempdat %>%
+      group_by(player, Team = team) %>%
+      summarize(Shots = sum(shots),
+                SoT = sum(ontarget),
+                Goals = sum(goals),
+                xG = sum(xG),
+                xPlace = sum(xG_gk) - xG,
+                `G-xG` = sum(`G-xG`),
+                KeyP = sum(keypasses),
+                Assts = sum(assists),
+                xA = sum(xA),
+                `A-xA` = sum(`A-xA`),
+                `xG+xA` = sum(xG + xA)) %>%
+      filter(Shots >= shotfilter,
+             KeyP >= keyfilter) %>%
+        left_join(tempmins %>%
+                    group_by(player, Team = team) %>%
+                    summarize(Min = sum(minutes)),
+                  by = c("player", "Team")) %>%
+        select(Player = player, Team, Min, Shots:`xG+xA`) %>%
+        mutate_at(.vars = vars(Shots:`xG+xA`),
+                  .funs = funs(.*96/Min))
+    
+  } else if(!byteams & byseasons){
+    aggdata <- tempdat %>%
+      group_by(player, Season) %>%
+      summarize(Team = paste0(na.omit(unique(team)), collapse = ', '),
+                Shots = sum(shots),
+                SoT = sum(ontarget),
+                Goals = sum(goals),
+                xG = sum(xG),
+                xPlace = sum(xG_gk) - xG,
+                `G-xG` = sum(`G-xG`),
+                KeyP = sum(keypasses),
+                Assts = sum(assists),
+                xA = sum(xA),
+                `A-xA` = sum(`A-xA`),
+                `xG+xA` = sum(xG + xA)) %>%
+      filter(Shots >= shotfilter,
+             KeyP >= keyfilter) %>%
+      left_join(tempmins %>%
+                  group_by(player, Season) %>%
+                  summarize(Min = sum(minutes)),
+                by = c("player", "Season")) %>%
+      select(Player = player, Season, Min, Shots:`xG+xA`) %>%
+      mutate_at(.vars = vars(Shots:`xG+xA`),
+                .funs = funs(.*96/Min))
   } else{
     aggdata <- tempdat %>%
       group_by(player) %>%
-      summarize(Shots = sum(shots),
+      summarize(Team = paste0(na.omit(unique(team)), collapse = ', '),
+                Shots = sum(shots),
                 SoT = sum(ontarget),
                 Goals = sum(goals),
                 xG = sum(xG),
@@ -74,14 +127,15 @@ shooterxgoals_perminute <- function(playerxgoals = playerxgoals,
                 xA = sum(xA),
                 `A-xA` = sum(`A-xA`),
                 `xG+xA` = sum(xG + xA)) %>%
-      ungroup() %>%
       filter(Shots >= shotfilter,
              KeyP >= keyfilter) %>%
-      left_join(tempmins, by = c('player')) %>%
-      mutate_at(.cols = vars(Shots:`xG+xA`),
-                .funs = funs(.*96/minutes)) %>%
-      select(Player = player, Min = minutes, Shots:`xG+xA`) %>%
-      filter(Min >= minfilter)
+        left_join(tempmins %>%
+                    group_by(player) %>%
+                    summarize(Min = sum(minutes)),
+                  by = c("player")) %>%
+        select(Player = player, Team, Min, Shots:`xG+xA`) %>%
+      mutate_at(.vars = vars(Shots:`xG+xA`),
+                .funs = funs(.*96/Min))
   }
   
   return(aggdata %>% 
@@ -90,15 +144,16 @@ shooterxgoals_perminute <- function(playerxgoals = playerxgoals,
   
 }
 
-# shooterxgoals_perminute(playerxgoals = readRDS('IgnoreList/xGoalsByPlayer.rds'),
-#                    minutes_df = minutesPlayed,
-#                    date1 = as.Date('2000-01-01'),
-#                    date2 = as.Date('9999-12-31'),
-#                    season = 2017,
-#                    shotfilter = 0,
-#                    keyfilter = 0,
-#                    minfilter = 0,
-#                    byseasons = T,
-#                    OtherShots = T,
-#                    FK = T,
-#                    PK = T) -> dt
+shooterxgoals_perminute(playerxgoals = readRDS('IgnoreList/xGoalsByPlayer.rds'),
+                   minutes_df = readRDS('IgnoreList/MinutesByGameID.rds'),
+                   date1 = as.Date('2000-01-01'),
+                   date2 = as.Date('9999-12-31'),
+                   season = 2017,
+                   shotfilter = 0,
+                   keyfilter = 0,
+                   minfilter = 0,
+                   byseasons = T,
+                   byteams = T,
+                   OtherShots = T,
+                   FK = T,
+                   PK = T)
