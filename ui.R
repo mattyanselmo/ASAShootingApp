@@ -16,7 +16,7 @@ shinyUI(
                                  sidebarLayout(
                                    sidebarPanel(width = 2,
                                                 actionButton('shooting_action',
-                                                             label = 'Apply filters'),
+                                                             label = "Refresh filters"),
                                                 numericInput('shooting_minshots',
                                                              "Minimum shots:",
                                                              value = 0,
@@ -100,7 +100,7 @@ shinyUI(
                                  sidebarLayout(
                                    sidebarPanel(width = 2,
                                                 actionButton('shooting_per96_action',
-                                                             label = 'Apply filters'),
+                                                             label = "Refresh filters"),
                                                 numericInput('shooting_per96_minfilter',
                                                              label = 'Minimum minutes:',
                                                              value = 0,
@@ -264,7 +264,7 @@ shinyUI(
                                                  tabPanel('Scatter plots',
                                                           p(div(HTML("<i> All statistics on a per game basis. Not all teams labeled. </i>"))),
                                                           actionButton('team_action', 
-                                                                       label = 'Apply filters'),
+                                                                       label = "Refresh filters"),
                                                           fluidPage(fluidRow(
                                                             column(4,
                                                                    selectInput('teamplot_xvar',
@@ -332,7 +332,7 @@ shinyUI(
                                  sidebarLayout(
                                    sidebarPanel(width = 2,
                                                 actionButton('keeper_action',
-                                                             label = 'Apply filters'),
+                                                             label = "Refresh filters"),
                                                 numericInput('keeper_minshots',
                                                              "Minimum shots faced:",
                                                              value = 0,
@@ -418,7 +418,11 @@ shinyUI(
                                  sidebarLayout(
                                    sidebarPanel(width = 3,
                                                 actionButton('passing_action',
-                                                             label = 'Apply filters'),
+                                                             label = "Refresh filters"),
+                                                numericInput('passing_minpasses',
+                                                             "Minimum passes:",
+                                                             value = 0,
+                                                             min = 0, max = 1000, step = 50),
                                                 checkboxGroupInput("passing_position",
                                                                    label = "Position:",
                                                                    inline = T,
@@ -435,10 +439,6 @@ shinyUI(
                                                              inline = F,
                                                              choices = c("All", "Attacking" = "Att", "Middle" = "Mid", "Defensive" = "Def"),
                                                              selected = "All"),
-                                                numericInput('passing_minpasses',
-                                                             "Minimum passes:",
-                                                             value = 0,
-                                                             min = 0, max = 1000, step = 50),
                                                 checkboxGroupInput('passing_seasonfilter',
                                                                    'Select seasons:',
                                                                    choices = min(playerpassing$year):max(playerpassing$year),
@@ -554,7 +554,7 @@ shinyUI(
                                                           p("This tab is currently under construction!")
                                                           # p(div(HTML("<i> All statistics on a per game basis. Not all teams labeled. </i>"))),
                                                           # actionButton('team_action',
-                                                          #              label = 'Apply filters'),
+                                                          #              label = "Refresh filters"),
                                                           # fluidPage(fluidRow(
                                                           #   column(4,
                                                           #          selectInput('teamplot_xvar',
