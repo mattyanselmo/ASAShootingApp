@@ -318,14 +318,16 @@ shinyUI(
                                                               value = T)),
                                    
                                    mainPanel(
+                                     h1('Keeper xGoals'),
+                                     p(paste0('Updated through games on ', max(as.Date(keeperxgoals$date)))),
+                                     downloadButton('keeper_download', 'Download CSV'),
+                                     br(),
+                                     br(),
                                      tabsetPanel(
-                                       tabPanel('Tables',
-                                                h1('Keeper xGoals'),
-                                                p(paste0('Updated through games on ', max(as.Date(keeperxgoals$date)))),
-                                                downloadButton('keeper_download', 'Download CSV'),
-                                                br(),
-                                                br(),
+                                       tabPanel('Tables: totals',
                                                 DT::dataTableOutput('keepertable')),
+                                       tabPanel("Tables: per 96",
+                                                p("This tab is still being developed!")),
                                        tabPanel('Scatter plots',
                                                 fluidPage(fluidRow(
                                                   column(4,
@@ -399,11 +401,11 @@ shinyUI(
                                                          tabPanel('Tables: totals',
                                                                   DT::dataTableOutput('passingtable_player')),
                                                          tabPanel("Plots: totals",
-                                                                  p("This tab is currently under construction!")),
+                                                                  p("This tab is still being developed!")),
                                                          tabPanel("Tables: per 96",
-                                                                  p("This tab is currently under construction!")),
+                                                                  p("This tab is still being developed!")),
                                                          tabPanel("Plots: per 96",
-                                                                  p("This tab is currently under construction!"))
+                                                                  p("This tab is still being developed!"))
                                                          
                                                          # tabPanel('Scatter plots',
                                                          #          fluidPage(fluidRow(
@@ -484,7 +486,7 @@ shinyUI(
                                                           DT::dataTableOutput("teampassing_total")
                                                  ),
                                                  tabPanel('Per game',
-                                                          p("This tab is currently under construction!")
+                                                          p("This tab is still being developed!")
                                                           # downloadButton('team_download_pergame', 'Download CSV'),
                                                           # br(),
                                                           # br(),
@@ -497,7 +499,7 @@ shinyUI(
                                                           #                  div(DT::dataTableOutput('teampergamexgoalseast')))
                                                  ),
                                                  tabPanel('Scatter plots',
-                                                          p("This tab is currently under construction!")
+                                                          p("This tab is still being developed!")
                                                           # p(div(HTML("<i> All statistics on a per game basis. Not all teams labeled. </i>"))),
                                                           # actionButton('team_action',
                                                           #              label = "Refresh filters"),

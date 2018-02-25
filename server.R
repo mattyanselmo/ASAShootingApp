@@ -247,9 +247,13 @@ shinyServer(function(input, output) {
     
     content = function(file){
       if(input$player_subtab %in% c("tablestotals", "plotstotals")){
-        write.csv(dt_total() %>% select(-c(extreme, plotnames)), file, row.names = F)
+        namesFL <- as.data.frame(do.call("rbind", strsplit(sub(" ", ";", dt_total()$Player), ";")))
+        names(namesFL) <- c("First", "Last")
+        write.csv(data.frame(namesFL, dt_total() %>% select(-c(extreme, plotnames))), file, row.names = F)
       } else{
-        write.csv(dt_per96() %>% select(-c(extreme, plotnames)), file, row.names = F)        
+        namesFL <- as.data.frame(do.call("rbind", strsplit(sub(" ", ";", dt_per96()$Player), ";")))
+        names(namesFL) <- c("First", "Last")
+        write.csv(data.frame(namesFL, dt_per96() %>% select(-c(extreme, plotnames))), file, row.names = F)        
       }
     }
   )
@@ -335,8 +339,9 @@ shinyServer(function(input, output) {
     filename = 'ASApassertable_totals.csv',
     
     content = function(file){
-      
-      write.csv(dt_passer(), file, row.names = F)
+      namesFL <- as.data.frame(do.call("rbind", strsplit(sub(" ", ";", dt_passer()$Player), ";")))
+      names(namesFL) <- c("First", "Last")
+      write.csv(data.frame(namesFL, dt_passer()), file, row.names = F)
     }
   )
   
@@ -440,7 +445,9 @@ shinyServer(function(input, output) {
     filename = 'ASAkeepertable.csv',
     
     content = function(file){
-      write.csv(dt_keeper() %>% select(-c(extreme, plotnames)), file, row.names = F)
+      namesFL <- as.data.frame(do.call("rbind", strsplit(sub(" ", ";", dt_keeper()$Keeper), ";")))
+      names(namesFL) <- c("First", "Last")
+      write.csv(data.frame(namesFL, dt_keeper() %>% select(-c(extreme, plotnames))), file, row.names = F)
     }
   )
   
