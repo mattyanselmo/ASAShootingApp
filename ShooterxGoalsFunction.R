@@ -3,7 +3,8 @@
 # minutes_df <- readRDS("IgnoreList/MinutesByGameID.rds")
 # date1 = as.Date('2000-01-01')
 # date2 = as.Date('9999-12-31')
-# season = 2011:2017
+# season = 2014:2015
+# minfilter = 0
 # shotfilter = 0
 # keyfilter = 0
 # byteams = T
@@ -17,6 +18,7 @@ shooterxgoals.func <- function(playerxgoals = playerxgoals,
                                date1 = as.Date('2000-01-01'), 
                                date2 = as.Date('9999-12-31'),
                                season = 2011:2017,
+                               minfilter = 0,
                                shotfilter = 0, 
                                keyfilter = 0,
                                byteams = F,
@@ -57,7 +59,8 @@ shooterxgoals.func <- function(playerxgoals = playerxgoals,
                   group_by(player, Team = team, Season) %>%
                   summarize(Min = sum(minutes)),
                 by = c("player", "Team", "Season")) %>%
-      select(Player = player, Team, Season, Min, Shots:`xG+xA`)
+      select(Player = player, Team, Season, Min, Shots:`xG+xA`) %>%
+      filter(Min >= minfilter | (rep(minfilter == 0, n()) & is.na(Min)))
     
   }else if(byteams & !byseasons){
     aggdata <- tempdat %>%
@@ -85,7 +88,8 @@ shooterxgoals.func <- function(playerxgoals = playerxgoals,
                     group_by(player, Team = team) %>%
                     summarize(Min = sum(minutes)),
                   by = c("player", "Team")) %>%
-        select(Player = player, Team, Min, Shots:`xG+xA`)
+        select(Player = player, Team, Min, Shots:`xG+xA`) %>%
+        filter(Min >= minfilter | (rep(minfilter == 0, n()) & is.na(Min)))
     } else{
       aggdata <- aggdata %>%
         select(Player = player, Team, Shots:`xG+xA`)
@@ -116,7 +120,8 @@ shooterxgoals.func <- function(playerxgoals = playerxgoals,
                   group_by(player, Season) %>%
                   summarize(Min = sum(minutes)),
                 by = c("player", "Season")) %>%
-      select(Player = player, Season, Min, Shots:`xG+xA`)
+      select(Player = player, Season, Min, Shots:`xG+xA`) %>%
+      filter(Min >= minfilter | (rep(minfilter == 0, n()) & is.na(Min)))
     
   } else{
     aggdata <- tempdat %>%
@@ -145,7 +150,8 @@ shooterxgoals.func <- function(playerxgoals = playerxgoals,
                     group_by(player) %>%
                     summarize(Min = sum(minutes)),
                   by = c("player")) %>%
-        select(Player = player, Team, Min, Shots:`xG+xA`)
+        select(Player = player, Team, Min, Shots:`xG+xA`) %>%
+        filter(Min >= minfilter | (rep(minfilter == 0, n()) & is.na(Min)))
     } else{
       aggdata <- aggdata %>%
         select(Player = player, Team, Shots:`xG+xA`)

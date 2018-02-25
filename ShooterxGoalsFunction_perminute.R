@@ -86,7 +86,8 @@ shooterxgoals_perminute <- function(playerxgoals = playerxgoals,
                   by = c("player", "Team")) %>%
         select(Player = player, Team, Min, Shots:`xG+xA`) %>%
         mutate_at(.vars = vars(Shots:`xG+xA`),
-                  .funs = funs(.*96/Min))
+                  .funs = funs(.*96/Min)) %>%
+      filter(Min >= minfilter)
     
   } else if(!byteams & byseasons){
     aggdata <- tempdat %>%
@@ -111,7 +112,9 @@ shooterxgoals_perminute <- function(playerxgoals = playerxgoals,
                 by = c("player", "Season")) %>%
       select(Player = player, Season, Min, Shots:`xG+xA`) %>%
       mutate_at(.vars = vars(Shots:`xG+xA`),
-                .funs = funs(.*96/Min))
+                .funs = funs(.*96/Min)) %>%
+      filter(Min >= minfilter)
+    
   } else{
     aggdata <- tempdat %>%
       group_by(player) %>%
@@ -135,7 +138,8 @@ shooterxgoals_perminute <- function(playerxgoals = playerxgoals,
                   by = c("player")) %>%
         select(Player = player, Team, Min, Shots:`xG+xA`) %>%
       mutate_at(.vars = vars(Shots:`xG+xA`),
-                .funs = funs(.*96/Min))
+                .funs = funs(.*96/Min)) %>%
+      filter(Min >= minfilter)
   }
   
   return(aggdata %>% 
@@ -144,16 +148,16 @@ shooterxgoals_perminute <- function(playerxgoals = playerxgoals,
   
 }
 
-shooterxgoals_perminute(playerxgoals = readRDS('IgnoreList/xGoalsByPlayer.rds'),
-                   minutes_df = readRDS('IgnoreList/MinutesByGameID.rds'),
-                   date1 = as.Date('2000-01-01'),
-                   date2 = as.Date('9999-12-31'),
-                   season = 2017,
-                   shotfilter = 0,
-                   keyfilter = 0,
-                   minfilter = 0,
-                   byseasons = T,
-                   byteams = T,
-                   OtherShots = T,
-                   FK = T,
-                   PK = T)
+# shooterxgoals_perminute(playerxgoals = readRDS('IgnoreList/xGoalsByPlayer.rds'),
+#                    minutes_df = readRDS('IgnoreList/MinutesByGameID.rds'),
+#                    date1 = as.Date('2000-01-01'),
+#                    date2 = as.Date('9999-12-31'),
+#                    season = 2017,
+#                    shotfilter = 0,
+#                    keyfilter = 0,
+#                    minfilter = 0,
+#                    byseasons = T,
+#                    byteams = T,
+#                    OtherShots = T,
+#                    FK = T,
+#                    PK = T)
