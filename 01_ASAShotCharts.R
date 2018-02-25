@@ -1,6 +1,7 @@
 # File to create shot tables for Shiny app
 
 library(dplyr)
+library(stringr)
 teamnames <- read.csv('TeamNameLinks.csv', stringsAsFactors = F)
 #load in the requisite data
 
@@ -61,7 +62,7 @@ shooting <- bind_rows(shooting14,
                       shooting15 %>% select(one_of(names(shooting14)))) %>%
   mutate(patternOfPlay.model = ifelse(patternOfPlay == 'Throw in', 'Regular', patternOfPlay),
          distance = ifelse(patternOfPlay == 'Penalty', 
-                           mean(distance[patternOfPlay == 'Penalty']), 
+                           12, 
                            distance),
          available = ifelse(patternOfPlay == 'Penalty', 
                             8, 
@@ -70,15 +71,16 @@ shooting <- bind_rows(shooting14,
 ## Need to correct scores in 2015 - 2017, see example of teams with negative goals scored
 
 xgoal.model <- glm(result == 'Goal' ~ 
-                     I(log(distance)) +
                      patternOfPlay.model +
+                     as.factor(year) +
+                     I(log(distance)) +
                      available +
                      I((available - mean(available))^2) +
                      I(bodypart == 'Head') +
                      through +
                      cross,
                    data = shooting %>% 
-                     filter(year <= 2016),
+                     filter(year <= 2017),
                    family = binomial)
 
 xgoal.model.keeper <- glm(result == 'Goal' ~
@@ -89,12 +91,15 @@ xgoal.model.keeper <- glm(result == 'Goal' ~
                             I(bodypart == 'Head') +
                             cross +
                             through +
-                            patternOfPlay.model,
+                            patternOfPlay.model +
+                            as.factor(year),
                           data = shooting %>%
-                            filter(year <= 2016,
+                            filter(year <= 2017,
                                    result == 'Goal' | result == 'Saved'),
                           family = binomial)
 
+save(xgoal.model, xgoal.model.keeper, file = paste0('IgnoreList/UpdatedModels_', Sys.Date(), '.Rdata'))
+     
 # Tested interaction between free kicks and distance: worse fit on holdout 2015 - 2017
 
 shooting[['xGShooter']] <- predict(xgoal.model, shooting, type = 'response')
@@ -105,9 +110,18 @@ shooting[['xGTeam']] <- predict(xgoal.model, shooting %>%
 shooting[['xGKeeper']][shooting$result %in% c('Goal', 'Saved')] <- predict(xgoal.model.keeper, 
                                                                            shooting[shooting$result %in% c('Goal', 'Saved'),], 
                                                                            type = 'response')
-
 source('TeamxGoalAdjustmentFunction.R')
 shooting <- team.xgoal.adj(shooting, 5/60)
+
+shooting <- shooting %>%
+  mutate(shooter = str_replace_all(shooter, 
+                                   c('Kazaishvili' = 'Qazaishvili', 
+                                     'Jorge Villafaña' = 'Jorge Villafana',
+                                     "Antonio Mlinar Dalamea" = "Antonio Mlinar Delamea")),
+         passer = str_replace_all(passer, 
+                                  c('Kazaishvili' = 'Qazaishvili', 
+                                    'Jorge Villafaña' = 'Jorge Villafana',
+                                    "Antonio Mlinar Dalamea" = "Antonio Mlinar Delamea")))
 
 saveRDS(shooting, 'IgnoreList/AllShotsData2011-2017.rds')
 

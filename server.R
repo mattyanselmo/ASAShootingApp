@@ -9,13 +9,14 @@ library(shiny)
 
 shinyServer(function(input, output) {
   
-  # Player reactive values ####
+  # Shooter reactive values ####
   
   # Initial values
   shooter_inputs <- reactiveValues(shooting_seasonordate = 'Season',
                                    shooting_date1 = as.Date('2000-01-01'),
                                    shooting_date2 = as.Date('9999-12-31'),
                                    shooting_seasonfilter = max(playerxgoals$Season),
+                                   shooting_minfilter = 0,
                                    shooting_minshots = 0,
                                    shooting_minkeypasses = 0,
                                    shooting_byteams = F,
@@ -24,23 +25,10 @@ shinyServer(function(input, output) {
                                    shooting_fk = T,
                                    shooting_pk = T,
                                    shooterplot_xvar = 'xG',
-                                   shooterplot_yvar = 'G-xG')
-  
-  shooter_per96_inputs <- reactiveValues(shooting_per96_seasonordate = 'Season',
-                                         shooting_per96_date1 = as.Date('2000-01-01'),
-                                         shooting_per96_date2 = as.Date('9999-12-31'),
-                                         shooting_per96_seasonfilter = max(playerxgoals$Season),
-                                         shooting_per96_minshots = 0,
-                                         shooting_per96_minkeypasses = 0,
-                                         shooting_per96_minfilter = 0,
-                                         #shooting_per96_byteams = F,
-                                         shooting_per96_byseasons = T,
-                                         shooting_per96_other = T,
-                                         shooting_per96_fk = T,
-                                         shooting_per96_pk = T,
-                                         shooterplot_per96_xvar = 'Min',
-                                         shooterplot_per96_yvar = 'xG')
-  
+                                   shooterplot_yvar = 'G-xG',
+                                   shooterplot_per96_xvar = 'xG',
+                                   shooterplot_per96_yvar = 'G-xG')
+
   # Updated values
   observeEvent(input$shooting_action,
                {
@@ -48,6 +36,7 @@ shinyServer(function(input, output) {
                  shooter_inputs$shooting_date1 <- input$shooting_date1
                  shooter_inputs$shooting_date2 <- input$shooting_date2
                  shooter_inputs$shooting_seasonfilter <- input$shooting_seasonfilter
+                 shooter_inputs$shooting_minfilter <- input$shooting_minfilter
                  shooter_inputs$shooting_minshots <- input$shooting_minshots
                  shooter_inputs$shooting_minkeypasses <- input$shooting_minkeypasses
                  shooter_inputs$shooting_byteams <- input$shooting_byteams
@@ -57,34 +46,18 @@ shinyServer(function(input, output) {
                  shooter_inputs$shooting_pk <- input$shooting_pk
                  shooter_inputs$shooterplot_xvar <- input$shooterplot_xvar
                  shooter_inputs$shooterplot_yvar <- input$shooterplot_yvar
+                 shooter_inputs$shooterplot_per96_xvar <- input$shooterplot_per96_xvar
+                 shooter_inputs$shooterplot_per96_yvar <- input$shooterplot_per96_yvar
                })
   
-  observeEvent(input$shooting_per96_action,
-               {
-                 shooter_per96_inputs$shooting_per96_seasonordate <- input$shooting_per96_seasonordate
-                 shooter_per96_inputs$shooting_per96_date1 <- input$shooting_per96_date1
-                 shooter_per96_inputs$shooting_per96_date2 <- input$shooting_per96_date2
-                 shooter_per96_inputs$shooting_per96_seasonfilter <- input$shooting_per96_seasonfilter
-                 shooter_per96_inputs$shooting_per96_minshots <- input$shooting_per96_minshots
-                 shooter_per96_inputs$shooting_per96_minkeypasses <- input$shooting_per96_minkeypasses
-                 shooter_per96_inputs$shooting_per96_minfilter <- input$shooting_per96_minfilter
-                 #shooter_per96_inputs$shooting_per96_byteams <- input$shooting_per96_byteams
-                 shooter_per96_inputs$shooting_per96_byseasons <- input$shooting_per96_byseasons
-                 shooter_per96_inputs$shooting_per96_other <- input$shooting_per96_other
-                 shooter_per96_inputs$shooting_per96_fk <- input$shooting_per96_fk
-                 shooter_per96_inputs$shooting_per96_pk <- input$shooting_per96_pk
-                 shooter_per96_inputs$shooterplot_per96_xvar <- input$shooterplot_per96_xvar
-                 shooter_per96_inputs$shooterplot_per96_yvar <- input$shooterplot_per96_yvar
-               })
-  
-  
-  # Player tables ####
+  # Shooter tables ####
   dt_total <- reactive({
     if(shooter_inputs$shooting_seasonordate == 'Season'){
       dt_total <- shooterxgoals.func(playerxgoals,
                                      date1 = as.Date('2000-01-01'),
                                      date2 = as.Date('9999-12-31'),
                                      season = shooter_inputs$shooting_seasonfilter,
+                                     minfilter = shooter_inputs$shooting_minfilter,
                                      shotfilter = shooter_inputs$shooting_minshots,
                                      keyfilter = shooter_inputs$shooting_minkeypasses,
                                      byteams = shooter_inputs$shooting_byteams,
@@ -101,6 +74,7 @@ shinyServer(function(input, output) {
                                      date1 = shooter_inputs$shooting_date1,
                                      date2 = shooter_inputs$shooting_date2,
                                      season = min(playerxgoals$Season):max(playerxgoals$Season),
+                                     minfilter = shooter_inputs$shooting_minfilter,
                                      shotfilter = shooter_inputs$shooting_minshots,
                                      keyfilter = shooter_inputs$shooting_minkeypasses,
                                      byteams = shooter_inputs$shooting_byteams,
@@ -126,35 +100,37 @@ shinyServer(function(input, output) {
   })
   
   dt_per96 <- reactive({
-    if(shooter_per96_inputs$shooting_per96_seasonordate == 'Season'){
+    if(shooter_inputs$shooting_seasonordate == 'Season'){
       dt_per96 <- shooterxgoals_perminute(playerxgoals,
                                           minutes_df = minutesPlayed,
                                           date1 = as.Date('2000-01-01'),
                                           date2 = as.Date('9999-12-31'),
-                                          season = shooter_per96_inputs$shooting_per96_seasonfilter,
-                                          shotfilter = shooter_per96_inputs$shooting_per96_minshots,
-                                          keyfilter = shooter_per96_inputs$shooting_per96_minkeypasses,
-                                          minfilter = shooter_per96_inputs$shooting_per96_minfilter,
-                                          byseasons = shooter_per96_inputs$shooting_per96_byseasons,
-                                          OtherShots = shooter_per96_inputs$shooting_per96_other,
-                                          FK = shooter_per96_inputs$shooting_per96_fk,
-                                          PK = shooter_per96_inputs$shooting_per96_pk)
+                                          season = shooter_inputs$shooting_seasonfilter,
+                                          shotfilter = shooter_inputs$shooting_minshots,
+                                          keyfilter = shooter_inputs$shooting_minkeypasses,
+                                          minfilter = shooter_inputs$shooting_minfilter,
+                                          byseasons = shooter_inputs$shooting_byseasons,
+                                          byteams = shooter_inputs$shooting_byteams,
+                                          OtherShots = shooter_inputs$shooting_other,
+                                          FK = shooter_inputs$shooting_fk,
+                                          PK = shooter_inputs$shooting_pk)
     } else{
       dt_per96 <- shooterxgoals_perminute(playerxgoals,
                                           minutes_df = minutesPlayed,
-                                          date1 = shooter_per96_inputs$shooting_per96_date1,
-                                          date2 = shooter_per96_inputs$shooting_per96_date2,
+                                          date1 = shooter_inputs$shooting_date1,
+                                          date2 = shooter_inputs$shooting_date2,
                                           season = min(playerxgoals$Season):max(playerxgoals$Season),
-                                          shotfilter = shooter_per96_inputs$shooting_per96_minshots,
-                                          keyfilter = shooter_per96_inputs$shooting_per96_minkeypasses,
-                                          minfilter = shooter_per96_inputs$shooting_per96_minfilter,
-                                          byseasons = shooter_per96_inputs$shooting_per96_byseasons,
-                                          OtherShots = shooter_per96_inputs$shooting_per96_other,
-                                          FK = shooter_per96_inputs$shooting_per96_fk,
-                                          PK = shooter_per96_inputs$shooting_per96_pk)
+                                          shotfilter = shooter_inputs$shooting_minshots,
+                                          keyfilter = shooter_inputs$shooting_minkeypasses,
+                                          minfilter = shooter_inputs$shooting_minfilter,
+                                          byseasons = shooter_inputs$shooting_byseasons,
+                                          byteams = shooter_inputs$shooting_byteams,
+                                          OtherShots = shooter_inputs$shooting_other,
+                                          FK = shooter_inputs$shooting_fk,
+                                          PK = shooter_inputs$shooting_pk)
     }
     
-    dt_per96[['extreme']] <- rank(dt_per96[[shooter_per96_inputs$shooterplot_per96_xvar]]) + rank(dt_per96[[shooter_per96_inputs$shooterplot_per96_yvar]])
+    dt_per96[['extreme']] <- rank(dt_per96[[shooter_inputs$shooterplot_xvar]]) + rank(dt_per96[[shooter_inputs$shooterplot_yvar]])
     if(length(unique(dt_per96$Season)) > 1){
       dt_per96[['plotnames']] <- paste(unlist(lapply(strsplit(dt_per96$Player, " "), function(x) { return(x[length(x)]) })), dt_per96$Season)
       
@@ -192,7 +168,7 @@ shinyServer(function(input, output) {
                   digits = 2)
   })
   
-  # Player plots ####
+  # Shooter plots ####
   output$shooterplot <- renderPlot({
     xlim <- min(dt_total()[[shooter_inputs$shooterplot_xvar]]) - 0.05*(max(dt_total()[[shooter_inputs$shooterplot_xvar]]) - min(dt_total()[[shooter_inputs$shooterplot_xvar]]))
     ylim <- min(dt_total()[[shooter_inputs$shooterplot_yvar]]) - 0.05*(max(dt_total()[[shooter_inputs$shooterplot_yvar]]) - min(dt_total()[[shooter_inputs$shooterplot_yvar]]))
@@ -235,12 +211,12 @@ shinyServer(function(input, output) {
     
     p <- dt_per96() %>%
       ggplot(
-        aes_string(x = paste0('`', shooter_per96_inputs$shooterplot_per96_xvar, '`'), 
-                   y = paste0('`', shooter_per96_inputs$shooterplot_per96_yvar, '`'))) +
+        aes_string(x = paste0('`', shooter_inputs$shooterplot_per96_xvar, '`'), 
+                   y = paste0('`', shooter_inputs$shooterplot_per96_yvar, '`'))) +
       geom_point(color = '#0000cc') +
       geom_text(aes(label = ifelse(dt_per96()$extreme >= sort(dt_per96()$extreme, decreasing = T)[min(5, nrow(dt_per96()))] |
-                                     dt_per96()[[shooter_per96_inputs$shooterplot_per96_xvar]] == max(dt_per96()[[shooter_per96_inputs$shooterplot_per96_xvar]]) |
-                                     dt_per96()[[shooter_per96_inputs$shooterplot_per96_yvar]] == max(dt_per96()[[shooter_per96_inputs$shooterplot_per96_yvar]]),
+                                     dt_per96()[[shooter_inputs$shooterplot_per96_xvar]] == max(dt_per96()[[shooter_inputs$shooterplot_per96_xvar]]) |
+                                     dt_per96()[[shooter_inputs$shooterplot_per96_yvar]] == max(dt_per96()[[shooter_inputs$shooterplot_per96_yvar]]),
                                    dt_per96()$plotnames, ''), 
                     hjust = 'inward'),
                 size = 5,
@@ -252,37 +228,131 @@ shinyServer(function(input, output) {
             axis.text = element_text(size = 14),
             axis.title = element_text(size = 14))
     p + geom_smooth(method = 'lm', se = F) +
-      geom_text(x = min(dt_per96()[[shooter_per96_inputs$shooterplot_per96_xvar]]) - 0.05*(max(dt_per96()[[shooter_per96_inputs$shooterplot_per96_xvar]]) - min(dt_per96()[[shooter_per96_inputs$shooterplot_per96_xvar]])),
-                y = min(dt_per96()[[shooter_per96_inputs$shooterplot_per96_yvar]]) - 0.05*(max(dt_per96()[[shooter_per96_inputs$shooterplot_per96_yvar]]) - min(dt_per96()[[shooter_per96_inputs$shooterplot_per96_yvar]])),
+      geom_text(x = min(dt_per96()[[shooter_inputs$shooterplot_per96_xvar]]) - 0.05*(max(dt_per96()[[shooter_inputs$shooterplot_per96_xvar]]) - min(dt_per96()[[shooter_inputs$shooterplot_per96_xvar]])),
+                y = min(dt_per96()[[shooter_inputs$shooterplot_per96_yvar]]) - 0.05*(max(dt_per96()[[shooter_inputs$shooterplot_per96_yvar]]) - min(dt_per96()[[shooter_inputs$shooterplot_per96_yvar]])),
                 hjust = 0,
                 label = lm_eqn(dt_per96(), 
-                               paste0('`', shooter_per96_inputs$shooterplot_per96_xvar, '`'), 
-                               paste0('`', shooter_per96_inputs$shooterplot_per96_yvar, '`')),
+                               paste0('`', shooter_inputs$shooterplot_per96_xvar, '`'), 
+                               paste0('`', shooter_inputs$shooterplot_per96_yvar, '`')),
                 parse = TRUE,
                 color = 'black',
                 size = 7)
   }, height = 500, width = 700)
   
-  
-  # Player downloads ####
+  # Shooter downloads ####
   output$player_download <- downloadHandler(
-    filename = 'ASAplayertable_totals.csv',
+    filename = paste0("ASAplayertable_", 
+                      ifelse(input$player_subtab %in% c("tablestotals", "plotstotals"), "totals", "per96"),
+                      ".csv"),
     
     content = function(file){
-      
-      write.csv(dt_total() %>% select(-c(extreme, plotnames)), file, row.names = F)
+      if(input$player_subtab %in% c("tablestotals", "plotstotals")){
+        namesFL <- as.data.frame(do.call("rbind", strsplit(sub(" ", ";", dt_total()$Player), ";")))
+        names(namesFL) <- c("First", "Last")
+        write.csv(data.frame(namesFL, dt_total() %>% select(-c(extreme, plotnames))), file, row.names = F)
+      } else{
+        namesFL <- as.data.frame(do.call("rbind", strsplit(sub(" ", ";", dt_per96()$Player), ";")))
+        names(namesFL) <- c("First", "Last")
+        write.csv(data.frame(namesFL, dt_per96() %>% select(-c(extreme, plotnames))), file, row.names = F)        
+      }
     }
   )
   
-  output$player_per96_download <- downloadHandler(
-    filename = 'ASAplayertable_per96.csv',
+  # Passer reactive values ####
+  
+  # Initial values
+  passer_inputs <- reactiveValues(passing_position = c("G", "D", "B", "M", "A", "F", "S"),
+                                  passing_third = "All",
+                                  passing_seasonfilter = max(playerxgoals$Season),
+                                  passing_minpasses = 0,
+                                  passing_byteams = F,
+                                  passing_byseasons = T,
+                                  passerplot_xvar = 'xG',
+                                  passerplot_yvar = 'G-xG')
+
+  # passer_per96_inputs <- reactiveValues(passing_seasonfilter = max(playerxgoals$Season),
+  #                                 passing_per96_minpasses = 0,
+  #                                 passing_per96_minfilter = 0,
+  #                                 passing_per96_byteams = F,
+  #                                 passing_per96_byseasons = T,
+  #                                 passerplot_per96_xvar = 'xG',
+  #                                 passerplot_per96_yvar = 'G-xG')
+  
+  # Updated values
+  observeEvent(input$passing_action,
+               {
+                 passer_inputs$passing_position <- input$passing_position
+                 passer_inputs$passing_third <- input$passing_third
+                 passer_inputs$passing_seasonfilter <- input$passing_seasonfilter
+                 passer_inputs$passing_minpasses <- input$passing_minpasses
+                 passer_inputs$passing_byteams <- input$passing_byteams
+                 passer_inputs$passing_byseasons <- input$passing_byseasons
+                 passer_inputs$passerplot_xvar <- input$passerplot_xvar
+                 passer_inputs$passerplot_yvar <- input$passerplot_yvar
+               })
+  
+  # observeEvent(input$passing_per96_action,
+  #              {
+  #                passer_per96_inputs$passing_per96_seasonfilter <- input$passing_per96_seasonfilter
+  #                passer_per96_inputs$passing_per96_minpasses <- input$passing_per96_minpasses
+  #                passer_per96_inputs$passing_per96_minfilter <- input$passing_per96_minfilter
+  #                passer_per96_inputs$passing_per96_byteams <- input$passing_per96_byteams
+  #                passer_per96_inputs$passing_per96_byseasons <- input$passing_per96_byseasons
+  #                passer_per96_inputs$passerplot_per96_xvar <- input$passerplot_per96_xvar
+  #                passer_per96_inputs$passerplot_per96_yvar <- input$passerplot_per96_yvar
+  #              })
+
+  # Passer tables ####
+  dt_passer <- reactive({
+    dt <- passer.xpasses(playerpassing,
+                   minpasses = passer_inputs$passing_minpasses,
+                   seasonfilter = passer_inputs$passing_seasonfilter,
+                   byteams = passer_inputs$passing_byteams,
+                   byseasons = passer_inputs$passing_byseasons,
+                   third.filter = passer_inputs$passing_third,
+                   pos.filter = passer_inputs$passing_position)
+    
+    dt
+    # Append passer names and extreme obs for plotting?
+      })
+  
+  dt_passer_per96 <- reactive({
+    # NEW PASSING FUNCTION(minfilter, minpasses, seasonfilter, byteams, byseasons)
+  })
+  
+  output$passingtable_player <- DT::renderDataTable({
+    DT::datatable(dt_passer(),
+              rownames = F,
+              options(list(autoWidth = T,
+                           pageLength = 25,
+                           lengthMenu = seq(25, 100, 25)))) %>%
+      formatRound(columns = c("Score", "Per100", "Distance", "Vertical"), 
+                  digits = 1) %>%
+      formatPercentage(columns = c("PassPct", "xPassPct"), 
+                       digits = 1)
+  })
+  
+  # Passer plots ####
+  
+  # Passer downloads ####
+  output$passing_download <- downloadHandler(
+    filename = 'ASApassertable_totals.csv',
     
     content = function(file){
-      
-      write.csv(dt_per96() %>% select(-c(extreme, plotnames)), file, row.names = F)
+      namesFL <- as.data.frame(do.call("rbind", strsplit(sub(" ", ";", dt_passer()$Player), ";")))
+      names(namesFL) <- c("First", "Last")
+      write.csv(data.frame(namesFL, dt_passer()), file, row.names = F)
     }
   )
   
+  # output$passer_per96_download <- downloadHandler(
+  #   filename = 'ASApassertable_per96.csv',
+  #   
+  #   content = function(file){
+  #     
+  #     write.csv(dt_passer_per96(), file, row.names = F)
+  #   }
+  # )
   # Keeper reactive values ####
   
   # Initial values
@@ -375,7 +445,9 @@ shinyServer(function(input, output) {
     filename = 'ASAkeepertable.csv',
     
     content = function(file){
-      write.csv(dt_keeper() %>% select(-c(extreme, plotnames)), file, row.names = F)
+      namesFL <- as.data.frame(do.call("rbind", strsplit(sub(" ", ";", dt_keeper()$Keeper), ";")))
+      names(namesFL) <- c("First", "Last")
+      write.csv(data.frame(namesFL, dt_keeper() %>% select(-c(extreme, plotnames))), file, row.names = F)
     }
   )
   
@@ -420,7 +492,8 @@ shinyServer(function(input, output) {
   }, height = 500, width = 700)
   
   # Team tables ####
-  output$teamtotalxgoalswest <- DT::renderDataTable({
+  
+  dt_team <- reactive({
     if(input$team_seasonordate == 'Season'){
       dt <- teamxgoals.func(teamxgoals, 
                             date1 = as.Date('2000-01-01'), 
@@ -431,23 +504,31 @@ shinyServer(function(input, output) {
                             pergame = F,
                             advanced = ifelse(input$team_advanced == 'Basic stats', F, T),
                             venue = input$team_home,
-                            byseasons = input$team_byseasons)
+                            byseasons = input$team_byseasons,
+                            confview = input$team_conferenceview)
       
     } else{
       dt <- teamxgoals.func(teamxgoals, 
                             date1 = input$team_date1, 
                             date2 = input$team_date2,
-                            season = min(teamxgoals$Season):max(teamxgoals$Season),
+                            season = as.numeric(format(input$team_date1, "%Y")):as.numeric(format(input$team_date2, "%Y")),
                             even = input$team_evenstate,
                             pattern = input$team_pattern,
                             pergame = F,
                             advanced = ifelse(input$team_advanced == 'Basic stats', F, T),
                             venue = input$team_home,
-                            byseasons = input$team_byseasons)
+                            byseasons = input$team_byseasons,
+                            confview = input$team_conferenceview)
     }
     
     is.num <- sapply(dt, is.numeric)
-    dt[is.num] <- lapply(dt[is.num], round, 2)
+    dt[is.num] <- lapply(dt[is.num], round, 3)
+    
+    dt
+  })
+  
+  output$teamtotalxgoalswest <- DT::renderDataTable({
+    dt <- dt_team()
     
     if('Conf' %in% names(dt)){
       dt <- dt %>%
@@ -455,41 +536,28 @@ shinyServer(function(input, output) {
         select(-Conf)
     }
     
-    datatable(dt,
+    if(input$team_advanced == "Basic stats"){
+      columns.perc1 <- c('SoT%F', 'SoT%A', 'Finish%F', 'Finish%A')
+      columns.dec1 <- c()
+      columns.dec2 <- c()
+    } else{
+      columns.perc1 <- c("Solo%F", "Solo%A")
+      columns.dec1 <- c("xGF", "xGA", "xGD", "PDO")
+      columns.dec2 <- c("TSR")
+    }
+    
+    DT::datatable(dt,
               rownames = F,
               options(list(autoWidth = T,
-                           pageLength = nrow(dt),
-                           dom = 't')))
+                           pageLength = 25,
+                           dom = 't'))) %>%
+      formatPercentage(columns = columns.perc1, digits = 1) %>%
+      formatRound(columns = columns.dec1, digits = 1) %>%
+      formatRound(columns = columns.dec2, digits = 2)
   })
   
   output$teamtotalxgoalseast <- DT::renderDataTable({
-    if(input$team_seasonordate == 'Season'){
-      dt <- teamxgoals.func(teamxgoals, 
-                            date1 = as.Date('2000-01-01'), 
-                            date2 = as.Date('9999-12-31'),
-                            season = input$team_seasonfilter,
-                            even = input$team_evenstate,
-                            pattern = input$team_pattern,
-                            pergame = F,
-                            advanced = ifelse(input$team_advanced == 'Basic stats', F, T),
-                            venue = input$team_home,
-                            byseasons = input$team_byseasons)
-      
-    } else{
-      dt <- teamxgoals.func(teamxgoals, 
-                            date1 = input$team_date1, 
-                            date2 = input$team_date2,
-                            season = min(teamxgoals$Season):max(teamxgoals$Season),
-                            even = input$team_evenstate,
-                            pattern = input$team_pattern,
-                            pergame = F,
-                            advanced = ifelse(input$team_advanced == 'Basic stats', F, T),
-                            venue = input$team_home,
-                            byseasons = input$team_byseasons)
-    }
-    
-    is.num <- sapply(dt, is.numeric)
-    dt[is.num] <- lapply(dt[is.num], round, 2)
+    dt <- dt_team()
     
     if('Conf' %in% names(dt)){
       dt <- dt %>%
@@ -497,47 +565,36 @@ shinyServer(function(input, output) {
         select(-Conf)
     }
     
-    datatable(dt,
+    if(input$team_advanced == "Basic stats"){
+      columns.perc1 <- c('SoT%F', 'SoT%A', 'Finish%F', 'Finish%A')
+      columns.dec1 <- c()
+      columns.dec2 <- c()
+    } else{
+      columns.perc1 <- c("Solo%F", "Solo%A")
+      columns.dec1 <- c("xGF", "xGA", "xGD", "PDO")
+      columns.dec2 <- c("TSR")
+    }
+    
+    DT::datatable(dt,
               rownames = F,
               options(list(autoWidth = T,
-                           pageLength = nrow(dt),
-                           dom = 't')))
+                           pageLength = 25,
+                           dom = 't'))) %>%
+      formatPercentage(columns = columns.perc1, digits = 1) %>%
+      formatRound(columns = columns.dec1, digits = 1) %>%
+      formatRound(columns = columns.dec2, digits = 2)
   })
   
   output$team_download <- downloadHandler(
     filename = 'ASAteamtable_total.csv',
     
     content = function(file){
-      if(input$team_seasonordate == 'Season'){
-        dt <- teamxgoals.func(teamxgoals, 
-                              date1 = as.Date('2000-01-01'), 
-                              date2 = as.Date('9999-12-31'),
-                              season = input$team_seasonfilter,
-                              even = input$team_evenstate,
-                              pattern = input$team_pattern,
-                              pergame = F,
-                              advanced = ifelse(input$team_advanced == 'Basic stats', F, T),
-                              venue = input$team_home,
-                              byseasons = input$team_byseasons)
-        
-      } else{
-        dt <- teamxgoals.func(teamxgoals, 
-                              date1 = input$team_date1, 
-                              date2 = input$team_date2,
-                              season = min(teamxgoals$Season):max(teamxgoals$Season),
-                              even = input$team_evenstate,
-                              pattern = input$team_pattern,
-                              pergame = F,
-                              advanced = ifelse(input$team_advanced == 'Basic stats', F, T),
-                              venue = input$team_home,
-                              byseasons = input$team_byseasons)
-      }
-      
-      write.csv(dt, file, row.names = F)
+      write.csv(dt_team(), file, row.names = F)
     }
   )
   
-  output$teampergamexgoalswest <- DT::renderDataTable({
+  # Per game team stats
+  dt_team_pergame <- reactive({
     if(input$team_seasonordate == 'Season'){
       dt <- teamxgoals.func(teamxgoals, 
                             date1 = as.Date('2000-01-01'), 
@@ -548,123 +605,109 @@ shinyServer(function(input, output) {
                             pergame = T,
                             advanced = ifelse(input$team_advanced == 'Basic stats', F, T),
                             venue = input$team_home,
-                            byseasons = input$team_byseasons)
+                            byseasons = input$team_byseasons,
+                            confview = input$team_conferenceview)
       
     } else{
       dt <- teamxgoals.func(teamxgoals, 
                             date1 = input$team_date1, 
                             date2 = input$team_date2,
-                            season = min(teamxgoals$Season):max(teamxgoals$Season),
+                            season = as.numeric(format(input$team_date1, "%Y")):as.numeric(format(input$team_date2, "%Y")),
                             even = input$team_evenstate,
                             pattern = input$team_pattern,
                             pergame = T,
                             advanced = ifelse(input$team_advanced == 'Basic stats', F, T),
                             venue = input$team_home,
-                            byseasons = input$team_byseasons)
+                            byseasons = input$team_byseasons,
+                            confview = input$team_conferenceview)
     }
     
     is.num <- sapply(dt, is.numeric)
-    dt[is.num] <- lapply(dt[is.num], round, 2)
+    dt[is.num] <- lapply(dt[is.num], round, 3)
+    dt
+  })
+  
+  output$teampergamexgoalswest <- DT::renderDataTable({
     
-    if('Conf' %in% names(dt)){
-      dt <- dt %>%
+    if('Conf' %in% names(dt_team_pergame())){
+      dt <- dt_team_pergame() %>%
         filter(Conf == 'west') %>%
         select(-Conf)
+    } else{
+      dt <- dt_team_pergame()
+    }
+    
+    if(input$team_advanced == "Basic stats"){
+      columns.perc1 <- c('SoT%F', 'SoT%A', 'Finish%F', 'Finish%A')
+      columns.dec1 <- c("ShtF", "ShtA", "SoTF", "SoTA")
+      columns.dec2 <- c("GF", "GA", "GD", "Pts")
+    } else{
+      columns.perc1 <- c("Solo%F", "Solo%A")
+      columns.dec1 <- c("ShtF", "ShtA","PDO")
+      columns.dec2 <- c("xGF", "xGA", "xGD", "GD", "TSR", "Pts")
     }
     
     datatable(dt,
               rownames = F,
               options(list(autoWidth = T,
-                           pageLength = nrow(dt),
-                           dom = 't')))
+                           pageLength = 25,
+                           dom = 't'))) %>%
+      formatPercentage(columns = columns.perc1, digits = 1) %>%
+      formatRound(columns = columns.dec1, digits = 1) %>%
+      formatRound(columns = columns.dec2, digits = 2)
   })
   
   output$teampergamexgoalseast <- DT::renderDataTable({
-    if(input$team_seasonordate == 'Season'){
-      dt <- teamxgoals.func(teamxgoals, 
-                            date1 = as.Date('2000-01-01'), 
-                            date2 = as.Date('9999-12-31'),
-                            season = input$team_seasonfilter,
-                            even = input$team_evenstate,
-                            pattern = input$team_pattern,
-                            pergame = T,
-                            advanced = ifelse(input$team_advanced == 'Basic stats', F, T),
-                            venue = input$team_home,
-                            byseasons = input$team_byseasons)
-      
-    } else{
-      dt <- teamxgoals.func(teamxgoals, 
-                            date1 = input$team_date1, 
-                            date2 = input$team_date2,
-                            season = min(teamxgoals$Season):max(teamxgoals$Season),
-                            even = input$team_evenstate,
-                            pattern = input$team_pattern,
-                            pergame = T,
-                            advanced = ifelse(input$team_advanced == 'Basic stats', F, T),
-                            venue = input$team_home,
-                            byseasons = input$team_byseasons)
-    }
-    
-    is.num <- sapply(dt, is.numeric)
-    dt[is.num] <- lapply(dt[is.num], round, 2)
-    
-    if('Conf' %in% names(dt)){
-      dt <- dt %>%
+  
+    if('Conf' %in% names(dt_team_pergame())){
+      dt <- dt_team_pergame() %>%
         filter(Conf == 'east') %>%
         select(-Conf)
+    } else{
+      dt <- dt_team_pergame()
+    }
+    
+    if(input$team_advanced == "Basic stats"){
+      columns.perc1 <- c('SoT%F', 'SoT%A', 'Finish%F', 'Finish%A')
+      columns.dec1 <- c("ShtF", "ShtA", "SoTF", "SoTA")
+      columns.dec2 <- c("GF", "GA", "GD", "Pts")
+    } else{
+      columns.perc1 <- c("Solo%F", "Solo%A")
+      columns.dec1 <- c("ShtF", "ShtA","PDO")
+      columns.dec2 <- c("xGF", "xGA", "xGD", "GD", "TSR", "Pts")
     }
     
     datatable(dt,
               rownames = F,
               options(list(autoWidth = T,
-                           pageLength = nrow(dt),
-                           dom = 't')))
+                           pageLength = 25,
+                           dom = 't'))) %>%
+      formatPercentage(columns = columns.perc1, digits = 1) %>%
+      formatRound(columns = columns.dec1, digits = 1) %>%
+      formatRound(columns = columns.dec2, digits = 2)
   })
   
   output$team_download_pergame <- downloadHandler(
     filename = 'ASAteamtable_pergame.csv',
     
     content = function(file){
-      if(input$team_seasonordate == 'Season'){
-        dt <- teamxgoals.func(teamxgoals, 
-                              date1 = as.Date('2000-01-01'), 
-                              date2 = as.Date('9999-12-31'),
-                              season = input$team_seasonfilter,
-                              even = input$team_evenstate,
-                              pattern = input$team_pattern,
-                              pergame = T,
-                              advanced = ifelse(input$team_advanced == 'Basic stats', F, T),
-                              venue = input$team_home,
-                              byseasons = input$team_byseasons)
-        
-      } else{
-        dt <- teamxgoals.func(teamxgoals, 
-                              date1 = input$team_date1, 
-                              date2 = input$team_date2,
-                              season = min(teamxgoals$Season):max(teamxgoals$Season),
-                              even = input$team_evenstate,
-                              pattern = input$team_pattern,
-                              pergame = T,
-                              advanced = ifelse(input$team_advanced == 'Basic stats', F, T),
-                              venue = input$team_home,
-                              byseasons = input$team_byseasons)
-      }
-      write.csv(dt, file, row.names = F)
+      write.csv(dt_team_pergame(), file, row.names = F)
     }
   )
   
-  # Team reactive values ####
+  # Team reactive values #### Unused
   team_inputs <- reactiveValues(team_seasonordate = 'Season',
                                 team_date1 = as.Date('2000-01-01'),
                                 team_date2 = as.Date('9999-12-31'),
                                 team_seasonfilter = max(teamxgoals$Season),
-                                shooting_byseasons = T,
+                                team_byseasons = T,
+                                team_conferenceview = T,
                                 team_advanced = 'Basic stats',
                                 team_home = c('Home', 'Away'),
                                 team_pattern =  'All',
                                 team_evenstate = F,
-                                teamplot_xvar = 'xG',
-                                teamplot_yvar = 'xA')
+                                teamplot_xvar = 'xGF',
+                                teamplot_yvar = 'xGA')
   
   observeEvent(input$team_action,
                {
@@ -672,6 +715,7 @@ shinyServer(function(input, output) {
                  team_inputs$team_date1 <- input$team_date1
                  team_inputs$team_date2 <- input$team_date2
                  team_inputs$team_seasonfilter <- input$team_seasonfilter
+                 team_inputs$team_conferenceview <- input$team_conferenceview
                  team_inputs$team_byseasons <- input$team_byseasons
                  team_inputs$team_advanced <- input$team_advanced
                  team_inputs$team_home <- input$team_home
@@ -744,6 +788,45 @@ shinyServer(function(input, output) {
     
   }, height = 500, width = 700)
   
+  # Team passing tables ####
+  dt_team_passing <- reactive({
+      dt <- teampassing.func(offense = teampassing.offense,
+                             defense = teampassing.defense,
+                             season = input$teampassing_seasonfilter,
+                             byseasons = input$teampassing_byseasons,
+                             third.filter = input$teampassing_thirdfilter) 
+      
+    is.num <- sapply(dt, is.numeric)
+    dt[is.num] <- lapply(dt[is.num], round, 3)
+    
+    dt
+  })
+  
+  output$teampassing_total <- DT::renderDataTable({
+    dt <- dt_team_passing()
+    
+    columns.perc1 <- c("PctF", "xPctF", "PctA", "xPctA")
+    columns.dec1 <- c("ScoreF", "ScoreA", "ScoreDiff")
+    columns.dec2 <- c("Per100F", "Per100A", "VertF", "VertA", "VertDiff")
+    
+    DT::datatable(dt,
+                  rownames = F,
+                  options(list(autoWidth = T,
+                               pageLength = 25,
+                               dom = 't'))) %>%
+      formatPercentage(columns = columns.perc1, digits = 1) %>%
+      formatRound(columns = columns.dec1, digits = 1) %>%
+      formatRound(columns = columns.dec2, digits = 2)
+  })
+  
+  output$teampassing_download <- downloadHandler(
+    filename = 'ASAteampassingtable_total.csv',
+    
+    content = function(file){
+      write.csv(dt_team_passing(), file, row.names = F)
+    }
+  )
+  
   ## XGoals by game ####
   output$teamxgoalsbygame <- DT::renderDataTable({
     if(input$teambygame_seasonordate == 'Season'){
@@ -792,11 +875,11 @@ shinyServer(function(input, output) {
   
   # Glossary ####
   output$glossary <- DT::renderDataTable({
-    datatable(glossary %>% select(-Notes),
+    DT::datatable(glossary %>% select(c(1, 2, 3)),
               rownames = F,
               options(list(autoWidth = T,
-                           pageLength = nrow(glossary),
-                           dom = 'ft')))
+                           pageLength = 20,
+                           lengthMenu = c(10, 20, 30, 40, 50))))
   })
   
 })

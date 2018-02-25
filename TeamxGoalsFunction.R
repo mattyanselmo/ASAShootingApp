@@ -22,6 +22,7 @@ teamxgoals.func <- function(teamxgoals = teamxgoals,
                             advanced = F,
                             venue = c('Home', 'Away'),
                             byseasons = T, 
+                            confview = T,
                             plot = F){
   
   tempdat <- teamxgoals %>%
@@ -90,13 +91,13 @@ teamxgoals.func <- function(teamxgoals = teamxgoals,
       summarize(Games = gamesplayed[1],
                 ShtF = sum(shots)/Games,
                 SoTF = sum(ontarget)/Games,
+                `SoT%F` = SoTF/ShtF,
                 GF = sum(goals)/Games,
-                AccuracyF = SoTF/ShtF,
                 `Finish%F` = sum(goals)/sum(shots),
                 ShtA = sum(shotsA)/Games,
                 SoTA = sum(ontargetA)/Games,
+                `SoT%A` = SoTA/ShtA,
                 GA = sum(goalsA)/Games,
-                AccuracyA = SoTA/ShtA,
                 `Finish%A` = sum(goalsA)/sum(shotsA),
                 GD = GF - GA)
     }
@@ -121,13 +122,13 @@ teamxgoals.func <- function(teamxgoals = teamxgoals,
         summarize(Games = gamesplayed[1],
                   ShtF = sum(shots),
                   SoTF = sum(ontarget),
+                  `SoT%F` = SoTF/ShtF,
                   GF = sum(goals),
-                  AccuracyF = SoTF/ShtF,
                   `Finish%F` = sum(goals)/sum(shots),
                   ShtA = sum(shotsA),
                   SoTA = sum(ontargetA),
+                  `SoT%A` = SoTA/ShtA,
                   GA = sum(goalsA),
-                  AccuracyA = SoTA/ShtA,
                   `Finish%A` = sum(goalsA)/sum(shotsA),
                   GD = GF - GA)
     }
@@ -142,13 +143,14 @@ teamxgoals.func <- function(teamxgoals = teamxgoals,
       left_join(ptsdat, by = c('Team', 'Season')[c(T, byseasons)])
   }
   
-  if(length(season) == 1){
+  if(length(season) == 1 & confview){
   aggdata <- aggdata %>%
     left_join(conferences %>% filter(Season == season) %>% select(-Season), 
               by = c('Team'))
   }
   
-  return(aggdata %>% 
+  return(aggdata %>%
+           ungroup() %>%
            arrange(desc(Pts)))
   
 }
