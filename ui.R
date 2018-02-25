@@ -11,12 +11,16 @@ shinyUI(
   navbarPage(title = HTML('<b>ASA Database</b>'),
              theme = 'bootstrap_edited.css',
              navbarMenu(strong('xGoals'),
-                        # Players totals tab panel ####
-                        tabPanel('Players: totals',
+                        # Players tab panel ####
+                        tabPanel('Players',
                                  sidebarLayout(
                                    sidebarPanel(width = 2,
                                                 actionButton('shooting_action',
                                                              label = "Refresh filters"),
+                                                numericInput("shooting_minfilter",
+                                                             label = "Minimum minutes:",
+                                                             value = 0,
+                                                             min = 0, max = 10000, step = 500),
                                                 numericInput('shooting_minshots',
                                                              "Minimum shots:",
                                                              value = 0,
@@ -63,7 +67,6 @@ shinyUI(
                                                 checkboxInput('shooting_fk',
                                                               label = 'Include FKs',
                                                               value = T)),
-                                   
                                    mainPanel(
                                      # div(style="display: inline-block;vertical-align:bottom; width: 250px;", h1('Player xGoals')),
                                      # div(style="display: inline-block;vertical-align:bottom; width: 250px;", downloadButton('player_download', 'Download CSV')),
@@ -72,10 +75,12 @@ shinyUI(
                                      downloadButton('player_download', 'Download CSV'),
                                      br(),
                                      tabsetPanel(id = 'player_subtab',
-                                                 tabPanel('Totals',
+                                                 tabPanel('Tables: totals',
+                                                          value = "tablestotals",
                                                           DT::dataTableOutput('shootertable')
                                                  ),
-                                                 tabPanel('Scatter plots',
+                                                 tabPanel('Scatter plots: totals',
+                                                          value = "plotstotals",
                                                           fluidPage(fluidRow(
                                                             column(3,
                                                                    selectInput('shooterplot_xvar',
@@ -92,79 +97,14 @@ shinyUI(
                                                                                                 'xA/Pass' = 'xAperPass', 'Shots on target' = 'OnTarget',
                                                                                                 'Shots', 'Key passes' = 'KeyP', 'Goals', 'G-xG/Shot' = 'GmxGperShot',
                                                                                                 'Assists' = 'Assts', 'G-xG', 'A-xA', 'xPlacement' = 'xPlace')),
-                                                                               selected ='xG/Shot')),
-                                                            plotOutput('shooterplot'))))
-                                     )))),
-                        # Players per 96 tab ####
-                        tabPanel('Players: per 96',
-                                 sidebarLayout(
-                                   sidebarPanel(width = 2,
-                                                actionButton('shooting_per96_action',
-                                                             label = "Refresh filters"),
-                                                numericInput('shooting_per96_minfilter',
-                                                             label = 'Minimum minutes:',
-                                                             value = 0,
-                                                             min = 0, max = 3000, step = 250),
-                                                numericInput('shooting_per96_minshots',
-                                                             "Minimum shots:",
-                                                             value = 0,
-                                                             min = 0, max = 100, step = 10),
-                                                numericInput('shooting_per96_minkeypasses',
-                                                             'Minimum key passes:',
-                                                             value = 0,
-                                                             min = 0, max = 100, step = 10),
-                                                radioButtons('shooting_per96_seasonordate',
-                                                             'Filter by:',
-                                                             choices = c('Season', 'Date')),
-                                                conditionalPanel(condition = "input.shooting_per96_seasonordate == 'Season'",
-                                                                 checkboxGroupInput('shooting_per96_seasonfilter',
-                                                                                    'Select seasons:',
-                                                                                    choices = 2015:max(playerxgoals$Season), # No minutes before 2015 yet
-                                                                                    selected = max(playerxgoals$Season))),
-                                                conditionalPanel(condition = "input.shooting_per96_seasonordate == 'Date'",
-                                                                 dateInput('shooting_per96_date1',
-                                                                           'From:',
-                                                                           value = min(playerxgoals$date[playerxgoals$Season == max(playerxgoals$Season)]),
-                                                                           min = min(playerxgoals$date[playerxgoals$Season > 2014]),
-                                                                           max = max(playerxgoals$date[playerxgoals$Season > 2014]), # No minutes before 2015 yet
-                                                                           format = 'mm/dd/yyyy'),
-                                                                 dateInput('shooting_per96_date2',
-                                                                           'To:',
-                                                                           value = max(playerxgoals$date),
-                                                                           min = min(playerxgoals$date[playerxgoals$Season > 2014]),
-                                                                           max = max(playerxgoals$date[playerxgoals$Season > 2014]),
-                                                                           format = 'mm/dd/yyyy')
-                                                ),                  
-                                                # We don't have teams in the per-minute data yet
-                                                # checkboxInput('shooting_per96_byteams',
-                                                #               label = 'Split players by teams',
-                                                #               value = F),
-                                                h5(HTML('<b>Other filters:</b>')),
-                                                checkboxInput('shooting_per96_byseasons',
-                                                              label = 'Split players by seasons',
-                                                              value = T),
-                                                checkboxInput('shooting_per96_other',
-                                                              label = 'Include non PK/FK',
-                                                              value = T),
-                                                checkboxInput('shooting_per96_pk',
-                                                              label = 'Include PKs',
-                                                              value = T),
-                                                checkboxInput('shooting_per96_fk',
-                                                              label = 'Include FKs',
-                                                              value = T)),
-                                   
-                                   mainPanel(
-                                     # div(style="display: inline-block;vertical-align:bottom; width: 250px;", h1('Player xGoals')),
-                                     # div(style="display: inline-block;vertical-align:bottom; width: 250px;", downloadButton('player_download', 'Download CSV')),
-                                     h1('Player xGoals: per 96 minutes'),
-                                     p(paste0('Updated through games on ', max(as.Date(playerxgoals$date)))),
-                                     downloadButton('player_per96_download', 'Download CSV'),
-                                     br(),
-                                     tabsetPanel(id = 'player_per96_subtab',
-                                                 tabPanel('Tables',
+                                                                               selected ='G-xG')),
+                                                            plotOutput('shooterplot')))),
+                                                 tabPanel('Tables: per 96',
+                                                          value = "tablesper96",
                                                           DT::dataTableOutput('shootertable_per96')
                                                  ),
-                                                 tabPanel('Scatter plots',
+                                                 tabPanel('Scatter plots: per 96',
+                                                          value = "plotsper96",
                                                           fluidPage(fluidRow(
                                                             column(3,
                                                                    selectInput('shooterplot_per96_xvar',
@@ -174,7 +114,7 @@ shinyUI(
                                                                                                 'Shots', 'Key passes' = 'KeyP', 'Goals', 
                                                                                                 'Assists' = 'Assts', 'G-xG', 'A-xA', 
                                                                                                 'xG+xA', 'xPlacement' = 'xPlace')),
-                                                                               selected ='Min')),
+                                                                               selected ='xG')),
                                                             column(3,
                                                                    selectInput('shooterplot_per96_yvar',
                                                                                label = 'Y-axis variable',
@@ -186,6 +126,7 @@ shinyUI(
                                                             
                                                             plotOutput('shooterplot_per96'))))
                                      )))),
+                        
                         # Team xG tab panel ####
                         tabPanel('Teams',
                                  sidebarLayout(
@@ -414,7 +355,7 @@ shinyUI(
              # Passing navbar ####
              navbarMenu(strong('xPasses'),
                         # Passing: Players totals tab panel ####
-                        tabPanel('Players: totals',
+                        tabPanel('Players',
                                  sidebarLayout(
                                    sidebarPanel(width = 3,
                                                 actionButton('passing_action',
