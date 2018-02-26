@@ -812,8 +812,7 @@ shinyServer(function(input, output) {
     DT::datatable(dt,
                   rownames = F,
                   options(list(autoWidth = T,
-                               pageLength = 25,
-                               dom = 't'))) %>%
+                               pageLength = 25))) %>%
       formatPercentage(columns = columns.perc1, digits = 1) %>%
       formatRound(columns = columns.dec1, digits = 1) %>%
       formatRound(columns = columns.dec2, digits = 2)
