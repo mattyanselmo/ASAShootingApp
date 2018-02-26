@@ -44,7 +44,8 @@ passes$Key2 <- paste(passes$gameID, passes$passer, sep = "")
 # Merge lineups with their proper positions
 # merged.lineups <- merge(jy.starting.lineups, vertical.lineups, by.x = 'Key', by.y = 'Key1')
 merged.lineups <- vertical.lineups %>%
-  left_join(jy.starting.lineups, by = c("Key1" = "Key"))
+  left_join(jy.starting.lineups, by = c("Key1" = "Key")) %>%
+  filter(!duplicated(Key2))
 
 # Merge lineups with positions
 # merged.passes <- merge(passes, merged.lineups, by.x = 'Key2', by.y = 'Key2')
@@ -86,6 +87,7 @@ merged.passes <- merged.passes %>%
          y = y*80/100,
          distance = sqrt((endX - x)^2 + (endY - y)^2),
          angle = atan((endY - y)/(endX - x)) + pi*ifelse(endX < x & endY < y, -1, ifelse(endX < x & endY > y, 1, 0)),
+         angle = ifelse(is.na(angle), 0, angle),
          year = as.numeric(as.character(year)),
          playerdiff = ifelse(team == hteam, hplayers - aplayers, aplayers - hplayers),
          minute.temp = unlist(sapply(strsplit(time, ":"), function(x) as.numeric(x[1]))),
