@@ -120,7 +120,7 @@ shooterxgoals.func <- function(playerxgoals = playerxgoals,
                   group_by(player, Season) %>%
                   summarize(Min = sum(minutes)),
                 by = c("player", "Season")) %>%
-      select(Player = player, Season, Min, Shots:`xG+xA`) %>%
+      select(Player = player, Team, Season, Min, Shots:`xG+xA`) %>%
       filter(Min >= minfilter | (rep(minfilter == 0, n()) & is.na(Min)))
     
   } else{

@@ -110,7 +110,7 @@ shooterxgoals_perminute <- function(playerxgoals = playerxgoals,
                   group_by(player, Season) %>%
                   summarize(Min = sum(minutes)),
                 by = c("player", "Season")) %>%
-      select(Player = player, Season, Min, Shots:`xG+xA`) %>%
+      select(Player = player, Team, Season, Min, Shots:`xG+xA`) %>%
       mutate_at(.vars = vars(Shots:`xG+xA`),
                 .funs = funs(.*96/Min)) %>%
       filter(Min >= minfilter)
