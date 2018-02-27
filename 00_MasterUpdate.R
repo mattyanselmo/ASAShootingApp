@@ -16,4 +16,6 @@ source('02_CompressTeamPassing.R')
 # source('03_TeamPredictiveModelFunction.R')
 source('02_CompressKeeperxGoals.R')
 
+source("03_CreateHTMLTables.R")
+
 source('IgnoreList/ConnectOnline.R')
