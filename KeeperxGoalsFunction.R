@@ -30,9 +30,10 @@ keeperxgoals.func <- function(keeperxgoals = keeperxgoals,
     aggdata <- tempdat %>%
       group_by(goalie, Team = team.1, Season) %>%
       summarize(Shots = sum(shotsfaced),
+                Goals = sum(goals),
+                Saves = Shots - Goals,
                 `Header%` = sum(headers)/sum(shotsfaced),
                 Dist = sum(shotsfaced*meddist, na.rm = T)/sum(shotsfaced),
-                Goals = sum(goals),
                 xG = sum(xG),
                 `G-xG` = sum(`G-xG`)) %>%
       filter(Shots >= shotfilter) 
@@ -41,9 +42,10 @@ keeperxgoals.func <- function(keeperxgoals = keeperxgoals,
     aggdata <- tempdat %>%
       group_by(goalie, Team = team.1) %>%
       summarize(Shots = sum(shotsfaced),
+                Goals = sum(goals),
+                Saves = Shots - Goals,
                 `Header%` = sum(headers)/sum(shotsfaced),
                 Dist = sum(shotsfaced*meddist, na.rm = T)/sum(shotsfaced),
-                Goals = sum(goals),
                 xG = sum(xG),
                 `G-xG` = sum(`G-xG`)) %>%
       filter(Shots >= shotfilter)
@@ -52,9 +54,10 @@ keeperxgoals.func <- function(keeperxgoals = keeperxgoals,
       group_by(goalie, Season) %>%
       summarize(Team = paste0(na.omit(unique(team.1)), collapse = ', '),
                 Shots = sum(shotsfaced),
+                Goals = sum(goals),
+                Saves = Shots - Goals,
                 `Header%` = sum(headers)/sum(shotsfaced),
                 Dist = sum(shotsfaced*meddist, na.rm = T)/sum(shotsfaced),
-                Goals = sum(goals),
                 xG = sum(xG),
                 `G-xG` = sum(`G-xG`)) %>%
       filter(Shots >= shotfilter)
@@ -64,9 +67,10 @@ keeperxgoals.func <- function(keeperxgoals = keeperxgoals,
       group_by(goalie) %>%
       summarize(Team = paste0(na.omit(unique(team.1)), collapse = ', '),
                 Shots = sum(shotsfaced),
+                Goals = sum(goals),
+                Saves = Shots - Goals,
                 `Header%` = sum(headers)/sum(shotsfaced),
                 Dist = sum(shotsfaced*meddist, na.rm = T)/sum(shotsfaced),
-                Goals = sum(goals),
                 xG = sum(xG),
                 `G-xG` = sum(`G-xG`)) %>%
       filter(Shots >= shotfilter)
@@ -87,6 +91,7 @@ keeperxgoals.func <- function(keeperxgoals = keeperxgoals,
 #                    season = 2011:2017,
 #                    shotfilter = 10,
 #                    byteams = F,
+#                    byseasons = T,
 #                    OtherShots = T,
 #                    FK = T,
 #                    PK = T)
