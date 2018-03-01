@@ -48,6 +48,6 @@ passer.xpasses <- function(playerpassing,
 # passer.xpasses(playerpassing = readRDS("IgnoreList/xPassingByPlayer.rds"),
 #                minpasses = 50,
 #                seasonfilter = 2015:2016,
-#                byteams = T,
+#                byteams = F,
 #                byseasons = T,
 #                third.filter = "Att") %>% as.data.frame() %>% head()
