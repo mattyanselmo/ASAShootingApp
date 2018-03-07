@@ -6,19 +6,21 @@ teamnames <- read.csv('TeamNameLinks.csv', stringsAsFactors = F)
 #load in the requisite data
 
 if(file.exists('C:/Users/Matthias')){
-  temp <- read.csv('C:/Users/Matthias/Dropbox/ASA Blog Data/2017 Stats/shots with xG.csv')
-  write.csv(temp, 'C:/Users/Matthias/Documents/GitHub/ASAShootingApp_development/IgnoreList/shots with xG.csv')
+  temp <- read.csv(paste0("C:/Users/Matthias/Dropbox/ASA Blog Data/", year, " Stats/shots with xG.csv"))
+  write.csv(temp, paste0("C:/Users/Matthias/Documents/GitHub/ASAShootingApp_development/IgnoreList/shots with xG ", year, ".csv"))
+  write.csv(temp, paste0("C:/Users/Matthias/Documents/GitHub/ASAShootingApp_master/IgnoreList/shots with xG ", year, ".csv"))
   rm(temp)
   gc()
 } else if(file.exists('C:/Users/Matthias.Kullowatz')){
-  temp <- read.csv('C:/Users/Matthias.Kullowatz/Dropbox/ASA Blog Data/2017 Stats/shots with xG.csv')
-  write.csv(temp, 'C:/Users/Matthias.Kullowatz/Documents/GitHub/ASAShootingApp_development/IgnoreList/shots with xG.csv')
+  temp <- read.csv(paste0("C:/Users/Matthias.Kullowatz/Dropbox/ASA Blog Data/", year, " Stats/shots with xG.csv"))
+  write.csv(temp, paste0("C:/Users/Matthias.Kullowatz/Documents/GitHub/ASAShootingApp_development/IgnoreList/shots with xG ", year, ".csv"))
+  write.csv(temp, paste0("C:/Users/Matthias.Kullowatz/Documents/GitHub/ASAShootingApp_master/IgnoreList/shots with xG ", year, ".csv"))
   rm(temp)
   gc()
 }
 
 shooting15 <- bind_rows(lapply(paste0('IgnoreList/', grep('shots with xG', list.files('IgnoreList'), value = T)), 
-                               function(x) read.csv(x, stringsAsFactors = F) %>% select(-X))) %>%
+                               function(x) read.csv(x, stringsAsFactors = F) %>% select(-one_of("X")))) %>%
   left_join(teamnames, by = c('team' = 'FullName')) %>%
   left_join(teamnames, by = c('team.1' = 'FullName')) %>%
   mutate(team = Abbr.x,
@@ -29,7 +31,7 @@ shooting15 <- bind_rows(lapply(paste0('IgnoreList/', grep('shots with xG', list.
   mutate(hteam = Abbr.x,
          ateam = Abbr.y) %>%
   select(-c(Abbr.x, Abbr.y)) %>%
-  mutate(date = as.Date(date, format = '%m/%d/%Y'),
+  mutate(date = as.Date(date, format = ifelse(row_number() %in% grep("/", date), "%m/%d/%Y", "%Y-%m-%d")),
          year = format(date, '%Y'),
          time = sapply(strsplit(time, ':'), function(x) as.numeric(x[1]) + as.numeric(x[2])/60))
 
@@ -102,13 +104,24 @@ save(xgoal.model, xgoal.model.keeper, file = paste0('IgnoreList/UpdatedModels_',
      
 # Tested interaction between free kicks and distance: worse fit on holdout 2015 - 2017
 
-shooting[['xGShooter']] <- predict(xgoal.model, shooting, type = 'response')
+shooting[['xGShooter']] <- predict(xgoal.model, 
+                                   shooting %>%
+                                     mutate(year = ifelse(as.numeric(year) == max(as.numeric(year)), 
+                                                          as.character(max(as.numeric(year)) - 1), 
+                                                          year)), 
+                                   type = 'response')
 shooting[['xGTeam']] <- predict(xgoal.model, shooting %>%
                                   mutate(patternOfPlay.model = ifelse(patternOfPlay.model == 'Penalty', 
-                                                                      'Regular', patternOfPlay.model)), 
+                                                                      'Regular', patternOfPlay.model),
+                                         year = ifelse(as.numeric(year) == max(as.numeric(year)), 
+                                                       as.character(max(as.numeric(year)) - 1), 
+                                                       year)), 
                                 type = 'response')
 shooting[['xGKeeper']][shooting$result %in% c('Goal', 'Saved')] <- predict(xgoal.model.keeper, 
-                                                                           shooting[shooting$result %in% c('Goal', 'Saved'),], 
+                                                                           shooting[shooting$result %in% c('Goal', 'Saved'),] %>%
+                                                                             mutate(year = ifelse(as.numeric(year) == max(as.numeric(year)), 
+                                                                                                  as.character(max(as.numeric(year)) - 1), 
+                                                                                                  year)), 
                                                                            type = 'response')
 source('TeamxGoalAdjustmentFunction.R')
 shooting <- team.xgoal.adj(shooting, 5/60)
@@ -118,11 +131,14 @@ shooting <- shooting %>%
                                    c('Kazaishvili' = 'Qazaishvili', 
                                      'Jorge Villafaña' = 'Jorge Villafana',
                                      "Antonio Mlinar Dalamea" = "Antonio Mlinar Delamea")),
+         shooter = ifelse(row_number() %in% grep("Boniek", shooter), "Oscar Boniek Garcia", shooter),
          passer = str_replace_all(passer, 
                                   c('Kazaishvili' = 'Qazaishvili', 
                                     'Jorge Villafaña' = 'Jorge Villafana',
-                                    "Antonio Mlinar Dalamea" = "Antonio Mlinar Delamea")))
-
+                                    "Antonio Mlinar Dalamea" = "Antonio Mlinar Delamea")),
+         passer = ifelse(row_number() %in% grep("Boniek", passer), "Oscar Boniek Garcia", passer))
+         
+"Boniek Garcia" = "Oscar Boniek Garcia"
 saveRDS(shooting, 'IgnoreList/AllShotsData2011-2017.rds')
 
 # library(xtable)
