@@ -540,8 +540,8 @@ shinyUI(
              tabPanel(strong('App info'),
                       h1('App info'),
                       p("We built this interactive web application to give ASA's loyal readers more control over 
-                        sorting and filtering our data. We plan to grow this application out to include
-                        more content, as well as more ways to view the content (like plots and other visuals, for example).
+                        sorting and filtering our data. This is a work in progress, and we plan to continue to
+                        add new features on a regular basis.
                         If you have an idea for a feature that will make the app totes better,
                         then please don't hesitate to email Matthias (mkullowatz at gmail) with your idea."),
                       br(),
@@ -554,8 +554,8 @@ shinyUI(
                       br(),
                       p('Please note that the statistics displayed in this app are very similiar to, but not exactly
                         the same as, those in our static tables. This is because this app utilizes
-                        updated xGoal models, fit through 2016, with a better method of capturing penalty kicks. For most
-                        players the differences are negligible.'))
+                        updated xGoal models, fit through 2017, with a better method of capturing penalty kicks. For most
+                        players the differences are negligible. We will correct this very soon.'))
              
   )
 )
