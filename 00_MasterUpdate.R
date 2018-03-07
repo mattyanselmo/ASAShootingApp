@@ -1,6 +1,7 @@
 # Update data and re-deploy app
 
-# setwd('C:/Users/Matthias.Kullowatz/Dropbox/ASA Blog Data/ShootingShinyApp')
+# setwd('C:/Users/Matthias.Kullowatz/Documents/GitHub/ASAShootingApp_master')
+year <- 2018
 
 source('01_ASAShotCharts.R')
 source("01_VerticalLineups.R")
