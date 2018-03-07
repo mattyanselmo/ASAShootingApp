@@ -541,19 +541,30 @@ shinyServer(function(input, output) {
       columns.dec1 <- c()
       columns.dec2 <- c()
     } else{
-      columns.perc1 <- c("Solo%F", "Solo%A")
-      columns.dec1 <- c("xGF", "xGA", "xGD", "PDO")
+      columns.perc1 <- c() #c("Solo%F", "Solo%A")
+      columns.dec1 <- c("xGF", "xGA", "xGD", "GD-xGD", "PDO")
       columns.dec2 <- c("TSR")
     }
     
+    if(!input$team_conferenceview | length(input$team_seasonfilter) > 1){
     DT::datatable(dt,
               rownames = F,
               options(list(autoWidth = T,
-                           pageLength = 25,
-                           dom = 't'))) %>%
+                           pageLength = 25))) %>%
       formatPercentage(columns = columns.perc1, digits = 1) %>%
       formatRound(columns = columns.dec1, digits = 1) %>%
       formatRound(columns = columns.dec2, digits = 2)
+    } else{
+      DT::datatable(dt,
+                    rownames = F,
+                    options(list(autoWidth = T,
+                                 pageLength = 25,
+                                 dom = 't'))) %>%
+        formatPercentage(columns = columns.perc1, digits = 1) %>%
+        formatRound(columns = columns.dec1, digits = 1) %>%
+        formatRound(columns = columns.dec2, digits = 2)
+      
+    }
   })
   
   output$teamtotalxgoalseast <- DT::renderDataTable({
@@ -570,8 +581,8 @@ shinyServer(function(input, output) {
       columns.dec1 <- c()
       columns.dec2 <- c()
     } else{
-      columns.perc1 <- c("Solo%F", "Solo%A")
-      columns.dec1 <- c("xGF", "xGA", "xGD", "PDO")
+      columns.perc1 <- c() #c("Solo%F", "Solo%A")
+      columns.dec1 <- c("xGF", "xGA", "xGD", "GD-xGD", "PDO")
       columns.dec2 <- c("TSR")
     }
     
@@ -642,9 +653,9 @@ shinyServer(function(input, output) {
       columns.dec1 <- c("ShtF", "ShtA", "SoTF", "SoTA")
       columns.dec2 <- c("GF", "GA", "GD", "Pts")
     } else{
-      columns.perc1 <- c("Solo%F", "Solo%A")
+      columns.perc1 <- c() #c("Solo%F", "Solo%A")
       columns.dec1 <- c("ShtF", "ShtA","PDO")
-      columns.dec2 <- c("xGF", "xGA", "xGD", "GD", "TSR", "Pts")
+      columns.dec2 <- c("xGF", "xGA", "xGD", "GF", "GA", "GD", "GD-xGD", "TSR", "Pts")
     }
     
     datatable(dt,
@@ -672,9 +683,9 @@ shinyServer(function(input, output) {
       columns.dec1 <- c("ShtF", "ShtA", "SoTF", "SoTA")
       columns.dec2 <- c("GF", "GA", "GD", "Pts")
     } else{
-      columns.perc1 <- c("Solo%F", "Solo%A")
+      columns.perc1 <- c() #c("Solo%F", "Solo%A")
       columns.dec1 <- c("ShtF", "ShtA","PDO")
-      columns.dec2 <- c("xGF", "xGA", "xGD", "GD", "TSR", "Pts")
+      columns.dec2 <- c("xGF", "xGA", "xGD", "GF", "GA", "GD", "GD-xGD", "TSR", "Pts")
     }
     
     datatable(dt,
