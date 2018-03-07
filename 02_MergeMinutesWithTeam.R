@@ -4,13 +4,28 @@ library(dplyr)
 library(stringr)
 library(zoo)
 
+if(file.exists('C:/Users/Matthias')){
+  temp <- read.csv(paste0("C:/Users/Matthias/Dropbox/ASA Blog Data/", year, " Stats/minutes played by game.csv"))
+  write.csv(temp, paste0("C:/Users/Matthias/Documents/GitHub/ASAShootingApp_development/IgnoreList/minutes played by game ", year, ".csv"))
+  write.csv(temp, paste0("C:/Users/Matthias/Documents/GitHub/ASAShootingApp_master/IgnoreList/minutes played by game ", year, ".csv"))
+  rm(temp)
+  gc()
+} else if(file.exists('C:/Users/Matthias.Kullowatz')){
+  temp <- read.csv(paste0("C:/Users/Matthias.Kullowatz/Dropbox/ASA Blog Data/", year, " Stats/minutes played by game.csv"))
+  write.csv(temp, paste0("C:/Users/Matthias.Kullowatz/Documents/GitHub/ASAShootingApp_development/IgnoreList/minutes played by game ", year, ".csv"))
+  write.csv(temp, paste0("C:/Users/Matthias.Kullowatz/Documents/GitHub/ASAShootingApp_master/IgnoreList/minutes played by game ", year, ".csv"))
+  rm(temp)
+  gc()
+}
+
 minutesPlayed <- bind_rows(lapply(grep('minutes played by game', list.files('IgnoreList/'), value = T),
                                   function(x) read.csv(paste0('IgnoreList/', x), stringsAsFactors = F))) %>%
   select(-X) %>%
   mutate(player = str_replace_all(player, 
-                           c('Kazaishvili' = 'Qazaishvili', 
-                             'Jorge Villafaña' = 'Jorge Villafana',
-                             "Antonio Mlinar Dalamea" = "Antonio Mlinar Delamea"))) %>%
+                                  c('Kazaishvili' = 'Qazaishvili', 
+                                    'Jorge Villafaña' = 'Jorge Villafana',
+                                    "Antonio Mlinar Dalamea" = "Antonio Mlinar Delamea",
+                                    "Boniek Garcia" = "Oscar Boniek Garcia"))) %>%
   left_join(merged.passes %>%
               select(gameID, date) %>% unique(),
               by = "gameID") %>%
