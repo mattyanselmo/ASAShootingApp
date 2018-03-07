@@ -5,11 +5,30 @@ library(gbm)
 library(stringr)
 teamnames <- read.csv('TeamNameLinks.csv', stringsAsFactors = F)
 
+if(file.exists('C:/Users/Matthias')){
+  temp <- read.csv(paste0("C:/Users/Matthias/Dropbox/ASA Blog Data/", year, " Stats/raw passes.csv"))
+  write.csv(temp, paste0("C:/Users/Matthias/Documents/GitHub/ASAShootingApp_development/IgnoreList/raw passes ", year, ".csv"))
+  write.csv(temp, paste0("C:/Users/Matthias/Documents/GitHub/ASAShootingApp_master/IgnoreList/raw passes ", year, ".csv"))
+  rm(temp)
+  gc()
+} else if(file.exists('C:/Users/Matthias.Kullowatz')){
+  temp <- read.csv(paste0("C:/Users/Matthias.Kullowatz/Dropbox/ASA Blog Data/", year, " Stats/raw passes.csv"))
+  write.csv(temp, paste0("C:/Users/Matthias.Kullowatz/Documents/GitHub/ASAShootingApp_development/IgnoreList/raw passes ", year, ".csv"))
+  write.csv(temp, paste0("C:/Users/Matthias.Kullowatz/Documents/GitHub/ASAShootingApp_master/IgnoreList/raw passes ", year, ".csv"))
+  rm(temp)
+  gc()
+}
+
 #load in the requisite data
 passes <- bind_rows(lapply(paste0("IgnoreList/", grep('raw passes', list.files("IgnoreList/"), value = T)),
                            function(x) read.csv(x, stringsAsFactors = F))) %>%
   mutate(date = as.Date(date, format = "%m/%d/%Y"),
-         year = as.numeric(format(date, "%Y")))
+         year = as.numeric(format(date, "%Y"))) %>%
+  mutate(passer = str_replace_all(passer, 
+                                  c('Kazaishvili' = 'Qazaishvili', 
+                                    'Jorge Villafaña' = 'Jorge Villafana',
+                                    "Antonio Mlinar Dalamea" = "Antonio Mlinar Delamea")),
+         passer = ifelse(row_number() %in% grep("Boniek", passer), "Oscar Boniek Garcia", passer))
 
 vertical.lineups <- read.csv('IgnoreList/vertical starting lineups.csv', stringsAsFactors = FALSE)
 jy.starting.lineups <- read.csv('IgnoreList/Starting Lineups editedJY.csv', stringsAsFactors = FALSE)
@@ -53,13 +72,8 @@ merged.passes <- left_join(passes,
                            merged.lineups %>%
                              select(-c(team, gameID)), 
                            by = "Key2")
-# This merge above isn't quite exact. Somehow I wind up with like 50 more passes - because of the double counting of key2 - so I don't know where that's coming in
 
 merged.passes <- merged.passes %>%
-  mutate(passer = str_replace_all(passer, 
-                                  c('Kazaishvili' = 'Qazaishvili', 
-                                    'Jorge Villafaña' = 'Jorge Villafana',
-                                    "Antonio Mlinar Dalamea" = "Antonio Mlinar Delamea"))) %>%
   left_join(teamnames, by = c('team' = 'FullName')) %>%
   left_join(teamnames, by = c('team.1' = 'FullName')) %>%
   mutate(team = Abbr.x,
@@ -107,12 +121,12 @@ success.gbm <- readRDS("IgnoreList/xPassModel.rds")
 merged.passes[["success.pred"]] <- predict(success.gbm, merged.passes, type = "response", n.trees = 1000)
 
 merged.passes <- merged.passes %>%
-  select(-c(eventID, hteam, ateam, final, hplayers, aplayers, 
+  select(-c(hteam, ateam, final, hplayers, aplayers, 
             teamEventId, Key2, position, Formation, Player, players,
             Key1, second.pass)) %>%
-#   mutate(type = ifelse(ifelse(throughball == 1, "through",
-#                               ifelse(freekick == 1, "freekick",
-#                                      ifelse(corner == 1, "corner", )))))
+  #   mutate(type = ifelse(ifelse(throughball == 1, "through",
+  #                               ifelse(freekick == 1, "freekick",
+  #                                      ifelse(corner == 1, "corner", )))))
   group_by(passer) %>%
   mutate(typical.pos = Mode(Position)) %>%
   ungroup()
