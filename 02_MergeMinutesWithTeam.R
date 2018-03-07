@@ -24,8 +24,8 @@ minutesPlayed <- bind_rows(lapply(grep('minutes played by game', list.files('Ign
   mutate(player = str_replace_all(player, 
                                   c('Kazaishvili' = 'Qazaishvili', 
                                     'Jorge Villafaña' = 'Jorge Villafana',
-                                    "Antonio Mlinar Dalamea" = "Antonio Mlinar Delamea",
-                                    "Boniek Garcia" = "Oscar Boniek Garcia"))) %>%
+                                    "Antonio Mlinar Dalamea" = "Antonio Mlinar Delamea")),
+         player = ifelse(row_number() %in% grep("Boniek", players), "Oscar Boniek Garcia", player)) %>%
   left_join(merged.passes %>%
               select(gameID, date) %>% unique(),
               by = "gameID") %>%
