@@ -77,12 +77,12 @@ xgoal.model <- glm(result == 'Goal' ~
                      as.factor(year) +
                      I(log(distance)) +
                      available +
-                     I((available - mean(available))^2) +
+                     I((available - mean(available, na.rm = T))^2) +
                      I(bodypart == 'Head') +
                      through +
                      cross,
                    data = shooting %>% 
-                     filter(year <= 2017),
+                     filter(as.numeric(as.character(year)) <= 2017),
                    family = binomial)
 
 xgoal.model.keeper <- glm(result == 'Goal' ~
