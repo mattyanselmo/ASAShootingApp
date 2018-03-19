@@ -39,7 +39,8 @@ dt_xgoals <- lapply(2011:max(playerxgoals$Season),
                         select(-c(Dist, Dist.key)) %>%
                         mutate(`G+A` = Goals + Assts) %>%
                         rename(Sht = Shots,G = Goals, KP = KeyP, A = Assts) %>%
-                        select(Player:xG, `G-xG`:`xG+xA`, xPlace)
+                        select(Player:xG, `G-xG`:`xG+xA`, xPlace) %>%
+                        select(-Season)
                       
                       dt_per96 <- shooterxgoals_perminute(playerxgoals,
                                                           minutes_df = minutesPlayed,
@@ -56,7 +57,8 @@ dt_xgoals <- lapply(2011:max(playerxgoals$Season),
                                                           PK = T) %>%
                         mutate(`G+A` = Goals + Assts) %>%
                         rename(Sht = Shots,G = Goals, KP = KeyP, A = Assts) %>%
-                        select(Player:xG, `G-xG`:`xG+xA`, xPlace) 
+                        select(Player:xG, `G-xG`:`xG+xA`, xPlace) %>%
+                        select(-Season)
                       
                       namesFL <- as.data.frame(do.call("rbind", strsplit(sub(" ", ";", dt_total$Player), ";"))) %>%
                         mutate_all(.funs = as.character)
@@ -68,16 +70,21 @@ dt_xgoals <- lapply(2011:max(playerxgoals$Season),
                         output <- data.frame(namesFL, dt_total %>% 
                                                left_join(dt_per96 %>%
                                                            select(-Team),
-                                                         by = c("Player", "Season", "Min"),
+                                                         by = c("Player", "Min"),
                                                          suffix = c("", "p96")) %>%
                                                ungroup() %>%
                                                select(-Player), check.names = F)
                         output <- xtable(output, 
-                                         digits = c(0, 0, 0, 0, 0, 0, 0, 0, 2, 0, 2, 2, 0, 0, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2))
-                        write.table(print.xtable(output, 
-                                                 type = "html",
-                                                 include.rownames = F,
-                                                 print.results = F), 
+                                         digits = c(0, 0, 0, 0, 0, 0, 0, 2, 0, 2, 2, 0, 0, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2))
+                        write.table(gsub("\n", "",
+                                         gsub(" <", "<", 
+                                              gsub("> ", ">", 
+                                                   gsub(' align="right"', "",
+                                                        gsub("table border=1", 'table border=1 class = "sortable"',
+                                                             print.xtable(output, 
+                                                                          type = "html",
+                                                                          include.rownames = F,
+                                                                          print.results = F)))))), 
                                     file = paste0("C:/Users/Matthias.Kullowatz/Dropbox/ASA Blog Data/HTMLOutputs/Player_xGoals_", x, ".txt"),
                                     row.names = F,
                                     quote = F)
@@ -87,12 +94,16 @@ dt_xgoals <- lapply(2011:max(playerxgoals$Season),
                                                select(-Player, -Min), check.names = F)
                         
                         output <- xtable(output, 
-                                         digits = c(0, 0, 0, 0, 0, 0, 0, 2, 0, 2, 2, 0, 0, 2, 2, 2, 2))
-                        write.table(gsub("table border=1", 'table border=1 class = "sortable"',
-                                         print.xtable(output, 
-                                                      type = "html",
-                                                      include.rownames = F,
-                                                      print.results = F)),
+                                         digits = c(0, 0, 0, 0, 0, 0, 2, 0, 2, 2, 0, 0, 2, 2, 2, 2))
+                        write.table(gsub("\n", "",
+                                         gsub(" <", "<", 
+                                              gsub("> ", ">", 
+                                                   gsub(' align="right"', "",
+                                                        gsub("table border=1", 'table border=1 class = "sortable"',
+                                                             print.xtable(output, 
+                                                                          type = "html",
+                                                                          include.rownames = F,
+                                                                          print.results = F)))))),
                                     file = paste0("C:/Users/Matthias.Kullowatz/Dropbox/ASA Blog Data/HTMLOutputs/Player_xGoals_", x, ".txt"),
                                     row.names = F,
                                     quote = F)
@@ -165,13 +176,16 @@ dt_xG_team <- lapply(2011:max(teamxgoals$Season),
                          select(Team:GD, xGF:xGD, `GD-xGD`, `ShtF/g`:`xGD/g`, Conf)
                        
                        output <- xtable(output, 
-                                        digits = c(0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 2, 2, 2, 2, 2, 2, 0),
-                                        align = rep("c", ncol(output) + 1))
-                       write.table(gsub("table border=1", 'table border=1 class = "sortable"',
-                                        print.xtable(output, 
-                                                     type = "html",
-                                                     include.rownames = F,
-                                                     print.results = F)),
+                                        digits = c(0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 2, 2, 2, 2, 2, 2, 0))
+                       write.table(gsub("\n", "",
+                                        gsub(" <", "<", 
+                                             gsub("> ", ">", 
+                                                  gsub(' align="right"', "", 
+                                                       gsub("table border=1", 'table border=1 class = "sortable"',
+                                                            print.xtable(output, 
+                                                                         type = "html",
+                                                                         include.rownames = F,
+                                                                         print.results = F)))))),
                                    file = paste0("C:/Users/Matthias.Kullowatz/Dropbox/ASA Blog Data/HTMLOutputs/Team_xGoals_", x, ".txt"),
                                    row.names = F,
                                    quote = F)
@@ -235,7 +249,7 @@ lapply(2015:max(playerpassing$year),
            mutate_at(.vars = setdiff(names(dt), c("Player", "Team", "Pos")),
                      .funs = function(x) ifelse(is.na(x), 0, x)) %>%
            mutate_at(.vars = grep("%", names(dt), value = T),
-                     .funs = function(x) percent(x, digits = 1))
+                     .funs = function(x) as.character(percent(x, digits = 1)))
          
          
          namesFL <- as.data.frame(do.call("rbind", strsplit(sub(" ", ";", dt$Player), ";")))
@@ -244,16 +258,19 @@ lapply(2015:max(playerpassing$year),
          dt <- data.frame(namesFL, dt %>% select(-Player), check.names = F)
          
          output <- print.xtable(xtable(dt, 
-                                       digits = c(0, 0, 0, 0, 0, 0, 3, 3, 3, 2, 0, 3, 3, 3, 2, 0, 3, 3, 3, 2, 0, 3, 3, 3, 2),
-                                       align = rep("c", ncol(dt) + 1)),
+                                       digits = c(0, 0, 0, 0, 0, 0, 3, 3, 3, 2, 0, 3, 3, 3, 2, 0, 3, 3, 3, 2, 0, 3, 3, 3, 2)),
                                 type = "html",
                                 include.rownames = F,
                                 print.results = F)
          # replace column tags and include script
-         write.table(gsub("</table>", "</tbody> </table>",
-                          gsub("Vertical </th>  </tr>", "Vertical </th> </tr> </thead> <tbody>",
-                               gsub("_all|_def|_mid|_att", "",
-                                    gsub("<table border=1>", '<script>
+         write.table(gsub("\n", "",
+                          gsub(" <", "<", 
+                               gsub("> ", ">", 
+                                    gsub(' align="right"', "",
+                                         gsub("</table>", "</tbody> </table>",
+                                              gsub("Vertical </th>  </tr>", "Vertical </th> </tr> </thead> <tbody>",
+                                                   gsub("_all|_def|_mid|_att", "",
+                                                        gsub("<table border=1>", '<script>
 $(document).ready(function() {
 $("#myTable").tablesorter();
   });
@@ -261,10 +278,10 @@ $("#myTable").tablesorter();
 <TABLE border=1 id="myTable" class="tablesorter"><thead>
 <TR><TH colspan="4" class="sorter-false"></TH><TH colspan="5" class="sorter-false">All Passes</TH><TH colspan="5" class="sorter-false">Attacking Third</TH><TH colspan="5" class="sorter-false">Middle Third</TH><TH colspan="5" class="sorter-false">Defensive Third</TH></TR>
 ',
-                                         output)))),
-                               file = paste0("C:/Users/Matthias.Kullowatz/Dropbox/ASA Blog Data/HTMLOutputs/Player_xPasses_", x, ".txt"),
-                               row.names = F,
-                               quote = F)
+                                                             output)))))))),
+                     file = paste0("C:/Users/Matthias.Kullowatz/Dropbox/ASA Blog Data/HTMLOutputs/Player_xPasses_", x, ".txt"),
+                     row.names = F,
+                     quote = F)
        })
 
 # Keeper xGoals ####
@@ -288,11 +305,15 @@ lapply(2011:max(keeperxgoals$Season),
          output <- xtable(dt, 
                           digits = c(0, 0, 0, 0, 0, 0, 2, 1, 2, 2),
                           align = rep("c", ncol(dt) + 1))
-         write.table(gsub("table border=1", 'table border=1 class = "sortable"',
-                          print.xtable(output, 
-                                       type = "html",
-                                       include.rownames = F,
-                                       print.results = F)),
+         write.table(gsub("\n", "",
+                          gsub(" <", "<", 
+                               gsub("> ", ">", 
+                                    gsub(' align="right"', "",
+                                         gsub("table border=1", 'table border=1 class = "sortable"',
+                                              print.xtable(output, 
+                                                           type = "html",
+                                                           include.rownames = F,
+                                                           print.results = F)))))),
                      file = paste0("C:/Users/Matthias.Kullowatz/Dropbox/ASA Blog Data/HTMLOutputs/Keeper_xGoals_", x, ".txt"),
                      row.names = F,
                      quote = F)
