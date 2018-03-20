@@ -8,6 +8,7 @@ teamxgoals <- readRDS('IgnoreList/xGoalsByTeam.rds')
 xgbygame <- readRDS('IgnoreList/xGoalsByTeam_byGame.rds')
 keeperxgoals <- readRDS('IgnoreList/xGoalsByKeeper.rds')
 conferences <- read.csv('teamsbyconferencebyseason.csv')
+teamlinks <- read.csv("TeamNameLinks_reverse.csv")
 glossary <- read.csv('Glossary.csv')
 
 playerpassing <- readRDS("IgnoreList/xPassingByPlayer.rds")
@@ -173,19 +174,23 @@ dt_xG_team <- lapply(2011:max(teamxgoals$Season),
                          left_join(dt_per96_adv, "Team", suffix = c("", "/g")) %>%
                          ungroup() %>%
                          mutate(`GD-xGD` = GD - xGD) %>%
-                         select(Team:GD, xGF:xGD, `GD-xGD`, `ShtF/g`:`xGD/g`, Conf)
+                         select(Team, Conf, GP:GD, xGF:xGD, `GD-xGD`, `ShtF/g`:`xGD/g`) %>%
+                         left_join(teamlinks, by = c("Team" = "Abbr")) %>%
+                         mutate(Team = FullName,
+                                Conf = ifelse(Conf == "east", "Eastern", "Western")) %>%
+                         select(-FullName)
                        
                        output <- xtable(output, 
-                                        digits = c(0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 2, 2, 2, 2, 2, 2, 0))
+                                        digits = c(0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 2, 2, 2, 2, 2, 2),
+                                        align = rep("center", ncol(output) + 1))
                        write.table(gsub("\n", "",
                                         gsub(" <", "<", 
                                              gsub("> ", ">", 
-                                                  gsub(' align="right"', "", 
-                                                       gsub("table border=1", 'table border=1 class = "sortable"',
-                                                            print.xtable(output, 
-                                                                         type = "html",
-                                                                         include.rownames = F,
-                                                                         print.results = F)))))),
+                                                  gsub("table border=1", 'table border=1 class = "sortable"',
+                                                       print.xtable(output, 
+                                                                    type = "html",
+                                                                    include.rownames = F,
+                                                                    print.results = F))))),
                                    file = paste0("C:/Users/Matthias.Kullowatz/Dropbox/ASA Blog Data/HTMLOutputs/Team_xGoals_", x, ".txt"),
                                    row.names = F,
                                    quote = F)
@@ -300,20 +305,25 @@ lapply(2011:max(keeperxgoals$Season),
                                  FK = T,
                                  PK = T) %>%
            select(-Season) %>%
-           rename(SOG = Shots, GA = Goals, xGA = xG, `GA-xGA` = `G-xG`)
+           select(Keeper:Team, Saves, Goals, Shots, `Header%`:`G-xG`) %>%
+           rename(SOG = Shots, GA = Goals, xGA = xG, `GA-xGA` = `G-xG`) %>%
+           ungroup()
+         
+         namesFL <- as.data.frame(do.call("rbind", strsplit(sub(" ", ";", dt$Keeper), ";")))
+         names(namesFL) <- c("First", "Last")
+         dt <- data.frame(namesFL, dt %>% select(-Keeper), check.names = F)
          
          output <- xtable(dt, 
-                          digits = c(0, 0, 0, 0, 0, 0, 2, 1, 2, 2),
+                          digits = c(0, 0, 0, 0, 0, 0, 0, 3, 1, 2, 2),
                           align = rep("c", ncol(dt) + 1))
          write.table(gsub("\n", "",
                           gsub(" <", "<", 
                                gsub("> ", ">", 
-                                    gsub(' align="right"', "",
-                                         gsub("table border=1", 'table border=1 class = "sortable"',
-                                              print.xtable(output, 
-                                                           type = "html",
-                                                           include.rownames = F,
-                                                           print.results = F)))))),
+                                    gsub("table border=1", 'table border=1 class = "sortable"',
+                                         print.xtable(output, 
+                                                      type = "html",
+                                                      include.rownames = F,
+                                                      print.results = F))))),
                      file = paste0("C:/Users/Matthias.Kullowatz/Dropbox/ASA Blog Data/HTMLOutputs/Keeper_xGoals_", x, ".txt"),
                      row.names = F,
                      quote = F)
