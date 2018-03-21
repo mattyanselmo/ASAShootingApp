@@ -105,7 +105,7 @@ shinyServer(function(input, output) {
                                           minutes_df = minutesPlayed,
                                           date1 = as.Date('2000-01-01'),
                                           date2 = as.Date('9999-12-31'),
-                                          season = shooter_inputs$shooting_seasonfilter,
+                                          season = shooter_inputs$shooting_seasonfilter[shooter_inputs$shooting_seasonfilter >= 2015],
                                           shotfilter = shooter_inputs$shooting_minshots,
                                           keyfilter = shooter_inputs$shooting_minkeypasses,
                                           minfilter = shooter_inputs$shooting_minfilter,
@@ -119,7 +119,7 @@ shinyServer(function(input, output) {
                                           minutes_df = minutesPlayed,
                                           date1 = shooter_inputs$shooting_date1,
                                           date2 = shooter_inputs$shooting_date2,
-                                          season = min(playerxgoals$Season):max(playerxgoals$Season),
+                                          season = min(playerxgoals$Season, 2015):max(playerxgoals$Season),
                                           shotfilter = shooter_inputs$shooting_minshots,
                                           keyfilter = shooter_inputs$shooting_minkeypasses,
                                           minfilter = shooter_inputs$shooting_minfilter,
@@ -357,6 +357,7 @@ shinyServer(function(input, output) {
   
   # Initial values
   keeper_inputs <- reactiveValues(keeper_minshots = 0,
+                                  keeper_minfilter = 0,
                                   keeper_date1 = as.Date('2000-01-01'),
                                   keeper_date2 = as.Date('9999-12-31'),
                                   keeper_seasonfilter = max(keeperxgoals$Season),
@@ -373,6 +374,7 @@ shinyServer(function(input, output) {
   observeEvent(input$keeper_action,
                {
                  keeper_inputs$keeper_minshots <- input$keeper_minshots
+                 keeper_inputs$keeper_minfilter <- input$keeper_minfilter
                  keeper_inputs$keeper_date1 <- input$keeper_date1
                  keeper_inputs$keeper_date2 <- input$keeper_date2
                  keeper_inputs$keeper_seasonfilter <- input$keeper_seasonfilter
@@ -390,10 +392,12 @@ shinyServer(function(input, output) {
   dt_keeper <- reactive({
     if(keeper_inputs$keeper_seasonordate == 'Season'){
       dt_keeper <- keeperxgoals.func(keeperxgoals,
+                                     minutes_df = minutesPlayed,
                               date1 = as.Date('2000-01-01'),
                               date2 = as.Date('9999-12-31'),
                               season = keeper_inputs$keeper_seasonfilter,
                               shotfilter = keeper_inputs$keeper_minshots,
+                              minfilter = keeper_inputs$keeper_minfilter,
                               byteams = keeper_inputs$keeper_byteams,
                               byseasons = keeper_inputs$keeper_byseasons,
                               OtherShots = keeper_inputs$keeper_othershots,
@@ -404,10 +408,12 @@ shinyServer(function(input, output) {
                GmxGperShot = `G-xG`/Shots)
     } else{
       dt_keeper <- keeperxgoals.func(keeperxgoals,
+                                     minutes_df = minutesPlayed,
                               date1 = keeper_inputs$keeper_date1,
                               date2 = keeper_inputs$keeper_date2,
                               season = min(playerxgoals$Season):max(playerxgoals$Season),
                               shotfilter = keeper_inputs$keeper_minshots,
+                              minfilter = keeper_inputs$keeper_minfilter,
                               byteams = keeper_inputs$keeper_byteams,
                               byseasons = keeper_inputs$keeper_byseasons,
                               OtherShots = keeper_inputs$keeper_othershots,
@@ -837,23 +843,29 @@ shinyServer(function(input, output) {
     }
   )
   
-  ## XGoals by game ####
-  output$teamxgoalsbygame <- DT::renderDataTable({
+  ## xGoals by game ####
+  dt_bygame <- reactive({
     if(input$teambygame_seasonordate == 'Season'){
       dt <- xgbygame %>%
         filter(Season %in% input$teambygame_seasonfilter) %>%
-        arrange(desc(Date))
-      
+        arrange(desc(Date)) %>%
+        select(-Season)
+
     } else{
       dt <- xgbygame %>%
         filter(Date >= input$teambygame_date1, Date <= input$teambygame_date2) %>%
-        arrange(desc(Date))
+        arrange(desc(Date)) %>%
+        select(-Season)
     }
     
     is.num <- sapply(dt, is.numeric)
     dt[is.num] <- lapply(dt[is.num], round, 2)
-    
-    datatable(dt,
+    dt
+  })
+  
+  output$teamxgoalsbygame <- DT::renderDataTable({
+
+    datatable(dt_bygame(),
               rownames = F,
               options(list(autoWidth = T,
                            pageLength = 25,
@@ -864,21 +876,7 @@ shinyServer(function(input, output) {
     filename = 'ASAxGoals_gamebygame.csv',
     
     content = function(file){
-      if(input$teambygame_seasonordate == 'Season'){
-        dt <- xgbygame %>%
-          filter(Season %in% input$teambygame_seasonfilter) %>%
-          arrange(desc(Date))
-        
-      } else{
-        dt <- xgbygame %>%
-          filter(Date >= input$teambygame_date1, Date <= input$teambygame_date2) %>%
-          arrange(desc(Date))
-      }
-      
-      is.num <- sapply(dt, is.numeric)
-      dt[is.num] <- lapply(dt[is.num], round, 2)
-      
-      write.csv(dt, file, row.names = F)
+      write.csv(dt_bygame(), file, row.names = F)
     }
   )
   
