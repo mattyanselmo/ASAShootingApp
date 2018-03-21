@@ -68,9 +68,9 @@ shooting <- bind_rows(shooting14,
                            distance),
          available = ifelse(patternOfPlay == 'Penalty', 
                             8, 
-                            available))
-
-## Need to correct scores in 2015 - 2017, see example of teams with negative goals scored
+                            ifelse(is.na(available),
+                                   0, 
+                                   available)))
 
 xgoal.model <- glm(result == 'Goal' ~ 
                      patternOfPlay.model +
