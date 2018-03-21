@@ -21,6 +21,7 @@ source('TeamxGoalsFunction.R')
 source('KeeperxGoalsFunction.R')
 source("PasserxPassesFunction.R")
 source("TeamxPassesFunction.R")
+source("xGoalByGameFunction.R")
 
 # Player xGoals ####
 dt_xgoals <- lapply(2011:max(playerxgoals$Season),
@@ -325,6 +326,37 @@ lapply(2011:max(keeperxgoals$Season),
                                                       include.rownames = F,
                                                       print.results = F))))),
                      file = paste0("C:/Users/Matthias.Kullowatz/Dropbox/ASA Blog Data/HTMLOutputs/Keeper_xGoals_", x, ".txt"),
+                     row.names = F,
+                     quote = F)
+         
+       })
+
+# xG by game ####
+lapply(2011:max(xgbygame$Season),
+       FUN = function(x){
+         dt <- xgbygame %>%
+           filter(Season == x) %>%
+           arrange(desc(Date)) %>%
+           select(-Season) %>%
+           left_join(teamlinks, by = c("Home" = "Abbr")) %>%
+           left_join(teamlinks, by = c("Away" = "Abbr"), suffix = c("_home", "_away")) %>%
+           mutate(Home = FullName_home,
+                  Away = FullName_away,
+                  Date = format(Date, "%m/%d/%Y")) %>%
+           select(-FullName_home, -FullName_away)
+         
+         output <- xtable(dt, 
+                          digits = c(0, 0, 0, 0, 2, 2, 0, 0, 2, 2, 0, 2, 2),
+                          align = rep("c", ncol(dt) + 1))
+         write.table(gsub("\n", "",
+                          gsub(" <", "<", 
+                               gsub("> ", ">", 
+                                    gsub("table border=1", 'table border=1 class = "sortable"',
+                                         print.xtable(output, 
+                                                      type = "html",
+                                                      include.rownames = F,
+                                                      print.results = F))))),
+                     file = paste0("C:/Users/Matthias.Kullowatz/Dropbox/ASA Blog Data/HTMLOutputs/xGoalsByGame_", x, ".txt"),
                      row.names = F,
                      quote = F)
          
