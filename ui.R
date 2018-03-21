@@ -101,7 +101,7 @@ shinyUI(
                                                             plotOutput('shooterplot')))),
                                                  tabPanel('Tables: per 96',
                                                           value = "tablesper96",
-                                                          p(HTML("<i>Per-minutes data only goes back to 2015.</i>"),
+                                                          p(HTML("<i>Per-minutes data only goes back to 2015.</i>")),
                                                           DT::dataTableOutput('shootertable_per96')
                                                  ),
                                                  tabPanel('Scatter plots: per 96',
@@ -557,7 +557,7 @@ shinyUI(
                         we show player statistics on a per-96-minute basis, too, so that the average number of goals per game
                         at the team level will be equal to the average number of goals per 96 minutes at the player level.'),
                       br(),
-                      p('Please note that the statistics displayed in this app are very similiar to, but not exactly
+                      p('Please note that the statistics displayed in this app for previous seasons are very similiar to, but not exactly
                         the same as, those in our static tables. This is because this app utilizes
                         updated xGoal models, fit through 2017, with a better method of capturing penalty kicks. For most
                         players the differences are negligible. We will correct this very soon.'))
