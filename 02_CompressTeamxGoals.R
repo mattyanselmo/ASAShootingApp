@@ -2,8 +2,10 @@ shooting <- readRDS('IgnoreList/AllShotsData2011-2017.rds')
 library(dplyr)
 source('xGoalByGameFunction.R')
 xGByGame <- xG.by.game(shooting) %>%
-  mutate(Season = format(date, '%Y')) %>%
-  select(Date = date, Season, Home = hteam, HxG, Away = ateam, AxG, xGD, GD)
+  mutate(Season = format(date, '%Y'),
+         Date = date) %>%
+  ungroup() %>%
+  select(Date, Season, Home = hteam, HG:HxGp, Away = ateam, AG:xGDp)
 
 shooting <- shooting %>%
   mutate(playerdiff = ifelse(team == hteam, hplayers - aplayers, aplayers - hplayers),
