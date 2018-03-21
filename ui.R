@@ -101,6 +101,7 @@ shinyUI(
                                                             plotOutput('shooterplot')))),
                                                  tabPanel('Tables: per 96',
                                                           value = "tablesper96",
+                                                          p(HTML("<i>Per-minutes data only goes back to 2015.</i>"),
                                                           DT::dataTableOutput('shootertable_per96')
                                                  ),
                                                  tabPanel('Scatter plots: per 96',
@@ -274,6 +275,10 @@ shinyUI(
                                    sidebarPanel(width = 2,
                                                 actionButton('keeper_action',
                                                              label = "Refresh filters"),
+                                                numericInput("keeper_minfilter",
+                                                             label = "Minimum minutes:",
+                                                             value = 0,
+                                                             min = 0, max = 10000, step = 500),
                                                 numericInput('keeper_minshots',
                                                              "Minimum shots faced:",
                                                              value = 0,
