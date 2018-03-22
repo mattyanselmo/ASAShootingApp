@@ -1,5 +1,8 @@
 # Produces minutes played per player per game
 # Append dates to minutes data
+
+# merged.passes <- readRDS("IgnoreList/AllPassingData.rds")
+
 library(dplyr)
 library(stringr)
 library(zoo)
@@ -19,16 +22,18 @@ if(file.exists('C:/Users/Matthias')){
 }
 
 minutesPlayed <- bind_rows(lapply(grep('minutes played by game', list.files('IgnoreList/'), value = T),
-                                  function(x) read.csv(paste0('IgnoreList/', x), stringsAsFactors = F))) %>%
+                                  function(x) read.csv(paste0('IgnoreList/', x), stringsAsFactors = F)))
+
+minutesPlayed_gameID <- minutesPlayed %>%
   select(-X) %>%
   mutate(player = str_replace_all(player, 
                                   c('Kazaishvili' = 'Qazaishvili', 
                                     'Jorge Villafaña' = 'Jorge Villafana',
                                     "Antonio Mlinar Dalamea" = "Antonio Mlinar Delamea")),
-         player = ifelse(row_number() %in% grep("Boniek", players), "Oscar Boniek Garcia", player)) %>%
+         player = ifelse(row_number() %in% grep("Boniek", player), "Oscar Boniek Garcia", player)) %>%
   left_join(merged.passes %>%
               select(gameID, date) %>% unique(),
-              by = "gameID") %>%
+            by = "gameID") %>%
   left_join(merged.passes %>% 
               select(gameID, passer, team) %>% unique(), 
             by = c("gameID", "player" = "passer")) %>%
@@ -39,4 +44,11 @@ minutesPlayed <- bind_rows(lapply(grep('minutes played by game', list.files('Ign
          team = ifelse(is.na(team), "Missing", team)) %>%
   ungroup()
 
-saveRDS(minutesPlayed, 'IgnoreList/MinutesByGameID.rds')
+saveRDS(minutesPlayed_gameID, 'IgnoreList/MinutesByGameID.rds')
+
+# By Season
+minutesPlayed_season <- minutesPlayed_gameID %>%
+  group_by(player, Season, team) %>%
+  summarize(minutes = sum(minutes))
+
+saveRDS(minutesPlayed_season, 'IgnoreList/MinutesBySeason.rds')
