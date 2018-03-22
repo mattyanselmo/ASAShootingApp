@@ -265,6 +265,7 @@ shinyServer(function(input, output) {
                                   passing_third = "All",
                                   passing_seasonfilter = max(playerxgoals$Season),
                                   passing_minpasses = 0,
+                                  passing_minfilter = 0,
                                   passing_byteams = F,
                                   passing_byseasons = T,
                                   passerplot_xvar = 'xG',
@@ -285,6 +286,7 @@ shinyServer(function(input, output) {
                  passer_inputs$passing_third <- input$passing_third
                  passer_inputs$passing_seasonfilter <- input$passing_seasonfilter
                  passer_inputs$passing_minpasses <- input$passing_minpasses
+                 passer_inputs$passing_minfilter <- input$passing_minfilter
                  passer_inputs$passing_byteams <- input$passing_byteams
                  passer_inputs$passing_byseasons <- input$passing_byseasons
                  passer_inputs$passerplot_xvar <- input$passerplot_xvar
@@ -306,6 +308,7 @@ shinyServer(function(input, output) {
   dt_passer <- reactive({
     dt <- passer.xpasses(playerpassing,
                    minpasses = passer_inputs$passing_minpasses,
+                   minfilter = passer_inputs$passing_minfilter,
                    seasonfilter = passer_inputs$passing_seasonfilter,
                    byteams = passer_inputs$passing_byteams,
                    byseasons = passer_inputs$passing_byseasons,
@@ -328,7 +331,7 @@ shinyServer(function(input, output) {
                            lengthMenu = seq(25, 100, 25)))) %>%
       formatRound(columns = c("Score", "Per100", "Distance", "Vertical"), 
                   digits = 1) %>%
-      formatPercentage(columns = c("PassPct", "xPassPct"), 
+      formatPercentage(columns = c("PassPct", "xPassPct", "Touch%")[c(T, T, passer_inputs$passing_third == "All")], 
                        digits = 1)
   })
   
