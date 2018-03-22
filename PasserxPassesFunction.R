@@ -1,14 +1,18 @@
 # Passing breakdown by player
 
-# Sample inputs:
-  # playerpassing <- readRDS("IgnoreList/xPassingByPlayer.rds")
-  # minpasses = 50
-  # seasonfilter = 2015:2016
-  # byteams = T
-  # byseasons = T
-  # third.filter = "Att"
+# # Sample inputs:
+#   playerpassing <- readRDS("IgnoreList/xPassingByPlayer.rds")
+#   minpasses = 50
+#   minfilter = 0
+#   seasonfilter = 2015:2018
+#   byteams = F
+#   byseasons = F
+#   third.filter = "All"
+#   pos.filter = c("G", "D", "B", "M", "A", "F", "S")
+  
 passer.xpasses <- function(playerpassing,
                            minpasses,
+                           minfilter,
                            seasonfilter,
                            byteams,
                            byseasons,
@@ -21,23 +25,26 @@ passer.xpasses <- function(playerpassing,
     filter(year %in% seasonfilter,
            Position %in% pos.filter) %>%
     group_by_(.dots = c("Player" = "passer", "Season" = "year", "team", "third")[c(T, byseasons, byteams, third.filter != "All")]) %>%
-    summarize(Team = paste(unique(team), collapse = ", "),
-              Pos = Position[1],
+    summarize(Team = paste(unique(team), collapse = ","),
+              Min = sum(tapply(minutes, paste0(year, "_", team), function(x) x[1])),
+              Pos = Position[which.max(touches)],
               Passes = sum(N),
               PassPct = sum(successes)/Passes,
               xPassPct = sum(exp)/Passes,
               Score = (PassPct - xPassPct)*Passes,
               Per100 = Score*100/Passes,
               Distance = sum(Distance)/sum(successes),
-              Vertical = sum(Vert.Dist)/sum(successes)) %>%
+              Vertical = sum(Vert.Dist)/sum(successes),
+              `Touch%` = sum(tapply(touches*touchpct, paste0(year, "_", team), function(x) x[1])/
+                               sum(tapply(touches, paste0(year, "_", team), function(x) x[1])))) %>%
     ungroup() %>%
     select(-one_of("team")) %>%
-    filter(Passes > minpasses)
+    filter(Passes > minpasses, Min > minfilter)
   
   if(third.filter != "All"){
   playerpassing.temp <- playerpassing.temp %>%
     filter(third %in% third.filter) %>%
-    select(-third)
+    select(-third, -`Touch%`)
   }
   return(playerpassing.temp %>%
            arrange(desc(Score)))
@@ -47,7 +54,9 @@ passer.xpasses <- function(playerpassing,
 # Function example:
 # passer.xpasses(playerpassing = readRDS("IgnoreList/xPassingByPlayer.rds"),
 #                minpasses = 50,
-#                seasonfilter = 2015:2016,
-#                byteams = F,
+#                minfilter = 0,
+#                seasonfilter = 2015:2018,
+#                byteams = T,
 #                byseasons = T,
-#                third.filter = "Att") %>% as.data.frame() %>% head()
+#                third.filter = "All",
+#                pos.filter = c("G", "D", "B", "M", "A", "F", "S")) %>% as.data.frame() %>% head()
