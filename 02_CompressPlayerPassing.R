@@ -1,6 +1,8 @@
 # Condense player passing data for web app
 
 # Read dataset ####
+library(dplyr)
+library(stringr)
 passing <- readRDS("IgnoreList/AllPassingData.rds")
 teamnames <- read.csv('TeamNameLinks.csv', stringsAsFactors = F)
 
@@ -29,24 +31,27 @@ touches <- bind_rows(lapply(grep('touches', list.files("IgnoreList/"), value = T
   mutate(team = Abbr) %>%
   select(-Abbr)
 
-touches <- touches %>%
-  mutate(date = as.Date(date, "%m/%d/%Y"),
-         Season = as.numeric(format(date, "%Y"))) %>%
+minutesPlayed_season <- readRDS("IgnoreList/MinutesBySeason.rds")
+minutesPlayed_gameID <- readRDS("IgnoreList/MinutesByGameID.rds")
+
+touches <- minutesPlayed_gameID %>%
+  select(gameID, player, minutes, date, team, Season) %>%
+  left_join(touches %>%
+              select(player, gameID, touches), by = c("gameID", "player")) %>%
+  mutate(touches = ifelse(is.na(touches), 0, touches)) %>%
   group_by(gameID, team) %>%
   mutate(TeamTouches = sum(touches)) %>%
   ungroup() %>%
   group_by(player, Season, team) %>%
-  summarize(touches = sum(touches),
-            touchpct = touches/sum(TeamTouches))
-
-minutesPlayed_season <- readRDS("IgnoreList/MinutesBySeason.rds")
-
+  summarize(touchpct = sum(touches)/sum((minutes*TeamTouches)/96),
+            minutes = sum(minutes),
+            touches = sum(touches)) %>%
+  filter(team != "Missing")
+  
 ## balance predictions to actual by zone
 passing <- passing %>%
   mutate(third = ifelse(x < 115/3, "Def",
-                          ifelse(x < 115*2/3, "Mid", "Att")))
-
-player.stats <- passing %>%
+                          ifelse(x < 115*2/3, "Mid", "Att"))) %>%
   group_by(passer, year, team, third) %>%
   summarize(N = n(),
             successes = sum(success),
@@ -54,11 +59,10 @@ player.stats <- passing %>%
             Position = typical.pos[1],
             Distance = sum(distance[success == 1]),
             Vert.Dist = sum((endX - x)[success == 1])) %>%
-  ungroup() %>%
-  left_join(minutesPlayed_season,
-            by = c("passer" = "player", "year" = "Season", "team")) %>%
-  left_join(touches,
-            by = c("passer" = "player", "year" = "Season", "team"))
+  ungroup()
+
+player.stats <- passing %>% 
+  left_join(touches, by = c("passer" = "player", "year" = "Season", "team"))
 
 saveRDS(player.stats, "IgnoreList/xPassingByPlayer.rds")
 write.csv(player.stats, "IgnoreList/xPassingByPlayer.csv", row.names = F)
