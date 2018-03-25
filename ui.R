@@ -412,11 +412,11 @@ shinyUI(
                                              tabsetPanel(id = 'passing_subtab',
                                                          tabPanel('Tables: totals',
                                                                   DT::dataTableOutput('passingtable_player')),
-                                                         tabPanel("Plots: totals",
+                                                         tabPanel("Scatter plots: totals",
                                                                   p("This tab is still being developed!")),
                                                          tabPanel("Tables: per 96",
                                                                   p("This tab is still being developed!")),
-                                                         tabPanel("Plots: per 96",
+                                                         tabPanel("Scatter plots: per 96",
                                                                   p("This tab is still being developed!"))
                                                          
                                                          # tabPanel('Scatter plots',
