@@ -331,7 +331,7 @@ shinyUI(
                                                  tabPanel('Tables: totals',
                                                           value = "tablestotals",
                                                           DT::dataTableOutput('keepertable')),
-                                                 tabPanel('Plots: totals',
+                                                 tabPanel('Scatter plots: totals',
                                                           value = "plotstotals",
                                                           fluidPage(fluidRow(
                                                             column(4,
@@ -358,6 +358,10 @@ shinyUI(
                                                           value = "tablesper96",
                                                           p(HTML("<i>Per-minutes data only goes back to 2015.</i>")),
                                                           DT::dataTableOutput("keepertable_per96")
+                                                 ),
+                                                 tabPanel("Scatter plots: per 96",
+                                                          value = "plotsper96",
+                                                          p(HTML("<i>This tab is still being developed!</i>"))
                                                  )
                                      ))
                                  )
