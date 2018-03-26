@@ -321,44 +321,51 @@ shinyUI(
                                                 checkboxInput('keeper_fk',
                                                               label = 'Include FKs',
                                                               value = T)),
-                                   
                                    mainPanel(
                                      h1('Keeper xGoals'),
                                      p(paste0('Updated through games on ', max(as.Date(keeperxgoals$date)))),
                                      downloadButton('keeper_download', 'Download CSV'),
                                      br(),
                                      br(),
-                                     tabsetPanel(
-                                       tabPanel('Tables: totals',
-                                                DT::dataTableOutput('keepertable')),
-                                       tabPanel("Tables: per 96",
-                                                p("This tab is still being developed!")),
-                                       tabPanel('Scatter plots',
-                                                fluidPage(fluidRow(
-                                                  column(4,
-                                                         selectInput('keeperplot_xvar',
-                                                                     label = 'X-axis variable',
-                                                                     choices = c('Shots faced' = 'Shots', 'Goals allowed' = 'GA',
-                                                                                 'GA/shot' = 'GAperShot', 'xG/Shot' = 'xGperShot',
-                                                                                 'G-xG/shot' = 'GmxGperShot',
-                                                                                 '%Shots headed' = 'Header%', 'Avg. distance' = 'Dist',
-                                                                                 'xG faced' = 'xG', 'GA above average' = 'G-xG'),
-                                                                     selected = 'xG')),
-                                                  column(4,
-                                                         selectInput('keeperplot_yvar',
-                                                                     label = 'Y-axis variable',
-                                                                     choices = c('Shots faced' = 'Shots', 'Goals allowed' = 'GA',
-                                                                                 'GA/shot' = 'GAperShot', 'xG/Shot' = 'xGperShot',
-                                                                                 'G-xG/shot' = 'GmxGperShot',
-                                                                                 '%Shots headed' = 'Header%', 'Avg. distance' = 'Dist',
-                                                                                 'xG faced' = 'xG', 'GA above average' = 'G-xG'),
-                                                                     selected = 'G-xG')),
-                                                  plotOutput('keeperplot')))
-                                       )
-                                     )
-                                   ))
-                        )
-             ),
+                                     tabsetPanel(id = 'keeper_subtab',
+                                                 tabPanel('Tables: totals',
+                                                          value = "tablestotals",
+                                                          DT::dataTableOutput('keepertable')),
+                                                 tabPanel('Scatter plots: totals',
+                                                          value = "plotstotals",
+                                                          fluidPage(fluidRow(
+                                                            column(4,
+                                                                   selectInput('keeperplot_xvar',
+                                                                               label = 'X-axis variable',
+                                                                               choices = c('Shots faced' = 'Shots', 'Goals allowed' = 'GA',
+                                                                                           'GA/shot' = 'GAperShot', 'xG/Shot' = 'xGperShot',
+                                                                                           'G-xG/shot' = 'GmxGperShot',
+                                                                                           '%Shots headed' = 'Header%', 'Avg. distance' = 'Dist',
+                                                                                           'xG faced' = 'xG', 'GA above average' = 'G-xG'),
+                                                                               selected = 'xG')),
+                                                            column(4,
+                                                                   selectInput('keeperplot_yvar',
+                                                                               label = 'Y-axis variable',
+                                                                               choices = c('Shots faced' = 'Shots', 'Goals allowed' = 'GA',
+                                                                                           'GA/shot' = 'GAperShot', 'xG/Shot' = 'xGperShot',
+                                                                                           'G-xG/shot' = 'GmxGperShot',
+                                                                                           '%Shots headed' = 'Header%', 'Avg. distance' = 'Dist',
+                                                                                           'xG faced' = 'xG', 'GA above average' = 'G-xG'),
+                                                                               selected = 'G-xG')),
+                                                            plotOutput('keeperplot')))
+                                                 ),
+                                                 tabPanel("Tables: per 96",
+                                                          value = "tablesper96",
+                                                          p(HTML("<i>Per-minutes data only goes back to 2015.</i>")),
+                                                          DT::dataTableOutput("keepertable_per96")
+                                                 ),
+                                                 tabPanel("Scatter plots: per 96",
+                                                          value = "plotsper96",
+                                                          p(HTML("<i>This tab is still being developed!</i>"))
+                                                 )
+                                     ))
+                                 )
+                        )),
              # Passing navbar ####
              navbarMenu(strong('xPasses'),
                         # Passing: Players totals tab panel ####
@@ -367,6 +374,10 @@ shinyUI(
                                    sidebarPanel(width = 3,
                                                 actionButton('passing_action',
                                                              label = "Refresh filters"),
+                                                numericInput("passing_minfilter",
+                                                             label = "Minimum minutes:",
+                                                             value = 0,
+                                                             min = 0, max = 10000, 500),
                                                 numericInput('passing_minpasses',
                                                              "Minimum passes:",
                                                              value = 0,
@@ -405,11 +416,11 @@ shinyUI(
                                              tabsetPanel(id = 'passing_subtab',
                                                          tabPanel('Tables: totals',
                                                                   DT::dataTableOutput('passingtable_player')),
-                                                         tabPanel("Plots: totals",
+                                                         tabPanel("Scatter plots: totals",
                                                                   p("This tab is still being developed!")),
                                                          tabPanel("Tables: per 96",
                                                                   p("This tab is still being developed!")),
-                                                         tabPanel("Plots: per 96",
+                                                         tabPanel("Scatter plots: per 96",
                                                                   p("This tab is still being developed!"))
                                                          
                                                          # tabPanel('Scatter plots',

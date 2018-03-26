@@ -205,6 +205,7 @@ lapply(2015:max(playerpassing$year),
          all <- passer.xpasses(playerpassing,
                                minpasses = 0,
                                seasonfilter = x,
+                               minfilter = 0,
                                byteams = F,
                                byseasons = T,
                                third.filter = "All") %>%
@@ -214,6 +215,7 @@ lapply(2015:max(playerpassing$year),
          att <- passer.xpasses(playerpassing,
                                minpasses = 0,
                                seasonfilter = x,
+                               minfilter = 0,
                                byteams = F,
                                byseasons = T,
                                third.filter = "Att") %>%
@@ -223,15 +225,17 @@ lapply(2015:max(playerpassing$year),
          mid <- passer.xpasses(playerpassing,
                                minpasses = 0,
                                seasonfilter = x,
+                               minfilter = 0,
                                byteams = F,
                                byseasons = T,
                                third.filter = "Mid") %>%
            mutate(Per100 = Per100/100) %>%
            rename(`%` = PassPct, `Exp%` = xPassPct, `%Diff` = Per100)
-         
+        
          def <- passer.xpasses(playerpassing,
                                minpasses = 0,
                                seasonfilter = x,
+                               minfilter = 0,
                                byteams = F,
                                byseasons = T,
                                third.filter = "Def") %>%
@@ -240,22 +244,24 @@ lapply(2015:max(playerpassing$year),
          
          dt <- all %>%
            select(-c(Season, Score, Distance)) %>%
+           select(Player:Pos, `Touch%`, Passes:Vertical) %>%
            full_join(att %>%
-                       select(-c(Season, Team, Pos, Score, Distance)), 
+                       select(-c(Season, Team, Min, Pos, Score, Distance)), 
                      by = c("Player"), 
                      suffix = c("_all", "_att")) %>%
            full_join(mid %>%
-                       select(-c(Season, Team, Pos, Score, Distance)), 
+                       select(-c(Season, Team, Min, Pos, Score, Distance)), 
                      by = c("Player")) %>%
            full_join(def %>%
-                       select(-c(Season, Team, Pos, Score, Distance)), 
+                       select(-c(Season, Team, Min, Pos, Score, Distance)), 
                      by = c("Player"), 
                      suffix = c("_mid", "_def"))
          dt <- dt %>%
            mutate_at(.vars = setdiff(names(dt), c("Player", "Team", "Pos")),
                      .funs = function(x) ifelse(is.na(x), 0, x)) %>%
            mutate_at(.vars = grep("%", names(dt), value = T),
-                     .funs = function(x) as.character(percent(x, digits = 1)))
+                     .funs = function(x) as.character(percent(x, digits = 1))) %>%
+           arrange(desc(`%Diff_all`))
          
          
          namesFL <- as.data.frame(do.call("rbind", strsplit(sub(" ", ";", dt$Player), ";")))
@@ -264,7 +270,7 @@ lapply(2015:max(playerpassing$year),
          dt <- data.frame(namesFL, dt %>% select(-Player), check.names = F)
          
          output <- print.xtable(xtable(dt, 
-                                       digits = c(0, 0, 0, 0, 0, 0, 3, 3, 3, 2, 0, 3, 3, 3, 2, 0, 3, 3, 3, 2, 0, 3, 3, 3, 2)),
+                                       digits = c(0, 0, 0, 0, 0, 0, 0, 0, 3, 3, 3, 2, 0, 3, 3, 3, 2, 0, 3, 3, 3, 2, 0, 3, 3, 3, 2)),
                                 type = "html",
                                 include.rownames = F,
                                 print.results = F)
@@ -282,7 +288,7 @@ $("#myTable").tablesorter();
   });
 </script>
 <TABLE border=1 id="myTable" class="tablesorter"><thead>
-<TR><TH colspan="4" class="sorter-false"></TH><TH colspan="5" class="sorter-false">All Passes</TH><TH colspan="5" class="sorter-false">Attacking Third</TH><TH colspan="5" class="sorter-false">Middle Third</TH><TH colspan="5" class="sorter-false">Defensive Third</TH></TR>
+<TR><TH colspan="6" class="sorter-false"></TH><TH colspan="5" class="sorter-false">All Passes</TH><TH colspan="5" class="sorter-false">Attacking Third</TH><TH colspan="5" class="sorter-false">Middle Third</TH><TH colspan="5" class="sorter-false">Defensive Third</TH></TR>
 ',
                                                              output)))))))),
                      file = paste0("C:/Users/Matthias.Kullowatz/Dropbox/ASA Blog Data/HTMLOutputs/Player_xPasses_", x, ".txt"),
@@ -296,6 +302,7 @@ lapply(2011:max(keeperxgoals$Season),
        FUN = function(x){
          dt <- keeperxgoals.func(keeperxgoals %>%
                                    mutate(date = as.Date(date, format = '%m/%d/%Y')),
+                                 minutes_df = minutesPlayed,
                                  date1 = as.Date('2000-01-01'),
                                  date2 = as.Date('9999-12-31'),
                                  season = x,
@@ -306,7 +313,7 @@ lapply(2011:max(keeperxgoals$Season),
                                  FK = T,
                                  PK = T) %>%
            select(-Season) %>%
-           select(Keeper:Team, Saves, Goals, Shots, `Header%`:`G-xG`) %>%
+           select(Keeper:Min, Saves, Goals, Shots, `Header%`:`G-xG`) %>%
            rename(SOG = Shots, GA = Goals, xGA = xG, `GA-xGA` = `G-xG`) %>%
            ungroup()
          
@@ -315,7 +322,7 @@ lapply(2011:max(keeperxgoals$Season),
          dt <- data.frame(namesFL, dt %>% select(-Keeper), check.names = F)
          
          output <- xtable(dt, 
-                          digits = c(0, 0, 0, 0, 0, 0, 0, 3, 1, 2, 2),
+                          digits = c(0, 0, 0, 0, 0, 0, 0, 0, 3, 1, 2, 2),
                           align = rep("c", ncol(dt) + 1))
          write.table(gsub("\n", "",
                           gsub(" <", "<", 
