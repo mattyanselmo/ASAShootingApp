@@ -51,7 +51,7 @@ xPasses: Players,Score,Total additional passes completed over expected: (PassPct
 xPasses: Players,Per100,Additional passes completed over expected per 100 passes: Score*100/Passes,,,,,
 xPasses: Players,Distance,Average distance of all completed passes,,,,,
 xPasses: Players,Vertical,"Average ""vertical"" distance of all completed passes (up the field)",,,,,
-xPasses: Players,Touch%,Player touches divided by team touches (in games played by that player),,,,,
+xPasses: Players,Touch%,Player touches divided by team touches (pro-rated by minutes played),,,,,
 xPasses: Team,F (suffix),Statistics for the team,,,,,
 xPasses: Team,A (suffix),Statistics against the team,,,,,
 xPasses: Team,Pass,Total passes attempted,,,,,
