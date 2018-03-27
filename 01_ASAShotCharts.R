@@ -100,9 +100,10 @@ xgoal.model.keeper <- glm(result == 'Goal' ~
                                    result == 'Goal' | result == 'Saved'),
                           family = binomial)
 
-save(xgoal.model, xgoal.model.keeper, file = paste0('IgnoreList/UpdatedModels_', Sys.Date(), '.Rdata'))
+# Save once per year...
+# save(xgoal.model, xgoal.model.keeper, file = paste0('IgnoreList/UpdatedModels_', Sys.Date(), '.Rdata'))
      
-# Tested interaction between free kicks and distance: worse fit on holdout 2015 - 2017
+# Note: Tested interaction between free kicks and distance: worse fit on holdout 2015 - 2017
 
 shooting[['xGShooter']] <- predict(xgoal.model, 
                                    shooting %>%
