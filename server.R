@@ -261,7 +261,7 @@ shinyServer(function(input, output) {
   # Passer reactive values ####
   
   # Initial values
-  passer_inputs <- reactiveValues(passing_position = c("G", "D", "B", "M", "A", "F", "S"),
+  passer_inputs <- reactiveValues(passing_position = c("G", "D", "B", "M", "A", "F", "S", "Heaven"),
                                   passing_third = "All",
                                   passing_seasonfilter = max(playerxgoals$Season),
                                   passing_minpasses = 0,
