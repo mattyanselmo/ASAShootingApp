@@ -18,5 +18,6 @@ source('02_CompressTeamPassing.R')
 source('02_CompressKeeperxGoals.R')
 
 source("03_CreateHTMLTables.R")
+gc()
 
 source('IgnoreList/ConnectOnline.R')
