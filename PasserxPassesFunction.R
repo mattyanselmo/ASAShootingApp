@@ -40,7 +40,7 @@ passer.xpasses <- function(playerpassing,
                                sum(tapply(touches, paste0(year, "_", team), function(x) x[1])))) %>%
     ungroup() %>%
     select(-one_of("team")) %>%
-    filter(Passes > minpasses, Min > minfilter)
+    filter(Passes >= minpasses, Min >= minfilter)
   
   if(third.filter != "All"){
   playerpassing.temp <- playerpassing.temp %>%
