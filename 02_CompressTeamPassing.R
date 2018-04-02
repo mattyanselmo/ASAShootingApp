@@ -1,14 +1,14 @@
 # Condense team passing data for web app
 
 # Read dataset ####
-passing <- readRDS("IgnoreList/AllPassingData.rds")
+merged.passes <- readRDS("IgnoreList/AllPassingData.rds")
 
 ## balance predictions to actual by zone
-passing <- passing %>%
+merged.passes <- merged.passes %>%
   mutate(third = ifelse(x < 115/3, "Def",
                         ifelse(x < 115*2/3, "Mid", "Att")))
 
-team.stats.offense <- passing %>%
+team.stats.offense <- merged.passes %>%
   group_by(year, team, third) %>%
   summarize(N = n(),
             successes = sum(success),
@@ -16,7 +16,7 @@ team.stats.offense <- passing %>%
             Distance = sum(distance[success == 1]),
             Vert.Dist = sum((endX - x)[success == 1]))
 
-team.stats.defense <- passing %>%
+team.stats.defense <- merged.passes %>%
   group_by(year, team.1, third) %>%
   summarize(N = n(),
             successes = sum(success),
