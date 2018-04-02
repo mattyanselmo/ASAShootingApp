@@ -2,6 +2,8 @@ library(dplyr)
 library(xtable)
 library(formattable)
 
+path <- ifelse(file.exists("C:/Users/Matthias"), "C:/Users/Matthias", "C:/Users/Matthias.Kullowatz")
+
 playerxgoals <- readRDS('IgnoreList/xGoalsByPlayer.rds')
 minutesPlayed <- readRDS('IgnoreList/MinutesByGameID.rds')
 teamxgoals <- readRDS('IgnoreList/xGoalsByTeam.rds')
@@ -87,7 +89,7 @@ dt_xgoals <- lapply(2011:max(playerxgoals$Season),
                                                                           type = "html",
                                                                           include.rownames = F,
                                                                           print.results = F)))))), 
-                                    file = paste0("C:/Users/Matthias.Kullowatz/Dropbox/ASA Blog Data/HTMLOutputs/Player_xGoals_", x, ".txt"),
+                                    file = paste0(path, "/Dropbox/ASA Blog Data/HTMLOutputs/Player_xGoals_", x, ".txt"),
                                     row.names = F,
                                     quote = F)
                       } else{
@@ -106,7 +108,7 @@ dt_xgoals <- lapply(2011:max(playerxgoals$Season),
                                                                           type = "html",
                                                                           include.rownames = F,
                                                                           print.results = F)))))),
-                                    file = paste0("C:/Users/Matthias.Kullowatz/Dropbox/ASA Blog Data/HTMLOutputs/Player_xGoals_", x, ".txt"),
+                                    file = paste0(path, "/Dropbox/ASA Blog Data/HTMLOutputs/Player_xGoals_", x, ".txt"),
                                     row.names = F,
                                     quote = F)
                       }
@@ -192,7 +194,7 @@ dt_xG_team <- lapply(2011:max(teamxgoals$Season),
                                                                     type = "html",
                                                                     include.rownames = F,
                                                                     print.results = F))))),
-                                   file = paste0("C:/Users/Matthias.Kullowatz/Dropbox/ASA Blog Data/HTMLOutputs/Team_xGoals_", x, ".txt"),
+                                   file = paste0(path, "/Dropbox/ASA Blog Data/HTMLOutputs/Team_xGoals_", x, ".txt"),
                                    row.names = F,
                                    quote = F)
                      })
@@ -291,7 +293,7 @@ $("#myTable").tablesorter();
 <TR><TH colspan="6" class="sorter-false"></TH><TH colspan="5" class="sorter-false">All Passes</TH><TH colspan="5" class="sorter-false">Attacking Third</TH><TH colspan="5" class="sorter-false">Middle Third</TH><TH colspan="5" class="sorter-false">Defensive Third</TH></TR>
 ',
                                                              output)))))))),
-                     file = paste0("C:/Users/Matthias.Kullowatz/Dropbox/ASA Blog Data/HTMLOutputs/Player_xPasses_", x, ".txt"),
+                     file = paste0(path, "/Dropbox/ASA Blog Data/HTMLOutputs/Player_xPasses_", x, ".txt"),
                      row.names = F,
                      quote = F)
        })
@@ -332,7 +334,7 @@ lapply(2011:max(keeperxgoals$Season),
                                                       type = "html",
                                                       include.rownames = F,
                                                       print.results = F))))),
-                     file = paste0("C:/Users/Matthias.Kullowatz/Dropbox/ASA Blog Data/HTMLOutputs/Keeper_xGoals_", x, ".txt"),
+                     file = paste0(path, "/Dropbox/ASA Blog Data/HTMLOutputs/Keeper_xGoals_", x, ".txt"),
                      row.names = F,
                      quote = F)
          
@@ -363,7 +365,7 @@ lapply(2011:max(xgbygame$Season),
                                                       type = "html",
                                                       include.rownames = F,
                                                       print.results = F))))),
-                     file = paste0("C:/Users/Matthias.Kullowatz/Dropbox/ASA Blog Data/HTMLOutputs/xGoalsByGame_", x, ".txt"),
+                     file = paste0(path, "/Dropbox/ASA Blog Data/HTMLOutputs/xGoalsByGame_", x, ".txt"),
                      row.names = F,
                      quote = F)
          
