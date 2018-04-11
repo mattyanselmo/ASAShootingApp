@@ -391,8 +391,10 @@ shinyUI(
                                                                                "Midfielder (M)" = "M",
                                                                                "Attacking Mid (A)" = "A",
                                                                                "Forward (F)" = "F",
-                                                                               "Sub (S)" = "S",
-                                                                               "Heaven"),
+                                                                               "Sub (S)" = "S"
+                                                                               # ,
+                                                                               # "Heaven"
+                                                                               ),
                                                                    selected = c("G", "D", "B", "M", "A", "F", "S", "Heaven")),
                                                 radioButtons('passing_third',
                                                              label = "Third:",
