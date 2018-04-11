@@ -2,14 +2,14 @@
 
 
 # Sample inputs:
-playerpassing <- readRDS("IgnoreList/xPassingByPlayer.rds")
-minpasses = 0
-minfilter = 0
-seasonfilter = 2015:2018
-byteams = F
-byseasons = T
-third.filter = "All"
-pos.filter = c("G", "D", "B", "M", "A", "F", "S")
+# playerpassing <- readRDS("IgnoreList/xPassingByPlayer.rds")
+# minpasses = 0
+# minfilter = 0
+# seasonfilter = 2015:2018
+# byteams = F
+# byseasons = T
+# third.filter = "All"
+# pos.filter = c("G", "D", "B", "M", "A", "F", "S")
 
 passer.xpasses <- function(playerpassing,
                            minpasses,
