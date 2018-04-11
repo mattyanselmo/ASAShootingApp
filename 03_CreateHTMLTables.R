@@ -84,11 +84,16 @@ dt_xgoals <- lapply(2011:max(playerxgoals$Season),
                                          gsub(" <", "<", 
                                               gsub("> ", ">", 
                                                    gsub(' align="right"', "",
-                                                        gsub("table border=1", 'table border=1 class = "sortable"',
-                                                             print.xtable(output, 
-                                                                          type = "html",
-                                                                          include.rownames = F,
-                                                                          print.results = F)))))), 
+                                                        gsub("<table border=1>", '<script>
+  $(document).ready(function() {
+                                                             $("#myTable").tablesorter();
+                      });
+                                                             </script><TABLE border=1 id="myTable" class="tablesorter"><thead>',
+                                                             gsub(" xPlacep96 </th>  </tr>", " xPlacep96 </th>  </tr> </thead> <tbody>",
+                                                                  print.xtable(output, 
+                                                                               type = "html",
+                                                                               include.rownames = F,
+                                                                               print.results = F))))))), 
                                     file = paste0(path, "/Dropbox/ASA Blog Data/HTMLOutputs/Player_xGoals_", x, ".txt"),
                                     row.names = F,
                                     quote = F)
@@ -103,11 +108,16 @@ dt_xgoals <- lapply(2011:max(playerxgoals$Season),
                                          gsub(" <", "<", 
                                               gsub("> ", ">", 
                                                    gsub(' align="right"', "",
-                                                        gsub("table border=1", 'table border=1 class = "sortable"',
+                                                        gsub("<table border=1>", '<script>
+  $(document).ready(function() {
+                                                             $("#myTable").tablesorter();
+                      });
+                                                             </script><TABLE border=1 id="myTable" class="tablesorter"><thead>',
+                                                             gsub(" xPlacep96 </th>  </tr>", " xPlacep96 </th>  </tr> </thead> <tbody>",
                                                              print.xtable(output, 
                                                                           type = "html",
                                                                           include.rownames = F,
-                                                                          print.results = F)))))),
+                                                                          print.results = F))))))),
                                     file = paste0(path, "/Dropbox/ASA Blog Data/HTMLOutputs/Player_xGoals_", x, ".txt"),
                                     row.names = F,
                                     quote = F)
@@ -181,7 +191,8 @@ dt_xG_team <- lapply(2011:max(teamxgoals$Season),
                          left_join(teamlinks, by = c("Team" = "Abbr")) %>%
                          mutate(Team = FullName,
                                 Conf = ifelse(Conf == "east", "Eastern", "Western")) %>%
-                         select(-FullName)
+                         select(-FullName) %>% 
+                         arrange(desc(xGD))
                        
                        output <- xtable(output, 
                                         digits = c(0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 2, 2, 2, 2, 2, 2),
@@ -189,11 +200,16 @@ dt_xG_team <- lapply(2011:max(teamxgoals$Season),
                        write.table(gsub("\n", "",
                                         gsub(" <", "<", 
                                              gsub("> ", ">", 
-                                                  gsub("table border=1", 'table border=1 class = "sortable"',
+                                                  gsub("<table border=1>", '<script>
+  $(document).ready(function() {
+                                                             $("#myTable").tablesorter();
+                      });
+                                                             </script><TABLE border=1 id="myTable" class="tablesorter"><thead>',
+                                                       gsub(" xGD/g </th>  </tr>", " xGD/g </th>  </tr> </thead> <tbody>",
                                                        print.xtable(output, 
                                                                     type = "html",
                                                                     include.rownames = F,
-                                                                    print.results = F))))),
+                                                                    print.results = F)))))),
                                    file = paste0(path, "/Dropbox/ASA Blog Data/HTMLOutputs/Team_xGoals_", x, ".txt"),
                                    row.names = F,
                                    quote = F)
@@ -329,11 +345,16 @@ lapply(2011:max(keeperxgoals$Season),
          write.table(gsub("\n", "",
                           gsub(" <", "<", 
                                gsub("> ", ">", 
-                                    gsub("table border=1", 'table border=1 class = "sortable"',
+                                    gsub("<table border=1>", '<script>
+  $(document).ready(function() {
+                                         $("#myTable").tablesorter();
+       });
+                                         </script><TABLE border=1 id="myTable" class="tablesorter"><thead>',
+                                         gsub(" GA-xGA </th>  </tr>", " GA-xGA </th>  </tr> </thead> <tbody>",
                                          print.xtable(output, 
                                                       type = "html",
                                                       include.rownames = F,
-                                                      print.results = F))))),
+                                                      print.results = F)))))),
                      file = paste0(path, "/Dropbox/ASA Blog Data/HTMLOutputs/Keeper_xGoals_", x, ".txt"),
                      row.names = F,
                      quote = F)
@@ -360,11 +381,16 @@ lapply(2011:max(xgbygame$Season),
          write.table(gsub("\n", "",
                           gsub(" <", "<", 
                                gsub("> ", ">", 
-                                    gsub("table border=1", 'table border=1 class = "sortable"',
+                                    gsub("<table border=1>", '<script>
+  $(document).ready(function() {
+                                         $("#myTable").tablesorter();
+       });
+                                         </script><TABLE border=1 id="myTable" class="tablesorter"><thead>',
+                                         gsub(" xGDp </th>  </tr>", " xGDp </th>  </tr> </thead> <tbody>",
                                          print.xtable(output, 
                                                       type = "html",
                                                       include.rownames = F,
-                                                      print.results = F))))),
+                                                      print.results = F)))))),
                      file = paste0(path, "/Dropbox/ASA Blog Data/HTMLOutputs/xGoalsByGame_", x, ".txt"),
                      row.names = F,
                      quote = F)
