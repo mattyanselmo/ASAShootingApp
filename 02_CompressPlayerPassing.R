@@ -57,7 +57,7 @@ touches <- minutesPlayed_gameID %>%
   filter(team != "Missing")
   
 ## balance predictions to actual by zone
-merged.passes <- merged.passes %>%
+pass.summ <- merged.passes %>%
   mutate(third = ifelse(x < 115/3, "Def",
                           ifelse(x < 115*2/3, "Mid", "Att"))) %>%
   group_by(passer, year, team, third) %>%
@@ -69,7 +69,7 @@ merged.passes <- merged.passes %>%
             Vert.Dist = sum((endX - x)[success == 1])) %>%
   ungroup()
 
-player.stats <- merged.passes %>% 
+player.stats <- pass.summ %>% 
   left_join(touches, by = c("passer" = "player", "year" = "Season", "team"))
 
 saveRDS(player.stats, "IgnoreList/xPassingByPlayer.rds")
