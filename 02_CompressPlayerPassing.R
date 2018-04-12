@@ -56,7 +56,7 @@ passing <- passing %>%
   summarize(N = n(),
             successes = sum(success),
             exp = sum(success.pred),
-            Position = typical.pos[1],
+            Position = season.pos[1],
             Distance = sum(distance[success == 1]),
             Vert.Dist = sum((endX - x)[success == 1])) %>%
   ungroup()
