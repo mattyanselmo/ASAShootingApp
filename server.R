@@ -19,6 +19,7 @@ shinyServer(function(input, output) {
                                    shooting_minfilter = 0,
                                    shooting_minshots = 0,
                                    shooting_minkeypasses = 0,
+                                   shooting_position = c("G", "D", "B", "M", "A", "F", "S"),
                                    shooting_byteams = F,
                                    shooting_byseasons = T,
                                    shooting_other = T,
@@ -39,6 +40,7 @@ shinyServer(function(input, output) {
                  shooter_inputs$shooting_minfilter <- input$shooting_minfilter
                  shooter_inputs$shooting_minshots <- input$shooting_minshots
                  shooter_inputs$shooting_minkeypasses <- input$shooting_minkeypasses
+                 shooter_inputs$shooting_position <- input$shooting_position
                  shooter_inputs$shooting_byteams <- input$shooting_byteams
                  shooter_inputs$shooting_byseasons <- input$shooting_byseasons
                  shooter_inputs$shooting_other <- input$shooting_other
@@ -96,7 +98,7 @@ shinyServer(function(input, output) {
       dt_total[['plotnames']] <- unlist(lapply(strsplit(dt_total$Player, " "), function(x) { return(x[length(x)]) }))
     }
     
-    dt_total
+    dt_total %>% filter(Pos %in% shooter_inputs$shooting_position)
   })
   
   dt_per96 <- reactive({
@@ -138,7 +140,7 @@ shinyServer(function(input, output) {
       dt_per96[['plotnames']] <- unlist(lapply(strsplit(dt_per96$Player, " "), function(x) { return(x[length(x)]) }))
     }
     
-    dt_per96
+    dt_per96 %>% filter(Pos %in% shooter_inputs$shooting_position)
     
   })
   

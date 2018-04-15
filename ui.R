@@ -8,65 +8,95 @@
 library(shiny)
 
 shinyUI(
+  # Shooting navbar ####
   navbarPage(title = HTML('<b>ASA Database</b>'),
              theme = 'bootstrap_edited.css',
              navbarMenu(strong('xGoals'),
                         # Players tab panel ####
                         tabPanel('Players',
                                  sidebarLayout(
-                                   sidebarPanel(width = 2,
-                                                actionButton('shooting_action',
-                                                             label = "Refresh filters"),
-                                                numericInput("shooting_minfilter",
-                                                             label = "Minimum minutes:",
-                                                             value = 0,
-                                                             min = 0, max = 10000, step = 500),
-                                                numericInput('shooting_minshots',
-                                                             "Minimum shots:",
-                                                             value = 0,
-                                                             min = 0, max = 100, step = 10),
-                                                numericInput('shooting_minkeypasses',
-                                                             'Minimum key passes:',
-                                                             value = 0,
-                                                             min = 0, max = 100, step = 10),
-                                                radioButtons('shooting_seasonordate',
-                                                             'Filter by:',
-                                                             choices = c('Season', 'Date')),
-                                                conditionalPanel(condition = "input.shooting_seasonordate == 'Season'",
-                                                                 checkboxGroupInput('shooting_seasonfilter',
-                                                                                    'Select seasons:',
-                                                                                    choices = min(playerxgoals$Season):max(playerxgoals$Season),
-                                                                                    selected = max(playerxgoals$Season))),
-                                                conditionalPanel(condition = "input.shooting_seasonordate == 'Date'",
-                                                                 dateInput('shooting_date1',
-                                                                           'From:',
-                                                                           value = min(playerxgoals$date[playerxgoals$Season == max(playerxgoals$Season)]),
-                                                                           min = min(playerxgoals$date),
-                                                                           max = max(playerxgoals$date),
-                                                                           format = 'mm/dd/yyyy'),
-                                                                 dateInput('shooting_date2',
-                                                                           'To:',
-                                                                           value = max(playerxgoals$date),
-                                                                           min = min(playerxgoals$date),
-                                                                           max = max(playerxgoals$date),
-                                                                           format = 'mm/dd/yyyy')
-                                                ),                  
-                                                h5(HTML('<b>Other filters:</b>')),
-                                                checkboxInput('shooting_byteams',
-                                                              label = 'Split players by teams',
-                                                              value = F),
-                                                checkboxInput('shooting_byseasons',
-                                                              label = 'Split players by seasons',
-                                                              value = T),
-                                                checkboxInput('shooting_other',
-                                                              label = 'Include non PK/FK',
-                                                              value = T),
-                                                checkboxInput('shooting_pk',
-                                                              label = 'Include PKs',
-                                                              value = T),
-                                                checkboxInput('shooting_fk',
-                                                              label = 'Include FKs',
-                                                              value = T)),
+                                   sidebarPanel(
+                                     tagList(
+                                       tags$head(
+                                         tags$style(
+                                           HTML(
+                                             ".checkbox-inline { 
+                    margin-left: 0px;
+                    margin-right: 10px;
+          }
+         .checkbox-inline+.checkbox-inline {
+                    margin-left: 0px;
+                    margin-right: 10px;
+          }
+        "
+                                           )
+                                         ) 
+                                       )),
+                                     width = 2,
+                                     actionButton('shooting_action',
+                                                  label = "Refresh filters"),
+                                     numericInput("shooting_minfilter",
+                                                  label = "Minimum minutes:",
+                                                  value = 0,
+                                                  min = 0, max = 10000, step = 500),
+                                     numericInput('shooting_minshots',
+                                                  "Minimum shots:",
+                                                  value = 0,
+                                                  min = 0, max = 100, step = 10),
+                                     numericInput('shooting_minkeypasses',
+                                                  'Minimum key passes:',
+                                                  value = 0,
+                                                  min = 0, max = 100, step = 10),
+                                     checkboxGroupInput("shooting_position",
+                                                        label = "Position:",
+                                                        inline = T,
+                                                        choices = c("Keeper (G)" = "G",
+                                                                    "Central Def (D)" = "D",
+                                                                    "Back (B)" = "B",
+                                                                    "Midfielder (M)" = "M",
+                                                                    "Attacking Mid (A)" = "A",
+                                                                    "Forward (F)" = "F",
+                                                                    "Sub (S)" = "S"),
+                                                        selected = c("G", "D", "B", "M", "A", "F", "S")),
+                                     radioButtons('shooting_seasonordate',
+                                                  'Filter by:',
+                                                  choices = c('Season', 'Date')),
+                                     conditionalPanel(condition = "input.shooting_seasonordate == 'Season'",
+                                                      checkboxGroupInput('shooting_seasonfilter',
+                                                                         'Select seasons:',
+                                                                         choices = min(playerxgoals$Season):max(playerxgoals$Season),
+                                                                         selected = max(playerxgoals$Season),
+                                                                         inline = T)),
+                                     conditionalPanel(condition = "input.shooting_seasonordate == 'Date'",
+                                                      dateInput('shooting_date1',
+                                                                'From:',
+                                                                value = min(playerxgoals$date[playerxgoals$Season == max(playerxgoals$Season)]),
+                                                                min = min(playerxgoals$date),
+                                                                max = max(playerxgoals$date),
+                                                                format = 'mm/dd/yyyy'),
+                                                      dateInput('shooting_date2',
+                                                                'To:',
+                                                                value = max(playerxgoals$date),
+                                                                min = min(playerxgoals$date),
+                                                                max = max(playerxgoals$date),
+                                                                format = 'mm/dd/yyyy')
+                                     ),                  
+                                     h5(HTML('<b>Other filters:</b>')),
+                                     checkboxInput('shooting_byteams',
+                                                   label = 'Split players by teams',
+                                                   value = F),
+                                     checkboxInput('shooting_byseasons',
+                                                   label = 'Split players by seasons',
+                                                   value = T),
+                                     checkboxInput('shooting_other',
+                                                   label = 'Include non PK/FK',
+                                                   value = T),
+                                     checkboxInput('shooting_pk',
+                                                   label = 'Include PKs',
+                                                   value = T),
+                                     checkboxInput('shooting_fk',
+                                                   label = 'Include FKs',
+                                                   value = T)),
                                    mainPanel(
                                      # div(style="display: inline-block;vertical-align:bottom; width: 250px;", h1('Player xGoals')),
                                      # div(style="display: inline-block;vertical-align:bottom; width: 250px;", downloadButton('player_download', 'Download CSV')),
@@ -371,7 +401,23 @@ shinyUI(
                         # Passing: Players totals tab panel ####
                         tabPanel('Players',
                                  sidebarLayout(
-                                   sidebarPanel(width = 3,
+                                   sidebarPanel(tagList(
+                                     tags$head(
+                                       tags$style(
+                                         HTML(
+                                           ".checkbox-inline { 
+                    margin-left: 0px;
+                    margin-right: 10px;
+          }
+         .checkbox-inline+.checkbox-inline {
+                    margin-left: 0px;
+                    margin-right: 10px;
+          }
+        "
+                                         )
+                                       ) 
+                                     )),
+                                     width = 2,
                                                 actionButton('passing_action',
                                                              label = "Refresh filters"),
                                                 numericInput("passing_minfilter",
