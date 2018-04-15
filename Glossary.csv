@@ -1,5 +1,6 @@
 Tab,Label,Description,Notes,,,,
 xGoals: Players,Min,Minutes played (including stoppage time),"Need to add to totals, too",,,,
+xGoals: Players,Pos,"Position that the player primarily played in, based on team and season",,,,, 
 xGoals: Players,Shots,"Shots include those on target, off target, and blocked by defenders",,,,, 
 xGoals: Players,SoT,Shots on target,,,,,
 xGoals: Players,Dist,Average distance to center of goal,,,,,
