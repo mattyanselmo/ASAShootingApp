@@ -3,6 +3,7 @@
 # playerxgoals <- readRDS('IgnoreList/xGoalsByPlayer.rds') %>%
 #   mutate(date = as.Date(date, format = '%m/%d/%Y'))
 # minutes_df <- readRDS('IgnoreList/MinutesByGameID.rds')
+# playerpos <- readRDS("IgnoreList/playerpositions_byseason.rds")
 # date1 = as.Date('2000-01-01')
 # date2 = as.Date('9999-12-31')
 # season = 2015:2017
@@ -13,7 +14,11 @@
 # byteams = T
 # FK = T
 # PK = T
-# OtherShots = T
+# OtherShots = 
+# Mode <- function(x) {
+#   ux <- unique(x)
+#   ux[which.max(tabulate(match(x, ux)))]
+# }
 
 shooterxgoals_perminute <- function(playerxgoals = playerxgoals,
                                     minutes_df = minutesPlayed,
@@ -41,7 +46,8 @@ shooterxgoals_perminute <- function(playerxgoals = playerxgoals,
   if(byseasons & byteams){
     aggdata <- tempdat %>%
       group_by(player, Team = team, Season) %>%
-      summarize(Shots = sum(shots),
+      summarize(Pos = season.pos[1],
+                Shots = sum(shots),
                 SoT = sum(ontarget),
                 Goals = sum(goals),
                 xG = sum(xG),
@@ -61,13 +67,14 @@ shooterxgoals_perminute <- function(playerxgoals = playerxgoals,
                 by = c('player', "Team", 'Season')) %>%
       mutate_at(.vars = vars(Shots:`xG+xA`),
                 .funs = funs(.*96/Min)) %>%
-      select(Player = player, Team, Season, Min, Shots:`xG+xA`) %>%
+      select(Player = player, Team, Season, Min, Pos, Shots:`xG+xA`) %>%
       filter(Min >= minfilter)
     
   } else if(byteams & !byseasons){
     aggdata <- tempdat %>%
       group_by(player, Team = team) %>%
-      summarize(Shots = sum(shots),
+      summarize(Pos = Mode(season.pos),
+                Shots = sum(shots),
                 SoT = sum(ontarget),
                 Goals = sum(goals),
                 xG = sum(xG),
@@ -84,7 +91,7 @@ shooterxgoals_perminute <- function(playerxgoals = playerxgoals,
                     group_by(player, Team = team) %>%
                     summarize(Min = sum(minutes)),
                   by = c("player", "Team")) %>%
-        select(Player = player, Team, Min, Shots:`xG+xA`) %>%
+        select(Player = player, Team, Min, Pos, Shots:`xG+xA`) %>%
         mutate_at(.vars = vars(Shots:`xG+xA`),
                   .funs = funs(.*96/Min)) %>%
       filter(Min >= minfilter)
@@ -92,7 +99,8 @@ shooterxgoals_perminute <- function(playerxgoals = playerxgoals,
   } else if(!byteams & byseasons){
     aggdata <- tempdat %>%
       group_by(player, Season) %>%
-      summarize(Team = paste0(na.omit(unique(team)), collapse = ', '),
+      summarize(Pos = Mode(season.pos),
+                Team = paste0(na.omit(unique(team)), collapse = ', '),
                 Shots = sum(shots),
                 SoT = sum(ontarget),
                 Goals = sum(goals),
@@ -110,7 +118,7 @@ shooterxgoals_perminute <- function(playerxgoals = playerxgoals,
                   group_by(player, Season) %>%
                   summarize(Min = sum(minutes)),
                 by = c("player", "Season")) %>%
-      select(Player = player, Team, Season, Min, Shots:`xG+xA`) %>%
+      select(Player = player, Team, Season, Min, Pos, Shots:`xG+xA`) %>%
       mutate_at(.vars = vars(Shots:`xG+xA`),
                 .funs = funs(.*96/Min)) %>%
       filter(Min >= minfilter)
@@ -118,7 +126,8 @@ shooterxgoals_perminute <- function(playerxgoals = playerxgoals,
   } else{
     aggdata <- tempdat %>%
       group_by(player) %>%
-      summarize(Team = paste0(na.omit(unique(team)), collapse = ', '),
+      summarize(Pos = Mode(season.pos),
+                Team = paste0(na.omit(unique(team)), collapse = ', '),
                 Shots = sum(shots),
                 SoT = sum(ontarget),
                 Goals = sum(goals),
@@ -136,7 +145,7 @@ shooterxgoals_perminute <- function(playerxgoals = playerxgoals,
                     group_by(player) %>%
                     summarize(Min = sum(minutes)),
                   by = c("player")) %>%
-        select(Player = player, Team, Min, Shots:`xG+xA`) %>%
+        select(Player = player, Team, Min, Pos, Shots:`xG+xA`) %>%
       mutate_at(.vars = vars(Shots:`xG+xA`),
                 .funs = funs(.*96/Min)) %>%
       filter(Min >= minfilter)
