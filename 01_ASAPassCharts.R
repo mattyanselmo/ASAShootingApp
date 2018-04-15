@@ -132,15 +132,17 @@ merged.passes <- merged.passes %>%
   ungroup()
 
 playerpos <- merged.passes %>% 
-  group_by(passer, year) %>% 
-  summarize(season.pos = Mode(Position),
-            typical.pos = typical.pos[1]) %>%
+  group_by(passer, year, team) %>% 
+  summarize(season.pos = as.character(Mode(Position)),
+            typical.pos = as.character(typical.pos[1])) %>%
   mutate(season.pos = ifelse(season.pos == "S", typical.pos, season.pos)) %>%
   select(-typical.pos) %>%
   ungroup()
 
+saveRDS(playerpos, "IgnoreList/playerpositions_byseason.rds")
+
 merged.passes <- merged.passes %>%
-  left_join(playerpos, by = c("passer", "year"))
+  left_join(playerpos, by = c("passer", "year", "team"))
 
 saveRDS(merged.passes, "IgnoreList/AllPassingData.rds")
 write.csv(merged.passes, "IgnoreList/AllPassingData.csv", row.names = F)
