@@ -3,7 +3,8 @@
 library(dplyr)
 library(gbm)
 library(stringr)
-teamnames <- read.csv('TeamNameLinks.csv', stringsAsFactors = F)
+teamnames <- read.csv('TeamNameLinks.csv', stringsAsFactors = F) %>%
+  select(-one_of("X"))
 
 if(file.exists('C:/Users/Matthias')){
   temp <- read.csv(paste0("C:/Users/Matthias/Dropbox/ASA Blog Data/", year, " Stats/raw passes.csv"))
@@ -22,6 +23,7 @@ if(file.exists('C:/Users/Matthias')){
 #load in the requisite data
 passes <- bind_rows(lapply(paste0("IgnoreList/", grep('raw passes', list.files("IgnoreList/"), value = T)),
                            function(x) read.csv(x, stringsAsFactors = F))) %>%
+  select(-one_of("X")) %>%
   mutate(date = as.Date(date, format = "%m/%d/%Y"),
          year = as.numeric(format(date, "%Y"))) %>%
   mutate(passer = str_replace_all(passer, 
