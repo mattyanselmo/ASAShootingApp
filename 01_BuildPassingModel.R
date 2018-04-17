@@ -3,16 +3,25 @@
 library(dplyr)
 library(gbm)
 library(stringr)
-teamnames <- read.csv('TeamNameLinks.csv', stringsAsFactors = F)
+teamnames <- read.csv('TeamNameLinks.csv', stringsAsFactors = F) %>%
+  select(-one_of("X"))
 
 #load in the requisite data
 passes <- bind_rows(lapply(paste0("IgnoreList/", grep('raw passes', list.files("IgnoreList/"), value = T)),
                            function(x) read.csv(x, stringsAsFactors = F))) %>%
   mutate(date = as.Date(date, format = "%m/%d/%Y"),
-         year = as.numeric(format(date, "%Y")))
+         year = as.numeric(format(date, "%Y"))) %>%
+  mutate(passer = str_replace_all(passer, 
+                                  c('Kazaishvili' = 'Qazaishvili', 
+                                    'Jorge Villafaña' = 'Jorge Villafana',
+                                    "Antonio Mlinar Dalamea" = "Antonio Mlinar Delamea")),
+         passer = ifelse(row_number() %in% grep("Boniek", passer), "Oscar Boniek Garcia", passer)) %>%
+  select(-one_of("X"))
 
-vertical.lineups <- read.csv('IgnoreList/vertical starting lineups.csv', stringsAsFactors = FALSE)
-jy.starting.lineups <- read.csv('IgnoreList/Starting Lineups editedJY.csv', stringsAsFactors = FALSE)
+vertical.lineups <- read.csv('IgnoreList/vertical starting lineups.csv', stringsAsFactors = FALSE) %>%
+  select(-one_of("X"))
+jy.starting.lineups <- read.csv('IgnoreList/Starting Lineups editedJY.csv', stringsAsFactors = FALSE) %>%
+  select(-one_of("X"))
 
 
 #########################################################
@@ -38,32 +47,27 @@ vertical.lineups$Key2 <- paste(vertical.lineups$gameID, vertical.lineups$players
 # Create key2 for passes df
 passes$Key2 <- paste(passes$gameID, passes$passer, sep = "")
 
-# Progress: If we go back to 2015, it looks like 5 formations are missing from Jared's position analysis
-# 3511, 3421, 3142, 343d, and 3331
-
 # Merge lineups with their proper positions
-# merged.lineups <- merge(jy.starting.lineups, vertical.lineups, by.x = 'Key', by.y = 'Key1')
 merged.lineups <- vertical.lineups %>%
-  left_join(jy.starting.lineups, by = c("Key1" = "Key"))
+  left_join(jy.starting.lineups, by = c("Key1" = "Key")) %>%
+  filter(!duplicated(Key2))
 
 # Merge lineups with positions
-# merged.passes <- merge(passes, merged.lineups, by.x = 'Key2', by.y = 'Key2')
 merged.passes <- left_join(passes, 
                            merged.lineups %>%
                              select(-c(team, gameID)), 
                            by = "Key2")
-# This merge above isn't quite exact. Somehow I wind up with like 50 more passes - because of the double counting of key2 - so I don't know where that's coming in
 
 merged.passes <- merged.passes %>%
-  mutate(passer = str_replace_all(passer, 
-                                  c('Kazaishvili' = 'Qazaishvili', 
-                                    'Jorge Villafaña' = 'Jorge Villafana',
-                                    "Antonio Mlinar Dalamea" = "Antonio Mlinar Delamea"))) %>%
   left_join(teamnames, by = c('team' = 'FullName')) %>%
-  left_join(teamnames, by = c('team.1' = 'FullName')) %>%
-  mutate(team = Abbr.x,
-         team.1 = Abbr.y) %>%
-  select(-c(Abbr.x, Abbr.y))
+  left_join(teamnames, by = c('team.1' = 'FullName'), suffix = c("_0", "_1")) %>%
+  left_join(teamnames, by = c("hteam" = "FullName")) %>%
+  left_join(teamnames, by = c("ateam" = "FullName"), suffix = c("_h", "_a")) %>%
+  mutate(team = Abbr_0,
+         team.1 = Abbr_1,
+         hteam = Abbr_h,
+         ateam = Abbr_a) %>%
+  select(-c(Abbr_0, Abbr_1, Abbr_h, Abbr_a))
 
 # Engineer features ####
 
@@ -95,8 +99,11 @@ merged.passes <- merged.passes %>%
             .funs = factor) %>%
   group_by(gameID, half) %>%
   arrange(minute) %>%
-  mutate(first.pass = ifelse(row_number() == 1, 1, 0),
-         second.pass = ifelse(row_number() == 2, 1, 0)) %>%
+  mutate(first.pass = ifelse(row_number() == 1, 1, 
+                             ifelse(hscore != lag(hscore) | ascore != lag(ascore), 1, 0)),
+         second.pass = ifelse(first.pass == 1, 0, 
+                              ifelse(row_number() == 2, 1, 
+                                     ifelse(team == lag(team) & (hscore != lag(hscore, 2) | ascore != lag(ascore, 2)), 1, 0)))) %>%
   select(-c(minute.temp, second.temp)) %>%
   ungroup()
 
@@ -146,23 +153,23 @@ merged.passes <- merged.passes %>%
 # Build pass success model
 # Include first pass of the half indicator!
 library(gbm)
-set.seed(17)
-success.gbm.distance <- gbm(success ~ home + playerdiff + x + y + angle + Position.model + 
-                              freekick + headpass + longball + throwin + throughball + 
-                              cross + corner + playerdiff + distance + first.pass,
-                            data = merged.passes,
-                            distribution = "bernoulli",
-                            n.trees = 1000,
-                            interaction.depth = 5,
-                            shrinkage = 0.1,
-                            n.minobsinnode = 20, 
-                            train.fraction = 1,
-                            keep.data = F)
+# set.seed(17)
+# success.gbm.distance <- gbm(success ~ home + playerdiff + x + y + angle + Position.model + 
+#                               freekick + headpass + longball + throwin + throughball + 
+#                               cross + corner + playerdiff + distance + first.pass + second.pass,
+#                             data = merged.passes,
+#                             distribution = "bernoulli",
+#                             n.trees = 1000,
+#                             interaction.depth = 5,
+#                             shrinkage = 0.1,
+#                             n.minobsinnode = 20, 
+#                             train.fraction = 1,
+#                             keep.data = F)
 
 set.seed(21)
 success.gbm <- gbm(success ~ home + playerdiff + x + y + angle + Position.model + 
                      freekick + headpass + longball + throwin + throughball + 
-                     cross + corner + playerdiff + first.pass,
+                     cross + corner + playerdiff + first.pass + second.pass,
                    data = merged.passes,
                    distribution = "bernoulli",
                    n.trees = 1000,
@@ -173,7 +180,7 @@ success.gbm <- gbm(success ~ home + playerdiff + x + y + angle + Position.model 
                    keep.data = F)
 
 saveRDS(success.gbm, "IgnoreList/xPassModel.rds")
-saveRDS(success.gbm.distance, "IgnoreList/xPassModel_withDistance.rds")
+# saveRDS(success.gbm.distance, "IgnoreList/xPassModel_withDistance.rds")
 
 #merged.passes[["success.pred.distance"]] <- predict(success.gbm.distance, merged.passes, type = "response", n.trees = 1000)
 merged.passes[["success.pred"]] <- predict(success.gbm, merged.passes, type = "response", n.trees = 1000)
@@ -181,9 +188,9 @@ merged.passes[["success.pred"]] <- predict(success.gbm, merged.passes, type = "r
 merged.passes <- merged.passes %>%
   select(-c(eventID, hteam, ateam, final, hplayers, aplayers, 
             teamEventId, Key2, position, Formation, Player, players,
-            Key1, second.pass))
+            Key1))
 
-saveRDS(merged.passes, "IgnoreList/AllPassingData.rds")
+# saveRDS(merged.passes, "IgnoreList/AllPassingData.rds")
 
 
 

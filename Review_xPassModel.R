@@ -10,12 +10,13 @@ passes <- readRDS("IgnoreList/AllPassingData.rds")
 smod <- readRDS("IgnoreList/xPassModel.rds")
 # Partial plots ####
 plot(smod, i.var = "angle", return.grid = T, type = "response", continuous.resolution = 25) %>%
-  mutate(angle = 180*angle/pi) %>%
+  mutate(angle = -180*angle/pi) %>%
+  filter(abs(angle) <= 160) %>%
   ggplot(aes(x = angle, y = y)) +
   geom_line(size = 2) +
   xlab("Angle (degrees)") + ylab("Completion probability") + ggtitle("Predicted pass success by angle") +
   scale_y_continuous(labels = scales::percent, limits = c(0, 1)) + 
-  labs(caption = "0 degrees implies forward; positive angles in the counterclockwise direction.") +
+  labs(caption = "0 degrees implies forward; positive angles imply the passer's right") +
   theme(plot.caption = element_text(hjust = 0.5))
 
 xy.tab <- plot(smod, i.var = c("x", "y"), return.grid = T, type = "response", continuous.resolution = 12)
