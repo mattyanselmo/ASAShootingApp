@@ -170,7 +170,22 @@ set.seed(21)
 success.gbm <- gbm(success ~ home + playerdiff + x + y + angle + Position.model + 
                      freekick + headpass + longball + throwin + throughball + 
                      cross + corner + playerdiff + first.pass + second.pass,
-                   data = merged.passes,
+                   data = merged.passes %>%
+                     filter(year < 2018),
+                   distribution = "bernoulli",
+                   n.trees = 1000,
+                   interaction.depth = 5,
+                   shrinkage = 0.1,
+                   n.minobsinnode = 20, 
+                   train.fraction = 1,
+                   keep.data = F)
+
+set.seed(13)
+success.gbm.16 <- gbm(success ~ home + playerdiff + x + y + angle + Position.model + 
+                     freekick + headpass + longball + throwin + throughball + 
+                     cross + corner + playerdiff + first.pass + second.pass,
+                   data = merged.passes %>%
+                     filter(year < 2017),
                    distribution = "bernoulli",
                    n.trees = 1000,
                    interaction.depth = 5,
@@ -180,10 +195,12 @@ success.gbm <- gbm(success ~ home + playerdiff + x + y + angle + Position.model 
                    keep.data = F)
 
 saveRDS(success.gbm, "IgnoreList/xPassModel.rds")
+saveRDS(success.gbm.16, "IgnoreList/xPassModel_2016.rds")
 # saveRDS(success.gbm.distance, "IgnoreList/xPassModel_withDistance.rds")
 
 #merged.passes[["success.pred.distance"]] <- predict(success.gbm.distance, merged.passes, type = "response", n.trees = 1000)
 merged.passes[["success.pred"]] <- predict(success.gbm, merged.passes, type = "response", n.trees = 1000)
+merged.passes[["success.pred.16"]] <- predict(success.gbm.16, merged.passes, type = "response", n.trees = 1000)
 
 merged.passes <- merged.passes %>%
   select(-c(eventID, hteam, ateam, final, hplayers, aplayers, 
