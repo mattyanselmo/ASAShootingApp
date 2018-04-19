@@ -21,12 +21,12 @@ shinyUI(
                                          tags$style(
                                            HTML(
                                              ".checkbox-inline { 
-                    margin-left: 0px;
-                    margin-right: 10px;
+                    margin-left: 20px;
+                    margin-right: 0px;
           }
          .checkbox-inline+.checkbox-inline {
-                    margin-left: 0px;
-                    margin-right: 10px;
+                    margin-left: 20px;
+                    margin-right: 0px;
           }
         "
                                            )
@@ -60,7 +60,8 @@ shinyUI(
                                                         selected = c("G", "D", "B", "M", "A", "F", "S")),
                                      radioButtons('shooting_seasonordate',
                                                   'Filter by:',
-                                                  choices = c('Season', 'Date')),
+                                                  choices = c('Season', 'Date'),
+                                                  inline = T),
                                      conditionalPanel(condition = "input.shooting_seasonordate == 'Season'",
                                                       checkboxGroupInput('shooting_seasonfilter',
                                                                          'Select seasons:',
@@ -161,50 +162,70 @@ shinyUI(
                         # Team xG tab panel ####
                         tabPanel('Teams',
                                  sidebarLayout(
-                                   sidebarPanel(width = 2,
-                                                radioButtons('team_advanced',
-                                                             '',
-                                                             choices = c('Basic stats', 'Advanced stats')),
-                                                conditionalPanel("input.team_seasonordate == 'Season' && input.team_seasonfilter.length == 1",
-                                                                 checkboxInput('team_conferenceview',
-                                                                               'View by conference',
-                                                                               value = T)),
-                                                radioButtons('team_seasonordate',
-                                                             'Filter by:',
-                                                             choices = c('Season', 'Date')),
-                                                conditionalPanel(condition = "input.team_seasonordate == 'Season'",
-                                                                 checkboxGroupInput('team_seasonfilter',
-                                                                                    'Select seasons:',
-                                                                                    choices = min(teamxgoals$Season):max(teamxgoals$Season),
-                                                                                    selected = max(teamxgoals$Season))),
-                                                conditionalPanel(condition = "input.team_seasonordate == 'Date'",
-                                                                 dateInput('team_date1',
-                                                                           'From:',
-                                                                           value = min(teamxgoals$date[teamxgoals$Season == max(teamxgoals$Season)]),
-                                                                           min = min(teamxgoals$date),
-                                                                           max = max(teamxgoals$date),
-                                                                           format = 'mm/dd/yyyy'),
-                                                                 dateInput('team_date2',
-                                                                           'To:',
-                                                                           value = max(teamxgoals$date),
-                                                                           min = min(teamxgoals$date),
-                                                                           max = max(teamxgoals$date),
-                                                                           format = 'mm/dd/yyyy')
-                                                ),
-                                                checkboxInput('team_byseasons',
-                                                              label = 'Split teams by seasons',
-                                                              value = T),
-                                                selectInput('team_pattern',
-                                                            'Pattern of play:',
-                                                            choices = c('All', sort(unique(teamxgoals$patternOfPlay.model))),
-                                                            selected = 'All'),
-                                                checkboxInput('team_evenstate',
-                                                              label = 'Even gamesate only',
-                                                              value = F),
-                                                checkboxGroupInput('team_home',
-                                                                   label = 'Venue:',
-                                                                   choices = c('Home', 'Away'),
-                                                                   selected = c('Home', 'Away'))),
+                                   sidebarPanel(tagList(
+                                     tags$head(
+                                       tags$style(
+                                         HTML(
+                                           ".checkbox-inline { 
+                                           margin-left: 20px;
+                                           margin-right: 0px;
+                                           }
+                                           .checkbox-inline+.checkbox-inline {
+                                           margin-left: 20px;
+                                           margin-right: 0px;
+                                           }
+                                           "
+                                         )
+                                       ) 
+                                     )),
+                                     width = 2,
+                                     radioButtons('team_advanced',
+                                                  'Stats option:',
+                                                  choices = c('Basic' = "Basic stats", 'Advanced' = "Advanced stats"),
+                                                  inline = T),
+                                     conditionalPanel("input.team_seasonordate == 'Season' && input.team_seasonfilter.length == 1",
+                                                      checkboxInput('team_conferenceview',
+                                                                    'View by conference',
+                                                                    value = T)),
+                                     checkboxInput('team_byseasons',
+                                                   label = 'Split teams by seasons',
+                                                   value = T),
+                                     radioButtons('team_seasonordate',
+                                                  'Filter by:',
+                                                  choices = c('Season', 'Date'),
+                                                  inline = T),
+                                     conditionalPanel(condition = "input.team_seasonordate == 'Season'",
+                                                      checkboxGroupInput('team_seasonfilter',
+                                                                         'Select seasons:',
+                                                                         choices = min(teamxgoals$Season):max(teamxgoals$Season),
+                                                                         selected = max(teamxgoals$Season),
+                                                                         inline = T)),
+                                     conditionalPanel(condition = "input.team_seasonordate == 'Date'",
+                                                      dateInput('team_date1',
+                                                                'From:',
+                                                                value = min(teamxgoals$date[teamxgoals$Season == max(teamxgoals$Season)]),
+                                                                min = min(teamxgoals$date),
+                                                                max = max(teamxgoals$date),
+                                                                format = 'mm/dd/yyyy'),
+                                                      dateInput('team_date2',
+                                                                'To:',
+                                                                value = max(teamxgoals$date),
+                                                                min = min(teamxgoals$date),
+                                                                max = max(teamxgoals$date),
+                                                                format = 'mm/dd/yyyy')
+                                     ),
+                                     selectInput('team_pattern',
+                                                 'Pattern of play:',
+                                                 choices = c('All', sort(unique(teamxgoals$patternOfPlay.model))),
+                                                 selected = 'All'),
+                                     checkboxInput('team_evenstate',
+                                                   label = 'Even gamesate only',
+                                                   value = F),
+                                     checkboxGroupInput('team_home',
+                                                        label = 'Venue:',
+                                                        choices = c('Home', 'Away'),
+                                                        selected = c('Home', 'Away'),
+                                                        inline = T)),
                                    mainPanel(
                                      h1('Team shots data'),
                                      p(paste0('Updated through games on ', max(as.Date(teamxgoals$date)))),
@@ -302,55 +323,73 @@ shinyUI(
                         # Keepers tab panel ####
                         tabPanel('Keepers',
                                  sidebarLayout(
-                                   sidebarPanel(width = 2,
-                                                actionButton('keeper_action',
-                                                             label = "Refresh filters"),
-                                                numericInput("keeper_minfilter",
-                                                             label = "Minimum minutes:",
-                                                             value = 0,
-                                                             min = 0, max = 10000, step = 500),
-                                                numericInput('keeper_minshots',
-                                                             "Minimum shots faced:",
-                                                             value = 0,
-                                                             min = 0, max = 100, step = 10),
-                                                radioButtons('keeper_seasonordate',
-                                                             'Filter by:',
-                                                             choices = c('Season', 'Date')),
-                                                conditionalPanel(condition = "input.keeper_seasonordate == 'Season'",
-                                                                 checkboxGroupInput('keeper_seasonfilter',
-                                                                                    'Select seasons:',
-                                                                                    choices = min(playerxgoals$Season):max(playerxgoals$Season),
-                                                                                    selected = max(playerxgoals$Season))),
-                                                conditionalPanel(condition = "input.keeper_seasonordate == 'Date'",
-                                                                 dateInput('keeper_date1',
-                                                                           'From:',
-                                                                           value = min(playerxgoals$date[playerxgoals$Season == max(playerxgoals$Season)]),
-                                                                           min = min(playerxgoals$date),
-                                                                           max = max(playerxgoals$date),
-                                                                           format = 'mm/dd/yyyy'),
-                                                                 dateInput('keeper_date2',
-                                                                           'To:',
-                                                                           value = max(playerxgoals$date),
-                                                                           min = min(playerxgoals$date),
-                                                                           max = max(playerxgoals$date),
-                                                                           format = 'mm/dd/yyyy')
-                                                ),                  
-                                                h5(HTML('<b>Other filters:</b>')),
-                                                checkboxInput('keeper_byteams',
-                                                              label = 'Split by teams',
-                                                              value = F),
-                                                checkboxInput('keeper_byseasons',
-                                                              label = 'Split by seasons',
-                                                              value = T),
-                                                checkboxInput('keeper_othershots',
-                                                              label = 'Include non PK/FK',
-                                                              value = T),
-                                                checkboxInput('keeper_pk',
-                                                              label = 'Include PKs',
-                                                              value = T),
-                                                checkboxInput('keeper_fk',
-                                                              label = 'Include FKs',
-                                                              value = T)),
+                                   sidebarPanel(tagList(
+                                     tags$head(
+                                       tags$style(
+                                         HTML(
+                                           ".checkbox-inline { 
+                     margin-left: 20px;
+                     margin-right: 0px;
+                     }
+                     .checkbox-inline+.checkbox-inline {
+                     margin-left: 20px;
+                     margin-right: 0px;
+                     }
+                     "
+                                         )
+                                       ) 
+                                     )),
+                                     width = 2,
+                                     actionButton('keeper_action',
+                                                  label = "Refresh filters"),
+                                     numericInput("keeper_minfilter",
+                                                  label = "Minimum minutes:",
+                                                  value = 0,
+                                                  min = 0, max = 10000, step = 500),
+                                     numericInput('keeper_minshots',
+                                                  "Minimum shots faced:",
+                                                  value = 0,
+                                                  min = 0, max = 100, step = 10),
+                                     radioButtons('keeper_seasonordate',
+                                                  'Filter by:',
+                                                  choices = c('Season', 'Date'),
+                                                  inline = T),
+                                     conditionalPanel(condition = "input.keeper_seasonordate == 'Season'",
+                                                      checkboxGroupInput('keeper_seasonfilter',
+                                                                         'Select seasons:',
+                                                                         choices = min(playerxgoals$Season):max(playerxgoals$Season),
+                                                                         selected = max(playerxgoals$Season),
+                                                                         inline = T)),
+                                     conditionalPanel(condition = "input.keeper_seasonordate == 'Date'",
+                                                      dateInput('keeper_date1',
+                                                                'From:',
+                                                                value = min(playerxgoals$date[playerxgoals$Season == max(playerxgoals$Season)]),
+                                                                min = min(playerxgoals$date),
+                                                                max = max(playerxgoals$date),
+                                                                format = 'mm/dd/yyyy'),
+                                                      dateInput('keeper_date2',
+                                                                'To:',
+                                                                value = max(playerxgoals$date),
+                                                                min = min(playerxgoals$date),
+                                                                max = max(playerxgoals$date),
+                                                                format = 'mm/dd/yyyy')
+                                     ),                  
+                                     h5(HTML('<b>Other filters:</b>')),
+                                     checkboxInput('keeper_byteams',
+                                                   label = 'Split by teams',
+                                                   value = F),
+                                     checkboxInput('keeper_byseasons',
+                                                   label = 'Split by seasons',
+                                                   value = T),
+                                     checkboxInput('keeper_othershots',
+                                                   label = 'Include non PK/FK',
+                                                   value = T),
+                                     checkboxInput('keeper_pk',
+                                                   label = 'Include PKs',
+                                                   value = T),
+                                     checkboxInput('keeper_fk',
+                                                   label = 'Include FKs',
+                                                   value = T)),
                                    mainPanel(
                                      h1('Keeper xGoals'),
                                      p(paste0('Updated through games on ', max(as.Date(keeperxgoals$date)))),
@@ -406,55 +445,56 @@ shinyUI(
                                        tags$style(
                                          HTML(
                                            ".checkbox-inline { 
-                    margin-left: 0px;
-                    margin-right: 10px;
+                    margin-left: 20px;
+                    margin-right: 0px;
           }
          .checkbox-inline+.checkbox-inline {
-                    margin-left: 0px;
-                    margin-right: 10px;
+                    margin-left: 20px;
+                    margin-right: 0px;
           }
         "
                                          )
                                        ) 
                                      )),
                                      width = 2,
-                                                actionButton('passing_action',
-                                                             label = "Refresh filters"),
-                                                numericInput("passing_minfilter",
-                                                             label = "Minimum minutes:",
-                                                             value = 0,
-                                                             min = 0, max = 10000, 500),
-                                                numericInput('passing_minpasses',
-                                                             "Minimum passes:",
-                                                             value = 0,
-                                                             min = 0, max = 1000, step = 50),
-                                                checkboxGroupInput("passing_position",
-                                                                   label = "Position:",
-                                                                   inline = T,
-                                                                   choices = c("Keeper (G)" = "G",
-                                                                               "Central Def (D)" = "D",
-                                                                               "Back (B)" = "B",
-                                                                               "Midfielder (M)" = "M",
-                                                                               "Attacking Mid (A)" = "A",
-                                                                               "Forward (F)" = "F",
-                                                                               "Sub (S)" = "S"),
-                                                                   selected = c("G", "D", "B", "M", "A", "F", "S")),
-                                                radioButtons('passing_third',
-                                                             label = "Third:",
-                                                             inline = F,
-                                                             choices = c("All", "Attacking" = "Att", "Middle" = "Mid", "Defensive" = "Def"),
-                                                             selected = "All"),
-                                                checkboxGroupInput('passing_seasonfilter',
-                                                                   'Select seasons:',
-                                                                   choices = min(playerpassing$year):max(playerpassing$year),
-                                                                   selected = max(playerpassing$year)),                  
-                                                h5(HTML('<b>Other filters:</b>')),
-                                                checkboxInput('passing_byteams',
-                                                              label = 'Split players by teams',
-                                                              value = F),
-                                                checkboxInput('passing_byseasons',
-                                                              label = 'Split players by seasons',
-                                                              value = T)),
+                                     actionButton('passing_action',
+                                                  label = "Refresh filters"),
+                                     numericInput("passing_minfilter",
+                                                  label = "Minimum minutes:",
+                                                  value = 0,
+                                                  min = 0, max = 10000, 500),
+                                     numericInput('passing_minpasses',
+                                                  "Minimum passes:",
+                                                  value = 0,
+                                                  min = 0, max = 1000, step = 50),
+                                     checkboxGroupInput("passing_position",
+                                                        label = "Position:",
+                                                        inline = T,
+                                                        choices = c("Keeper (G)" = "G",
+                                                                    "Central Def (D)" = "D",
+                                                                    "Back (B)" = "B",
+                                                                    "Midfielder (M)" = "M",
+                                                                    "Attacking Mid (A)" = "A",
+                                                                    "Forward (F)" = "F",
+                                                                    "Sub (S)" = "S"),
+                                                        selected = c("G", "D", "B", "M", "A", "F", "S")),
+                                     radioButtons('passing_third',
+                                                  label = "Third:",
+                                                  inline = F,
+                                                  choices = c("All", "Attacking" = "Att", "Middle" = "Mid", "Defensive" = "Def"),
+                                                  selected = "All"),
+                                     checkboxGroupInput('passing_seasonfilter',
+                                                        'Select seasons:',
+                                                        choices = min(playerpassing$year):max(playerpassing$year),
+                                                        selected = max(playerpassing$year),
+                                                        inline = T),                  
+                                     h5(HTML('<b>Other filters:</b>')),
+                                     checkboxInput('passing_byteams',
+                                                   label = 'Split players by teams',
+                                                   value = F),
+                                     checkboxInput('passing_byseasons',
+                                                   label = 'Split players by seasons',
+                                                   value = T)),
                                    mainPanel(h1('Player xPasses'),
                                              # p(paste0('Updated through games on ', max(as.Date(playerpassing$year)))), # not segmented by game (yet)
                                              downloadButton('passing_download', 'Download CSV'),
