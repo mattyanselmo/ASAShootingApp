@@ -108,10 +108,12 @@ shinyUI(
                                      tabsetPanel(id = 'player_subtab',
                                                  tabPanel('Tables: totals',
                                                           value = "tablestotals",
+                                                          p(HTML("<i>Per-minutes data and position information only goes back to 2015.</i>")),
                                                           DT::dataTableOutput('shootertable')
                                                  ),
                                                  tabPanel('Scatter plots: totals',
                                                           value = "plotstotals",
+                                                          p(HTML("<i>Per-minutes data and position information only goes back to 2015.</i>")),
                                                           fluidPage(fluidRow(
                                                             column(3,
                                                                    selectInput('shooterplot_xvar',
@@ -132,11 +134,12 @@ shinyUI(
                                                             plotOutput('shooterplot')))),
                                                  tabPanel('Tables: per 96',
                                                           value = "tablesper96",
-                                                          p(HTML("<i>Per-minutes data only goes back to 2015.</i>")),
+                                                          p(HTML("<i>Per-minutes data and position information only goes back to 2015.</i>")),
                                                           DT::dataTableOutput('shootertable_per96')
                                                  ),
                                                  tabPanel('Scatter plots: per 96',
                                                           value = "plotsper96",
+                                                          p(HTML("<i>Per-minutes data and position information only goes back to 2015.</i>")),
                                                           fluidPage(fluidRow(
                                                             column(3,
                                                                    selectInput('shooterplot_per96_xvar',
