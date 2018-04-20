@@ -8,10 +8,10 @@
 # minfilter = 0
 # shotfilter = 0
 # keyfilter = 0
-# byteams = T
+# byteams = F
 # byseasons = T
-# FK = F
-# PK = F
+# FK = T
+# PK = T
 # OtherShots = T
 # Mode <- function(x) {
 #   ux <- unique(x)
@@ -192,10 +192,10 @@ shooterxgoals.func <- function(playerxgoals = playerxgoals,
 #                    minutes_df <- readRDS("IgnoreList/MinutesByGameID.rds"),
 #                    date1 = as.Date('2000-01-01'),
 #                    date2 = as.Date('9999-12-31'),
-#                    season = 2015:2018,
+#                    season = 2014:2015,
 #                    shotfilter = 0,
 #                    keyfilter = 0,
-#                    byteams = T,
+#                    byteams = F,
 #                    byseasons = T,
 #                    FK = T,
 #                    PK = T) %>%

@@ -98,7 +98,11 @@ shinyServer(function(input, output) {
       dt_total[['plotnames']] <- unlist(lapply(strsplit(dt_total$Player, " "), function(x) { return(x[length(x)]) }))
     }
     
-    dt_total %>% filter(Pos %in% shooter_inputs$shooting_position)
+    if("Pos" %in% names(dt_total)){
+      dt_total %>% filter(Pos %in% shooter_inputs$shooting_position)
+    } else{
+      dt_total
+    }
   })
   
   dt_per96 <- reactive({
