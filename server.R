@@ -886,7 +886,23 @@ shinyServer(function(input, output) {
                            defense = teampassing.defense,
                            season = input$teampassing_seasonfilter,
                            byseasons = input$teampassing_byseasons,
-                           third.filter = input$teampassing_thirdfilter) 
+                           third.filter = input$teampassing_thirdfilter,
+                           games_df = gamesplayed) 
+    
+    is.num <- sapply(dt, is.numeric)
+    dt[is.num] <- lapply(dt[is.num], round, 3)
+    
+    dt
+  })
+  
+  dt_team_passing_pergame <- reactive({
+    dt <- teampassing.func(offense = teampassing.offense,
+                           defense = teampassing.defense,
+                           season = input$teampassing_seasonfilter,
+                           byseasons = input$teampassing_byseasons,
+                           third.filter = input$teampassing_thirdfilter,
+                           pergame = T,
+                           games_df = gamesplayed) 
     
     is.num <- sapply(dt, is.numeric)
     dt[is.num] <- lapply(dt[is.num], round, 3)
@@ -910,11 +926,35 @@ shinyServer(function(input, output) {
       formatRound(columns = columns.dec2, digits = 2)
   })
   
+  output$teampassing_pergame <- DT::renderDataTable({
+    dt <- dt_team_passing_pergame()
+    
+    columns.perc1 <- c("PctF", "xPctF", "PctA", "xPctA")
+    columns.dec1 <- c("PassF/g", "PassA/g")
+    columns.dec2 <- c("Per100F", "Per100A", "VertF", "VertA", "VertDiff", "ScoreF/g", "ScoreA/g", "ScoreDiff/g")
+    
+    DT::datatable(dt,
+                  rownames = F,
+                  options(list(autoWidth = T,
+                               pageLength = 25))) %>%
+      formatPercentage(columns = columns.perc1, digits = 1) %>%
+      formatRound(columns = columns.dec1, digits = 1) %>%
+      formatRound(columns = columns.dec2, digits = 2)
+  })
+  
   output$teampassing_download <- downloadHandler(
     filename = 'ASAteampassingtable_total.csv',
     
     content = function(file){
       write.csv(dt_team_passing(), file, row.names = F)
+    }
+  )
+  
+  output$teampassing_download_pergame <- downloadHandler(
+    filename = 'ASAteampassingtable_pergame.csv',
+    
+    content = function(file){
+      write.csv(dt_team_passing_pergame(), file, row.names = F)
     }
   )
   

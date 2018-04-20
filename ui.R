@@ -579,7 +579,7 @@ shinyUI(
                                    ),
                                    mainPanel(
                                      h1('Team passing data'),
-                                     # p(paste0('Updated through games on ', max(as.Date(???)))),
+                                     p(paste0('Updated through games on ', max(as.Date(teamxgoals$date)))),
                                      tabsetPanel(id = 'teampassing_subtab',
                                                  tabPanel('Totals',
                                                           downloadButton('teampassing_download', 'Download CSV'),
@@ -588,18 +588,10 @@ shinyUI(
                                                           DT::dataTableOutput("teampassing_total")
                                                  ),
                                                  tabPanel('Per game',
-                                                          p("This tab is still being developed!")
-                                                          # downloadButton('team_download_pergame', 'Download CSV'),
-                                                          # br(),
-                                                          # br(),
-                                                          # conditionalPanel(condition = "input.team_seasonordate == 'Season' && input.team_seasonfilter.length == 1",
-                                                          #                  h2('Western conference')),
-                                                          # div(DT::dataTableOutput('teampergamexgoalswest')),
-                                                          # br(),
-                                                          # conditionalPanel(condition = "input.team_seasonordate == 'Season' && input.team_seasonfilter.length == 1",
-                                                          #                  h2('Eastern conference'),
-                                                          #                  div(DT::dataTableOutput('teampergamexgoalseast')))
-                                                 ),
+                                                          downloadButton('teampassing_download_pergame', 'Download CSV'),
+                                                          br(),
+                                                          br(),
+                                                          DT::dataTableOutput("teampassing_pergame")),
                                                  tabPanel('Scatter plots',
                                                           p("This tab is still being developed!")
                                                           # p(div(HTML("<i> All statistics on a per game basis. Not all teams labeled. </i>"))),

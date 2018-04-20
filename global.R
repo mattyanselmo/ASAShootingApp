@@ -16,6 +16,7 @@ playerpos <- readRDS("IgnoreList/playerpositions_byseason.rds")
 playerpassing <- readRDS("IgnoreList/xPassingByPlayer.rds")
 teampassing.offense <- readRDS("IgnoreList/xPassingByTeamOffense.rds")
 teampassing.defense <- readRDS("IgnoreList/xPassingByTeamDefense.rds")
+gamesplayed <- readRDS("IgnoreList/GamesPlayed_forTeamPassing.rds")
 
 #pred.data <- readRDS('IgnoreList/TeamPredictionsData_week35.rds')
 #load('IgnoreList/UnivariatePoissonModels.Rdata')
