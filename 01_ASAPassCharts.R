@@ -23,6 +23,7 @@ if(file.exists('C:/Users/Matthias')){
 #load in the requisite data
 passes <- bind_rows(lapply(paste0("IgnoreList/", grep('raw passes', list.files("IgnoreList/"), value = T)),
                            function(x) read.csv(x, stringsAsFactors = F))) %>%
+  select(-one_of("X")) %>%
   mutate(date = as.Date(date, format = "%m/%d/%Y"),
          year = as.numeric(format(date, "%Y"))) %>%
   mutate(passer = str_replace_all(passer, 

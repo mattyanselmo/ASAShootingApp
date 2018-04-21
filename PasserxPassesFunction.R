@@ -1,16 +1,16 @@
 # Passing breakdown by player
 
 
-# # Sample inputs:
-  # playerpassing <- readRDS("IgnoreList/xPassingByPlayer.rds")
-  # minpasses = 50
-  # minfilter = 0
-  # seasonfilter = 2015:2018
-  # byteams = F
-  # byseasons = F
-  # third.filter = "All"
-  # pos.filter = c("G", "D", "B", "M", "A", "F", "S")
-  # 
+# Sample inputs:
+# playerpassing <- readRDS("IgnoreList/xPassingByPlayer.rds")
+# minpasses = 0
+# minfilter = 0
+# seasonfilter = 2015:2018
+# byteams = F
+# byseasons = T
+# third.filter = "All"
+# pos.filter = c("G", "D", "B", "M", "A", "F", "S")
+
 passer.xpasses <- function(playerpassing,
                            minpasses,
                            minfilter,
@@ -40,7 +40,7 @@ passer.xpasses <- function(playerpassing,
                                sum(tapply(touches, paste0(year, "_", team), function(x) x[1])))) %>%
     ungroup() %>%
     select(-one_of("team")) %>%
-    filter(Passes > minpasses, Min > minfilter)
+    filter(Passes >= minpasses, Min >= minfilter)
   
   if(third.filter != "All"){
   playerpassing.temp <- playerpassing.temp %>%
