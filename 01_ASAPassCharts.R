@@ -30,10 +30,13 @@ passes <- bind_rows(lapply(paste0("IgnoreList/", grep('raw passes', list.files("
                                   c('Kazaishvili' = 'Qazaishvili', 
                                     'Jorge Villafaña' = 'Jorge Villafana',
                                     "Antonio Mlinar Dalamea" = "Antonio Mlinar Delamea")),
-         passer = ifelse(row_number() %in% grep("Boniek", passer), "Oscar Boniek Garcia", passer))
+         passer = ifelse(row_number() %in% grep("Boniek", passer), "Oscar Boniek Garcia", passer)) %>%
+  select(-one_of("X"))
 
-vertical.lineups <- read.csv('IgnoreList/vertical starting lineups.csv', stringsAsFactors = FALSE)
-jy.starting.lineups <- read.csv('IgnoreList/Starting Lineups editedJY.csv', stringsAsFactors = FALSE)
+vertical.lineups <- read.csv('IgnoreList/vertical starting lineups.csv', stringsAsFactors = FALSE) %>%
+  select(-one_of("X"))
+jy.starting.lineups <- read.csv('IgnoreList/Starting Lineups editedJY.csv', stringsAsFactors = FALSE) %>%
+  select(-one_of("X"))
 
 
 #########################################################
@@ -59,17 +62,12 @@ vertical.lineups$Key2 <- paste(vertical.lineups$gameID, vertical.lineups$players
 # Create key2 for passes df
 passes$Key2 <- paste(passes$gameID, passes$passer, sep = "")
 
-# Progress: If we go back to 2015, it looks like 5 formations are missing from Jared's position analysis
-# 3511, 3421, 3142, 343d, and 3331
-
 # Merge lineups with their proper positions
-# merged.lineups <- merge(jy.starting.lineups, vertical.lineups, by.x = 'Key', by.y = 'Key1')
 merged.lineups <- vertical.lineups %>%
   left_join(jy.starting.lineups, by = c("Key1" = "Key")) %>%
   filter(!duplicated(Key2))
 
 # Merge lineups with positions
-# merged.passes <- merge(passes, merged.lineups, by.x = 'Key2', by.y = 'Key2')
 merged.passes <- left_join(passes, 
                            merged.lineups %>%
                              select(-c(team, gameID)), 
@@ -77,10 +75,14 @@ merged.passes <- left_join(passes,
 
 merged.passes <- merged.passes %>%
   left_join(teamnames, by = c('team' = 'FullName')) %>%
-  left_join(teamnames, by = c('team.1' = 'FullName')) %>%
-  mutate(team = Abbr.x,
-         team.1 = Abbr.y) %>%
-  select(-c(Abbr.x, Abbr.y))
+  left_join(teamnames, by = c('team.1' = 'FullName'), suffix = c("_0", "_1")) %>%
+  left_join(teamnames, by = c("hteam" = "FullName")) %>%
+  left_join(teamnames, by = c("ateam" = "FullName"), suffix = c("_h", "_a")) %>%
+  mutate(team = Abbr_0,
+         team.1 = Abbr_1,
+         hteam = Abbr_h,
+         ateam = Abbr_a) %>%
+  select(-c(Abbr_0, Abbr_1, Abbr_h, Abbr_a))
 
 # Engineer features ####
 
@@ -92,7 +94,7 @@ Mode <- function(x) {
 
 merged.passes <- merged.passes %>%
   group_by(passer) %>%
-  mutate(Position = ifelse(is.na(Position) | Position == "S", na.omit(c(Mode(Position[Position != "S"]), "S"))[1], Position)) %>%
+  mutate(Position = ifelse(is.na(Position) | Position == "S", na.omit(c(Mode(Position[Position != "S"]), "S"))[1], Position)) %>% # Edit this?
   ungroup() %>%
   mutate(Position.model = factor(ifelse(Position == "G", "GK", "Field")))
 
@@ -113,8 +115,11 @@ merged.passes <- merged.passes %>%
             .funs = factor) %>%
   group_by(gameID, half) %>%
   arrange(minute) %>%
-  mutate(first.pass = ifelse(row_number() == 1, 1, 0),
-         second.pass = ifelse(row_number() == 2, 1, 0)) %>%
+  mutate(first.pass = ifelse(row_number() == 1, 1, 
+                             ifelse(hscore != lag(hscore) | ascore != lag(ascore), 1, 0)),
+         second.pass = ifelse(first.pass == 1, 0, 
+                              ifelse(row_number() == 2, 1, 
+                                     ifelse(team == lag(team) & (hscore != lag(hscore, 2) | ascore != lag(ascore, 2)), 1, 0)))) %>%
   select(-c(minute.temp, second.temp)) %>%
   ungroup()
 
@@ -125,7 +130,7 @@ merged.passes[["success.pred"]] <- predict(success.gbm, merged.passes, type = "r
 merged.passes <- merged.passes %>%
   select(-c(hteam, ateam, final, hplayers, aplayers, 
             teamEventId, Key2, position, Formation, Player, players,
-            Key1, second.pass)) %>%
+            Key1)) %>%
   #   mutate(type = ifelse(ifelse(throughball == 1, "through",
   #                               ifelse(freekick == 1, "freekick",
   #                                      ifelse(corner == 1, "corner", )))))
@@ -133,7 +138,18 @@ merged.passes <- merged.passes %>%
   mutate(typical.pos = Mode(Position)) %>%
   ungroup()
 
+playerpos <- merged.passes %>% 
+  group_by(passer, year, team) %>% 
+  summarize(season.pos = as.character(Mode(Position)),
+            typical.pos = as.character(typical.pos[1])) %>%
+  mutate(season.pos = ifelse(season.pos == "S", typical.pos, season.pos)) %>%
+  select(-typical.pos) %>%
+  ungroup()
 
+saveRDS(playerpos, "IgnoreList/playerpositions_byseason.rds")
+
+merged.passes <- merged.passes %>%
+  left_join(playerpos, by = c("passer", "year", "team"))
 
 saveRDS(merged.passes, "IgnoreList/AllPassingData.rds")
 write.csv(merged.passes, "IgnoreList/AllPassingData.csv", row.names = F)

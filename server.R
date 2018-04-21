@@ -19,6 +19,7 @@ shinyServer(function(input, output) {
                                    shooting_minfilter = 0,
                                    shooting_minshots = 0,
                                    shooting_minkeypasses = 0,
+                                   shooting_position = c("G", "D", "B", "M", "A", "F", "S"),
                                    shooting_byteams = F,
                                    shooting_byseasons = T,
                                    shooting_other = T,
@@ -39,6 +40,7 @@ shinyServer(function(input, output) {
                  shooter_inputs$shooting_minfilter <- input$shooting_minfilter
                  shooter_inputs$shooting_minshots <- input$shooting_minshots
                  shooter_inputs$shooting_minkeypasses <- input$shooting_minkeypasses
+                 shooter_inputs$shooting_position <- input$shooting_position
                  shooter_inputs$shooting_byteams <- input$shooting_byteams
                  shooter_inputs$shooting_byseasons <- input$shooting_byseasons
                  shooter_inputs$shooting_other <- input$shooting_other
@@ -96,7 +98,11 @@ shinyServer(function(input, output) {
       dt_total[['plotnames']] <- unlist(lapply(strsplit(dt_total$Player, " "), function(x) { return(x[length(x)]) }))
     }
     
-    dt_total
+    if("Pos" %in% names(dt_total)){
+      dt_total %>% filter(Pos %in% shooter_inputs$shooting_position)
+    } else{
+      dt_total
+    }
   })
   
   dt_per96 <- reactive({
@@ -138,7 +144,7 @@ shinyServer(function(input, output) {
       dt_per96[['plotnames']] <- unlist(lapply(strsplit(dt_per96$Player, " "), function(x) { return(x[length(x)]) }))
     }
     
-    dt_per96
+    dt_per96 %>% filter(Pos %in% shooter_inputs$shooting_position)
     
   })
   
@@ -884,7 +890,23 @@ shinyServer(function(input, output) {
                            defense = teampassing.defense,
                            season = input$teampassing_seasonfilter,
                            byseasons = input$teampassing_byseasons,
-                           third.filter = input$teampassing_thirdfilter) 
+                           third.filter = input$teampassing_thirdfilter,
+                           games_df = gamesplayed) 
+    
+    is.num <- sapply(dt, is.numeric)
+    dt[is.num] <- lapply(dt[is.num], round, 3)
+    
+    dt
+  })
+  
+  dt_team_passing_pergame <- reactive({
+    dt <- teampassing.func(offense = teampassing.offense,
+                           defense = teampassing.defense,
+                           season = input$teampassing_seasonfilter,
+                           byseasons = input$teampassing_byseasons,
+                           third.filter = input$teampassing_thirdfilter,
+                           pergame = T,
+                           games_df = gamesplayed) 
     
     is.num <- sapply(dt, is.numeric)
     dt[is.num] <- lapply(dt[is.num], round, 3)
@@ -908,11 +930,35 @@ shinyServer(function(input, output) {
       formatRound(columns = columns.dec2, digits = 2)
   })
   
+  output$teampassing_pergame <- DT::renderDataTable({
+    dt <- dt_team_passing_pergame()
+    
+    columns.perc1 <- c("PctF", "xPctF", "PctA", "xPctA")
+    columns.dec1 <- c("PassF/g", "PassA/g")
+    columns.dec2 <- c("Per100F", "Per100A", "VertF", "VertA", "VertDiff", "ScoreF/g", "ScoreA/g", "ScoreDiff/g")
+    
+    DT::datatable(dt,
+                  rownames = F,
+                  options(list(autoWidth = T,
+                               pageLength = 25))) %>%
+      formatPercentage(columns = columns.perc1, digits = 1) %>%
+      formatRound(columns = columns.dec1, digits = 1) %>%
+      formatRound(columns = columns.dec2, digits = 2)
+  })
+  
   output$teampassing_download <- downloadHandler(
     filename = 'ASAteampassingtable_total.csv',
     
     content = function(file){
       write.csv(dt_team_passing(), file, row.names = F)
+    }
+  )
+  
+  output$teampassing_download_pergame <- downloadHandler(
+    filename = 'ASAteampassingtable_pergame.csv',
+    
+    content = function(file){
+      write.csv(dt_team_passing_pergame(), file, row.names = F)
     }
   )
   

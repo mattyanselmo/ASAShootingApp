@@ -9,6 +9,9 @@ library(zoo)
 teamnames <- read.csv('TeamNameLinks.csv', stringsAsFactors = F) %>%
   select(-one_of("X"))
 
+teamnames <- read.csv('TeamNameLinks.csv', stringsAsFactors = F) %>%
+  select(-one_of("X"))
+
 if(file.exists('C:/Users/Matthias')){
   temp <- read.csv(paste0("C:/Users/Matthias/Dropbox/ASA Blog Data/", year, " Stats/minutes played by game.csv"))
   write.csv(temp %>% select(-one_of("X")), paste0("C:/Users/Matthias/Documents/GitHub/ASAShootingApp_development/IgnoreList/minutes played by game ", year, ".csv"))
@@ -24,10 +27,15 @@ if(file.exists('C:/Users/Matthias')){
 }
 
 minutesPlayed <- bind_rows(lapply(grep('minutes played by game', list.files('IgnoreList/'), value = T),
-                                  function(x) read.csv(paste0('IgnoreList/', x), stringsAsFactors = F)))
+                                  function(x) read.csv(paste0('IgnoreList/', x), stringsAsFactors = F))) %>%
+  select(-one_of(c("X", "X.1")))
+
+minutesPlayed <- minutesPlayed %>%
+  left_join(teamnames, by = c('team' = 'FullName')) %>%
+  mutate(team = Abbr) %>%
+  select(-Abbr)
 
 minutesPlayed_gameID <- minutesPlayed %>%
-  select(-X) %>%
   mutate(player = str_replace_all(player, 
                                   c('Kazaishvili' = 'Qazaishvili', 
                                     'Jorge Villafaña' = 'Jorge Villafana',

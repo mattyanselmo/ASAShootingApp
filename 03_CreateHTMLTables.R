@@ -73,7 +73,7 @@ dt_xgoals <- lapply(2011:max(playerxgoals$Season),
                       if(x >= 2015){
                         output <- data.frame(namesFL, dt_total %>% 
                                                left_join(dt_per96 %>%
-                                                           select(-Team),
+                                                           select(-Team, -Pos),
                                                          by = c("Player", "Min"),
                                                          suffix = c("", "p96")) %>%
                                                ungroup() %>%
@@ -100,7 +100,7 @@ dt_xgoals <- lapply(2011:max(playerxgoals$Season),
                       } else{
                         output <- data.frame(namesFL, dt_total %>%
                                                ungroup() %>%
-                                               select(-Player, -Min), check.names = F)
+                                               select(-Player), check.names = F)
                         
                         output <- xtable(output, 
                                          digits = c(0, 0, 0, 0, 0, 0, 2, 0, 2, 2, 0, 0, 2, 2, 2, 2),

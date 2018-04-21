@@ -38,7 +38,7 @@ xgbygame <- readRDS('IgnoreList/xGoalsByTeam_byGame.rds')
 keeperxgoals <- readRDS('IgnoreList/xGoalsByKeeper.rds')
 conferences <- read.csv('teamsbyconferencebyseason.csv')
 glossary <- read.csv('Glossary.csv')
-
+playerpos <- readRDS("IgnoreList/playerpositions_byseason.rds")
 playerpassing <- readRDS("IgnoreList/xPassingByPlayer.rds")
 # %>%
 #   bind_rows(data.frame(passer = "God Zlatan",
@@ -57,6 +57,7 @@ playerpassing <- readRDS("IgnoreList/xPassingByPlayer.rds")
 
 teampassing.offense <- readRDS("IgnoreList/xPassingByTeamOffense.rds")
 teampassing.defense <- readRDS("IgnoreList/xPassingByTeamDefense.rds")
+gamesplayed <- readRDS("IgnoreList/GamesPlayed_forTeamPassing.rds")
 
 #pred.data <- readRDS('IgnoreList/TeamPredictionsData_week35.rds')
 #load('IgnoreList/UnivariatePoissonModels.Rdata')
@@ -68,6 +69,11 @@ lm_eqn <- function(df, x, y){
                         b = format(coef(m)[2], digits = 2), 
                         r2 = format(summary(m)$r.squared, digits = 3)))
   as.character(as.expression(eq));                 
+}
+
+Mode <- function(x) {
+  ux <- unique(x)
+  ux[which.max(tabulate(match(x, ux)))]
 }
 
 source('ShooterxGoalsFunction.R')

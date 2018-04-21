@@ -1,6 +1,9 @@
 shooting <- readRDS('IgnoreList/AllShotsData2011-2017.rds')
 library(dplyr)
 
+# incorporate player positions by season
+playerpos <- readRDS("IgnoreList/playerpositions_byseason.rds")
+
 shooting <- shooting %>%
   mutate(playerdiff = ifelse(team == hteam, hplayers - aplayers, aplayers - hplayers),
          evengamestate = ifelse(hscore == ascore & playerdiff == 0, 1, 0))
@@ -47,6 +50,7 @@ playerxgoals <- shooterxgoals %>%
                          ifelse(gameID_shooter == 0, gameID_passer, gameID_shooter), 0)) %>%
   select(-c(gameID_passer, gameID_shooter))
 
-
+playerxgoals <- playerxgoals %>%
+  left_join(playerpos, by = c("shooter" = "passer", "Season" = "year", "team"))
 
 saveRDS(playerxgoals, file = 'IgnoreList/xGoalsByPlayer.rds')

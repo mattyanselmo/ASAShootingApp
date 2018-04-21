@@ -8,6 +8,10 @@ merged.passes <- merged.passes %>%
   mutate(third = ifelse(x < 115/3, "Def",
                         ifelse(x < 115*2/3, "Mid", "Att")))
 
+gamesplayed <- passing %>% 
+  group_by(year, team) %>%
+  summarize(Games = length(unique(gameID)))
+
 team.stats.offense <- merged.passes %>%
   group_by(year, team, third) %>%
   summarize(N = n(),
@@ -24,6 +28,7 @@ team.stats.defense <- merged.passes %>%
             Distance = sum(distance[success == 1]),
             Vert.Dist = sum((endX - x)[success == 1]))
 
+saveRDS(gamesplayed, "IgnoreList/GamesPlayed_forTeamPassing.rds")
 saveRDS(team.stats.offense, "IgnoreList/xPassingByTeamOffense.rds")
 saveRDS(team.stats.defense, "IgnoreList/xPassingByTeamDefense.rds")
 
