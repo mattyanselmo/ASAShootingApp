@@ -4,7 +4,7 @@
 # playerpos <- readRDS("IgnoreList/playerpositions_byseason.rds")
 # date1 = as.Date('2000-01-01')
 # date2 = as.Date('9999-12-31')
-# season = 2014:2015
+# season = 2018
 # minfilter = 0
 # shotfilter = 0
 # keyfilter = 0
@@ -192,7 +192,7 @@ shooterxgoals.func <- function(playerxgoals = playerxgoals,
 #                    minutes_df <- readRDS("IgnoreList/MinutesByGameID.rds"),
 #                    date1 = as.Date('2000-01-01'),
 #                    date2 = as.Date('9999-12-31'),
-#                    season = 2014:2015,
+#                    season = 2018,
 #                    shotfilter = 0,
 #                    keyfilter = 0,
 #                    byteams = F,
