@@ -9,8 +9,6 @@ library(zoo)
 teamnames <- read.csv('TeamNameLinks.csv', stringsAsFactors = F) %>%
   select(-one_of("X"))
 
-teamnames <- read.csv('TeamNameLinks.csv', stringsAsFactors = F) %>%
-  select(-one_of("X"))
 
 if(file.exists('C:/Users/Matthias')){
   temp <- read.csv(paste0("C:/Users/Matthias/Dropbox/ASA Blog Data/", year, " Stats/minutes played by game.csv"))
@@ -30,10 +28,10 @@ minutesPlayed <- bind_rows(lapply(grep('minutes played by game', list.files('Ign
                                   function(x) read.csv(paste0('IgnoreList/', x), stringsAsFactors = F))) %>%
   select(-one_of(c("X", "X.1")))
 
-minutesPlayed <- minutesPlayed %>%
-  left_join(teamnames, by = c('team' = 'FullName')) %>%
-  mutate(team = Abbr) %>%
-  select(-Abbr)
+# minutesPlayed <- minutesPlayed %>%
+#   left_join(teamnames, by = c('team' = 'FullName')) %>%
+#   mutate(team = Abbr) %>%
+#   select(-Abbr)
 
 minutesPlayed_gameID <- minutesPlayed %>%
   mutate(player = str_replace_all(player, 
