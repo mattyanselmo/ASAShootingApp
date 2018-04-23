@@ -8,7 +8,7 @@ merged.passes <- merged.passes %>%
   mutate(third = ifelse(x < 115/3, "Def",
                         ifelse(x < 115*2/3, "Mid", "Att")))
 
-gamesplayed <- passing %>% 
+gamesplayed <- merged.passes %>% 
   group_by(year, team) %>%
   summarize(Games = length(unique(gameID)))
 
