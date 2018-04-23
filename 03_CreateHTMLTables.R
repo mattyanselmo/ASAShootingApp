@@ -78,8 +78,9 @@ dt_xgoals <- lapply(2011:max(playerxgoals$Season),
                                                          suffix = c("", "p96")) %>%
                                                ungroup() %>%
                                                select(-Player), check.names = F)
+                        write.csv(output, paste0(path, "/Dropbox/ASA Blog Data/HTMLOutputs/Player_xGoals_", x, ".csv"))
                         output <- xtable(output, 
-                                         digits = c(0, 0, 0, 0, 0, 0, 0, 2, 0, 2, 2, 0, 0, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2),
+                                         digits = c(0, 0, 0, 0, 0, 0, 0, 0, 2, 0, 2, 2, 0, 0, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2),
                                          align = rep("c", ncol(output) + 1))
                         write.table(gsub("\n", "",
                                          gsub(" <", "<", 
@@ -101,7 +102,7 @@ dt_xgoals <- lapply(2011:max(playerxgoals$Season),
                         output <- data.frame(namesFL, dt_total %>%
                                                ungroup() %>%
                                                select(-Player), check.names = F)
-                        
+                        write.csv(output, paste0(path, "/Dropbox/ASA Blog Data/HTMLOutputs/Player_xGoals_", x, ".csv"))
                         output <- xtable(output, 
                                          digits = c(0, 0, 0, 0, 0, 0, 2, 0, 2, 2, 0, 0, 2, 2, 2, 2),
                                          align = rep("c", ncol(output) + 1))
@@ -193,7 +194,7 @@ dt_xG_team <- lapply(2011:max(teamxgoals$Season),
                                 Conf = ifelse(Conf == "east", "Eastern", "Western")) %>%
                          select(-FullName) %>% 
                          arrange(desc(xGD))
-                       
+                       write.csv(output, paste0(path, "/Dropbox/ASA Blog Data/HTMLOutputs/Team_xGoals_", x, ".csv"))
                        output <- xtable(output, 
                                         digits = c(0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 2, 2, 2, 2, 2, 2),
                                         align = rep("center", ncol(output) + 1))
@@ -286,7 +287,7 @@ lapply(2015:max(playerpassing$year),
          names(namesFL) <- c("First", "Last")
          
          dt <- data.frame(namesFL, dt %>% select(-Player), check.names = F)
-         
+         write.csv(dt, paste0(path, "/Dropbox/ASA Blog Data/HTMLOutputs/Player_xPasses_", x, ".csv"))
          output <- print.xtable(xtable(dt, 
                                        digits = c(0, 0, 0, 0, 0, 0, 0, 0, 3, 3, 3, 2, 0, 3, 3, 3, 2, 0, 3, 3, 3, 2, 0, 3, 3, 3, 2)),
                                 type = "html",
@@ -338,6 +339,7 @@ lapply(2011:max(keeperxgoals$Season),
          namesFL <- as.data.frame(do.call("rbind", strsplit(sub(" ", ";", dt$Keeper), ";")))
          names(namesFL) <- c("First", "Last")
          dt <- data.frame(namesFL, dt %>% select(-Keeper), check.names = F)
+         write.csv(dt, paste0(path, "/Dropbox/ASA Blog Data/HTMLOutputs/Keeper_xGoals_", x, ".csv"))
          
          if(x >= 2015){
          output <- xtable(dt, 
@@ -380,7 +382,7 @@ lapply(2011:max(xgbygame$Season),
                   Away = FullName_away,
                   Date = format(Date, "%m/%d/%Y")) %>%
            select(-FullName_home, -FullName_away)
-         
+         write.csv(dt, paste0(path, "/Dropbox/ASA Blog Data/HTMLOutputs/xGoalsByGame_", x, ".csv"))
          output <- xtable(dt, 
                           digits = c(0, 0, 0, 0, 2, 2, 0, 0, 2, 2, 0, 2, 2),
                           align = rep("c", ncol(dt) + 1))
