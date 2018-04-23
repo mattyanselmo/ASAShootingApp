@@ -583,11 +583,11 @@ shinyUI(
                                    mainPanel(
                                      h1('Team passing data'),
                                      p(paste0('Updated through games on ', max(as.Date(playerxgoals$date)))),
-                                     downloadButton('teampassing_download', 'Download CSV'),
                                      # p(paste0('Updated through games on ', max(as.Date(???)))),
                                      p(HTML("<i>Against stats (A) refer to the third of the field from the perspective of the teams' opponents.</i>")),
                                      tabsetPanel(id = 'teampassing_subtab',
                                                  tabPanel('Totals',
+                                                          downloadButton('teampassing_download', 'Download CSV'),
                                                           br(),
                                                           br(),
                                                           DT::dataTableOutput("teampassing_total")
