@@ -5,6 +5,6 @@ account: asashinyapps
 server: shinyapps.io
 hostUrl: https://api.shinyapps.io/v1
 appId: 250527
-bundleId: 1320181
+bundleId: 1332775
 url: https://asashinyapps.shinyapps.io/asashootingapp_master/
-when: 1523848375.89356
+when: 1524455886.31727
