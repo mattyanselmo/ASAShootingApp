@@ -32,9 +32,8 @@ touches <- bind_rows(lapply(grep('touches', list.files("IgnoreList/"), value = T
   select(-Abbr)
 
 #minutesPlayed_season <- readRDS("IgnoreList/MinutesBySeason.rds")
-minutesPlayed_gameID <- readRDS("IgnoreList/MinutesByGameID.rds")
-minutesPlayed_gameID <- minutesPlayed_gameID %>%
-  left_join(unique(touches %>% 
+minutesPlayed_gameID <- readRDS("IgnoreList/MinutesByGameID.rds") %>%
+  left_join(unique(touches %>%
                      select(gameID, date)) %>%
                      mutate(date = as.Date(date, "%m/%d/%Y"),
                             Season = as.numeric(format(date, "%Y"))),
@@ -43,7 +42,6 @@ minutesPlayed_gameID <- minutesPlayed_gameID %>%
 saveRDS(minutesPlayed_gameID, "IgnoreList/MinutesByGameID.rds")
 
 touches <- minutesPlayed_gameID %>%
-  select(gameID, player, minutes, team, date, Season) %>%
   left_join(touches %>%
               select(player, gameID, touches), by = c("gameID", "player")) %>%
   mutate(touches = ifelse(is.na(touches), 0, touches)) %>%
@@ -55,11 +53,11 @@ touches <- minutesPlayed_gameID %>%
             minutes = sum(minutes),
             touches = sum(touches)) %>%
   filter(team != "Missing")
-  
+
 ## balance predictions to actual by zone
 pass.summ <- merged.passes %>%
   mutate(third = ifelse(x < 115/3, "Def",
-                          ifelse(x < 115*2/3, "Mid", "Att"))) %>%
+                        ifelse(x < 115*2/3, "Mid", "Att"))) %>%
   group_by(passer, year, team, third) %>%
   summarize(N = n(),
             successes = sum(success),
