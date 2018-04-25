@@ -109,6 +109,7 @@ shinyUI(
                                                  tabPanel('Tables: totals',
                                                           value = "tablestotals",
                                                           p(HTML("<i>Per-minutes data and position information only goes back to 2015.</i>")),
+                                                          #tags$head(tags$script(src = "www/tablesorter.js")),
                                                           DT::dataTableOutput('shootertable')
                                                  ),
                                                  tabPanel('Scatter plots: totals',
