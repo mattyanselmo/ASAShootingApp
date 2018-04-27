@@ -38,7 +38,8 @@ minutesPlayed_gameID <- minutesPlayed %>%
                                   c('Kazaishvili' = 'Qazaishvili', 
                                     'Jorge Villafaña' = 'Jorge Villafana',
                                     "Antonio Mlinar Dalamea" = "Antonio Mlinar Delamea")),
-         player = ifelse(row_number() %in% grep("Boniek", player), "Oscar Boniek Garcia", player)) %>%
+         player = ifelse(row_number() %in% grep("Boniek", player), "Oscar Boniek Garcia", 
+                         ifelse(player == "Eddie Johnson" & team == "Portland", "Eddie Johnson (no, not that one)", player))) %>%
   left_join(teamnames, by = c('team' = 'FullName')) %>%
   mutate(team = Abbr) %>%
   select(-Abbr)

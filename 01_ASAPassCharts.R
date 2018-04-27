@@ -30,7 +30,8 @@ passes <- bind_rows(lapply(paste0("IgnoreList/", grep('raw passes', list.files("
                                   c('Kazaishvili' = 'Qazaishvili', 
                                     'Jorge Villafaña' = 'Jorge Villafana',
                                     "Antonio Mlinar Dalamea" = "Antonio Mlinar Delamea")),
-         passer = ifelse(row_number() %in% grep("Boniek", passer), "Oscar Boniek Garcia", passer)) %>%
+         passer = ifelse(row_number() %in% grep("Boniek", passer), "Oscar Boniek Garcia", 
+                         ifelse(passer == "Eddie Johnson" & year == 2011, "Eddie Johnson (no, not that one)", passer))) %>%
   select(-one_of("X"))
 
 vertical.lineups <- read.csv('IgnoreList/vertical starting lineups.csv', stringsAsFactors = FALSE) %>%

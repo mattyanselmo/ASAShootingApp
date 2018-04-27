@@ -46,6 +46,7 @@ eighteenGameInfo <- eighteenGameInfo %>%
                                    c('Kazaishvili' = 'Qazaishvili', 
                                      'Jorge Villafaña' = 'Jorge Villafana',
                                      "Antonio Mlinar Dalamea" = "Antonio Mlinar Delamea")),
-         players = ifelse(row_number() %in% grep("Boniek", players), "Oscar Boniek Garcia", players))
+         players = ifelse(row_number() %in% grep("Boniek", players), "Oscar Boniek Garcia", 
+                          ifelse(players == "Eddie Johnson" & team == "Portland", "Eddie Johnson (no, not that one)", players)))
 
 write.csv(eighteenGameInfo, 'IgnoreList/vertical starting lineups.csv', row.names = F)

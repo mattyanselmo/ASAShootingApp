@@ -132,12 +132,14 @@ shooting <- shooting %>%
                                    c('Kazaishvili' = 'Qazaishvili', 
                                      'Jorge Villafaña' = 'Jorge Villafana',
                                      "Antonio Mlinar Dalamea" = "Antonio Mlinar Delamea")),
-         shooter = ifelse(row_number() %in% grep("Boniek", shooter), "Oscar Boniek Garcia", shooter),
+         shooter = ifelse(row_number() %in% grep("Boniek", shooter), "Oscar Boniek Garcia", 
+                          ifelse(shooter == "Eddie Johnson" & year == 2011, "Eddie Johnson (no, not that one)", shooter)),
          passer = str_replace_all(passer, 
                                   c('Kazaishvili' = 'Qazaishvili', 
                                     'Jorge Villafaña' = 'Jorge Villafana',
                                     "Antonio Mlinar Dalamea" = "Antonio Mlinar Delamea")),
-         passer = ifelse(row_number() %in% grep("Boniek", passer), "Oscar Boniek Garcia", passer))
+         passer = ifelse(row_number() %in% grep("Boniek", passer), "Oscar Boniek Garcia", 
+                         ifelse(passer == "Eddie Johnson" & year == 2011, "Eddie Johnson (no, not that one)", passer)))
          
 "Boniek Garcia" = "Oscar Boniek Garcia"
 saveRDS(shooting, 'IgnoreList/AllShotsData2011-2017.rds')
