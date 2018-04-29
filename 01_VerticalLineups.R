@@ -45,7 +45,8 @@ eighteenGameInfo <- eighteenGameInfo %>%
   mutate(players = str_replace_all(players, 
                                    c('Kazaishvili' = 'Qazaishvili', 
                                      'Jorge Villafaña' = 'Jorge Villafana',
-                                     "Antonio Mlinar Dalamea" = "Antonio Mlinar Delamea")),
+                                     "Antonio Mlinar Dalamea" = "Antonio Mlinar Delamea",
+                                     "Ismael Tajouri-Shradi" = "Ismael Tajouri")),
          players = ifelse(row_number() %in% grep("Boniek", players), "Oscar Boniek Garcia", 
                           ifelse(players == "Eddie Johnson" & team == "Portland", "Eddie Johnson (no, not that one)", players)))
 
