@@ -35,7 +35,11 @@ shinyUI(
                                      width = 2,
                                      actionButton('shooting_action',
                                                   label = "Refresh filters"),
-                                     conditionalPanel(condition = "input.shooting_seasonordate == 'Season' && Math.min(parseInt(input.shooting_seasonfilter)) >= 2015", # try || date > 2015-03-01 here
+                                     conditionalPanel(condition = 
+                                                        "(input.shooting_seasonordate == 'Season' && 
+                                                      Math.min(parseInt(input.shooting_seasonfilter)) >= 2015) ||
+                                                      (input.shooting_seasonordate == 'Date' && 
+                                                      parseInt(input.shooting_date1.substring(0,4)) >= 2015)",
                                                       numericInput("shooting_minfilter",
                                                                    label = "Minimum minutes:",
                                                                    value = 0,
@@ -48,7 +52,11 @@ shinyUI(
                                                   'Minimum key passes:',
                                                   value = 0,
                                                   min = 0, max = 100, step = 10),
-                                     conditionalPanel(condition = "input.shooting_seasonordate == 'Season' && Math.min(parseInt(input.shooting_seasonfilter)) >= 2015", # try || date > 2015-03-01 here
+                                     conditionalPanel(condition = 
+                                                        "(input.shooting_seasonordate == 'Season' && 
+                                                      Math.min(parseInt(input.shooting_seasonfilter)) >= 2015) ||
+                                                      (input.shooting_seasonordate == 'Date' && 
+                                                      parseInt(input.shooting_date1.substring(0,4)) >= 2015)",
                                                       checkboxGroupInput("shooting_position",
                                                                          label = "Position:",
                                                                          inline = T,

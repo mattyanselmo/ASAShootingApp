@@ -32,7 +32,7 @@ shinyServer(function(input, output) {
   
   # Updated values
   observeEvent(input$shooting_action,
-               {
+               { 
                  shooter_inputs$shooting_seasonordate <- input$shooting_seasonordate
                  shooter_inputs$shooting_date1 <- input$shooting_date1
                  shooter_inputs$shooting_date2 <- input$shooting_date2
@@ -165,7 +165,7 @@ shinyServer(function(input, output) {
   output$shootertable_per96 <- DT::renderDataTable({
     
     
-    datatable(dt_per96() %>% select(-c(extreme, plotnames)),
+    datatable(dt_per96() %>% select(-one_of("extreme", "plotnames")),
               rownames = F,
               options(list(autoWidth = T,
                            pageLength = 25,
