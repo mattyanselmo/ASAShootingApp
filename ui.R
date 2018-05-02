@@ -11,9 +11,11 @@ shinyUI(
   # Shooting navbar ####
   navbarPage(title = HTML('<b>ASA Database</b>'),
              theme = 'bootstrap_edited.css',
+             id = "headnavbar",
              navbarMenu(strong('xGoals'),
                         # Players tab panel ####
                         tabPanel('Players',
+                                 value = "playerxgoals",
                                  sidebarLayout(
                                    sidebarPanel(
                                      tagList(
@@ -175,6 +177,7 @@ shinyUI(
                         
                         # Team xG tab panel ####
                         tabPanel('Teams',
+                                 value = "teamxgoals",
                                  sidebarLayout(
                                    sidebarPanel(tagList(
                                      tags$head(
@@ -300,6 +303,7 @@ shinyUI(
                                  )
                         ),
                         tabPanel('Game-by-game xG',
+                                 value = "gamebygamexg",
                                  sidebarLayout(
                                    sidebarPanel(width = 2,
                                                 radioButtons('teambygame_seasonordate',
@@ -336,6 +340,7 @@ shinyUI(
                         ),
                         # Keepers tab panel ####
                         tabPanel('Keepers',
+                                 value = "keeperxgoals",
                                  sidebarLayout(
                                    sidebarPanel(tagList(
                                      tags$head(
@@ -453,6 +458,7 @@ shinyUI(
              navbarMenu(strong('xPasses'),
                         # Passing: Players totals tab panel ####
                         tabPanel('Players',
+                                 value = "playerpassing",
                                  sidebarLayout(
                                    sidebarPanel(tagList(
                                      tags$head(
@@ -539,6 +545,7 @@ shinyUI(
                                              )))),
                         # Passing: Teams ####
                         tabPanel('Teams',
+                                 value = "teampassing",
                                  sidebarLayout(
                                    sidebarPanel(width = 2,
                                                 # conditionalPanel("input.team_seasonordate == 'Season' && input.team_seasonfilter.length == 1",
@@ -643,11 +650,13 @@ shinyUI(
              ),
              # Glossary ####
              tabPanel(strong('Glossary'),
+                      value = "glossary",
                       h1('Glossary'),
                       dataTableOutput('glossary')                        
              ),
              # App info ####
              tabPanel(strong('App info'),
+                      value = "appinfo",
                       h1('App info'),
                       p("We built this interactive web application to give ASA's loyal readers more control over 
                         sorting and filtering our data. This is a work in progress, and we plan to continue to

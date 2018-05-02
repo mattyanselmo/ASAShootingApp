@@ -7,10 +7,39 @@
 
 library(shiny)
 
-shinyServer(function(input, output) {
+shinyServer(function(input, output, session) {
+  
+  # Bookmarks workaround ####
+  # observe({
+  #   
+  #   query <- parseQueryString(session$clientData$url_search)
+  #   
+  #   for (i in 1:(length(reactiveValuesToList(input)))) {
+  #     nameval = names(reactiveValuesToList(input)[i])
+  #     valuetoupdate = query[[nameval]]
+  #     print(nameval)
+  #     print(valuetoupdate)
+  #     if (!is.null(query[[nameval]])) {
+  #       if (is.na(as.numeric(valuetoupdate))) {
+  #         updateTextInput(session, nameval, value = valuetoupdate)
+  #       }
+  #       else {
+  #         updateTextInput(session, nameval, value = as.numeric(valuetoupdate))
+  #       }
+  #     }
+  #     
+  #   }
+  #   
+  # })
+  
+  observe({
+    query <- parseQueryString(session$clientData$url_search)
+    if(!is.null(query[["headnavbar"]])){
+    updateNavbarPage(session, "headnavbar", selected = query[["headnavbar"]])
+    }
+  })
   
   # Shooter reactive values ####
-  
   # Initial values
   shooter_inputs <- reactiveValues(shooting_seasonordate = 'Season',
                                    shooting_date1 = as.Date('2000-01-01'),
