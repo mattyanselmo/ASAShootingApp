@@ -62,8 +62,12 @@ gamesplayed <- readRDS("IgnoreList/GamesPlayed_forTeamPassing.rds")
 #pred.data <- readRDS('IgnoreList/TeamPredictionsData_week35.rds')
 #load('IgnoreList/UnivariatePoissonModels.Rdata')
 
+ggtheme <- theme(legend.position = "none",
+                 axis.text=element_text(size = 14),
+                 axis.title=element_text(size = 16, face = "bold"))
+
 lm_eqn <- function(df, x, y){
-  m <- lm(formula(paste0(y, ' ~ ', x)), df);
+  m <- lm(formula(paste0(y, " ~ ", x)), df);
   eq <- substitute(italic(y) == a + b %.% italic(x)*","~~italic(r)^2~"="~r2, 
                    list(a = format(coef(m)[1], digits = 2), 
                         b = format(coef(m)[2], digits = 2), 

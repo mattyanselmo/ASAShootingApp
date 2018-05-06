@@ -187,6 +187,13 @@ shooterxgoals.func <- function(playerxgoals = playerxgoals,
   
 }
 
+# # Function example
+# library(dplyr)
+# playerpos <- readRDS("IgnoreList/playerpositions_byseason.rds")
+# Mode <- function(x) {
+#   ux <- unique(x)
+#   ux[which.max(tabulate(match(x, ux)))]
+# }
 # shooterxgoals.func(playerxgoals = readRDS('IgnoreList/xGoalsByPlayer.rds') %>%
 #                      mutate(date = as.Date(date, format = '%m/%d/%Y')),
 #                    minutes_df <- readRDS("IgnoreList/MinutesByGameID.rds"),
@@ -199,5 +206,7 @@ shooterxgoals.func <- function(playerxgoals = playerxgoals,
 #                    byseasons = T,
 #                    FK = T,
 #                    PK = T) %>%
-#   mutate(xGperShot = ifelse(Shots > 0, xG/Shots, 0),
-#          xAperPass = ifelse(KeyP > 0, xA/KeyP, 0))
+#   mutate(`xG/shot` = ifelse(Shots > 0, xG/Shots, 0),
+#          `xA/pass` = ifelse(KeyP > 0, xA/KeyP, 0),
+#          `G-xG/shot` = ifelse(Shots > 0, `G-xG`/Shots, 0),
+#          `A-xA/pass` = ifelse(KeyP > 0, `A-xA`/KeyP, 0))

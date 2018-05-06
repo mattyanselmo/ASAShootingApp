@@ -157,16 +157,23 @@ shooterxgoals_perminute <- function(playerxgoals = playerxgoals,
   
 }
 
-# shooterxgoals_perminute(playerxgoals = readRDS('IgnoreList/xGoalsByPlayer.rds'),
-#                    minutes_df = readRDS('IgnoreList/MinutesByGameID.rds'),
-#                    date1 = as.Date('2000-01-01'),
-#                    date2 = as.Date('9999-12-31'),
-#                    season = 2017,
-#                    shotfilter = 0,
-#                    keyfilter = 0,
-#                    minfilter = 0,
-#                    byseasons = T,
-#                    byteams = T,
-#                    OtherShots = T,
-#                    FK = T,
-#                    PK = T)
+# Function example
+library(dplyr)
+playerpos <- readRDS("IgnoreList/playerpositions_byseason.rds")
+Mode <- function(x) {
+  ux <- unique(x)
+  ux[which.max(tabulate(match(x, ux)))]
+}
+shooterxgoals_perminute(playerxgoals = readRDS('IgnoreList/xGoalsByPlayer.rds'),
+                   minutes_df = readRDS('IgnoreList/MinutesByGameID.rds'),
+                   date1 = as.Date('2000-01-01'),
+                   date2 = as.Date('9999-12-31'),
+                   season = 2017,
+                   shotfilter = 0,
+                   keyfilter = 0,
+                   minfilter = 0,
+                   byseasons = T,
+                   byteams = T,
+                   OtherShots = T,
+                   FK = T,
+                   PK = T)
