@@ -134,7 +134,15 @@ shinyUI(
                                                           p(HTML("<i>Per-minutes data only goes back to 2015. Please allow a few seconds for the plot to load.</i>")),
                                                           fluidPage(fluidRow(
                                                             column(3,
-                                                                   uiOutput(outputId = "shooterplot_axes", width = 4, inline = T)),
+                                                                   selectInput('shooterplot_xvar',
+                                                                               label = 'X-axis variable',
+                                                                               choices = "xG",
+                                                                               selected = "xG")),
+                                                            column(3,
+                                                                   selectInput('shooterplot_yvar',
+                                                                               label = 'Y-axis variable',
+                                                                               choices = "Goals",
+                                                                               selected = "Goals")),
                                                             plotOutput('shooterplot'))))
                                      )))),
                         

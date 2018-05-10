@@ -54,10 +54,10 @@ shinyServer(function(input, output, session) {
                                    shooting_other = T,
                                    shooting_fk = T,
                                    shooting_pk = T,
-                                   shooterplot_xvar = 'xG',
-                                   shooterplot_yvar = 'G-xG',
-                                   shooterplot_per96_xvar = 'xG',
-                                   shooterplot_per96_yvar = 'G-xG')
+                                   shooterplot_xvar = "xG",
+                                   shooterplot_yvar = "Goals",
+                                   shooterplot_per96_xvar = "xG",
+                                   shooterplot_per96_yvar = "Goals")
   
   # Updated values
   observeEvent(input$shooting_action,
@@ -160,24 +160,61 @@ shinyServer(function(input, output, session) {
     dt_per96 %>% filter(Pos %in% shooter_inputs$shooting_position)
   })
   
-  output$shooterplot_axes <- renderUI({
+  playerplotvalues <- reactiveValues(shooterplot_xvar = "xG", shooterplot_yvar = "Goals")
+  
+  observeEvent(input$shooting_action, {
     choices.total <- names(dt_total())[!(names(dt_total()) %in% c("Player", "Team", "Season", "Pos"))]
     if(min(input$shooting_seasonfilter) >= 2015){
       choices.96 <- paste0(names(dt_per96())[!(names(dt_per96()) %in% c("Player", "Team", "Season", "Pos", "Min"))], "/96")
     } else{
       choices.96 <- c("")
     }
-    tagList(
-      selectInput('shooterplot_xvar',
-                  label = 'X-axis variable',
-                  choices = c(choices.total, choices.96),
-                  selected ='xG'),
-      selectInput('shooterplot_yvar',
-                  label = 'Y-axis variable',
-                  choices = c(choices.total, choices.96),
-                  selected ='Goals')
-    )
+    updateSelectInput(session,
+                      inputId = 'shooterplot_xvar',
+                      label = 'X-axis variable',
+                      choices = c(choices.total, choices.96),
+                      selected = playerplotvalues$shooterplot_xvar)
+    
+    updateSelectInput(session,
+                      inputId = 'shooterplot_yvar',
+                      label = 'Y-axis variable',
+                      choices = c(choices.total, choices.96),
+                      selected = playerplotvalues$shooterplot_yvar)
   })
+  
+  observeEvent({
+    dt_total()
+    dt_per96()},
+               {
+                 choices.total <- names(dt_total())[!(names(dt_total()) %in% c("Player", "Team", "Season", "Pos"))]
+                 if(min(input$shooting_seasonfilter) >= 2015){
+                   choices.96 <- paste0(names(dt_per96())[!(names(dt_per96()) %in% c("Player", "Team", "Season", "Pos", "Min"))], "/96")
+                 } else{
+                   choices.96 <- c("")
+                 }
+                 updateSelectInput(session,
+                                   inputId = 'shooterplot_xvar',
+                                   label = 'X-axis variable',
+                                   choices = c(choices.total, choices.96),
+                                   selected = "xG")
+                 
+                 updateSelectInput(session,
+                                   inputId = 'shooterplot_yvar',
+                                   label = 'Y-axis variable',
+                                   choices = c(choices.total, choices.96),
+                                   selected = "Goals")             
+  },
+  once = T)
+  
+  observeEvent({
+    input$shooterplot_xvar 
+    input$shooterplot_yvar
+  }, 
+  {
+    playerplotvalues$shooterplot_xvar <- input$shooterplot_xvar
+    playerplotvalues$shooterplot_yvar <- input$shooterplot_yvar
+  })
+
   
   dt_playershootingplot <- reactive({
     dt <- dt_total() %>%
@@ -916,6 +953,7 @@ shinyServer(function(input, output, session) {
   })
   
   output$teamplot <- renderPlot({
+    req(input$teamplot_xvar, input$teamplot_yvar)
     dt <- dt_teamshots_plot()
     # dt[['extreme']] <- rank(dt[[input$teamplot_xvar]]) + rank(dt[[input$teamplot_yvar]])
     if(length(unique(dt$Season)) > 1){
