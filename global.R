@@ -31,7 +31,7 @@ playerxgoals <- readRDS('IgnoreList/xGoalsByPlayer.rds')
 #                        gameID = 666,
 #                        check.names = F))
 
-minutesPlayed <- readRDS('IgnoreList/MinutesByGameID.rds')
+minutesPlayed <- readRDS('IgnoreList/MinutesByGameID_forapp.rds')
 # minutesPlayedPassing <- readRDS("IgnoreList/MinutesBySeason.rds")
 teamxgoals <- readRDS('IgnoreList/xGoalsByTeam.rds')
 xgbygame <- readRDS('IgnoreList/xGoalsByTeam_byGame.rds')
