@@ -5,6 +5,7 @@ library(shinyjs)
 library(ggplot2)
 
 playerxgoals <- readRDS('IgnoreList/xGoalsByPlayer.rds') 
+# Create made-up players
 # %>% 
 #   bind_rows(data.frame(date = as.Date("2018-04-01"),
 #                        team = "LAG",
