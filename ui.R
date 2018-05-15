@@ -250,10 +250,17 @@ shinyUI(
                                                                            div(DT::dataTableOutput('teampergamexgoalseast')))
                                                  ),
                                                  tabPanel('Scatter plots',
-                                                          p(div(HTML("<i> All statistics on a per game basis. Not all teams labeled. </i>"))),
                                                           fluidPage(fluidRow(
                                                             column(3,
-                                                                   uiOutput(outputId = "teamshotsplot_axes", width = 4, inline = T)),
+                                                                   selectInput('teamplot_xvar',
+                                                                               label = 'X-axis variable',
+                                                                               choices = "xGF",
+                                                                               selected = 'xGF')),
+                                                            column(3,
+                                                                   selectInput('teamplot_yvar',
+                                                                               label = 'Y-axis variable',
+                                                                               choices = "GF",
+                                                                               selected = 'GF')),
                                                             plotOutput('teamplot')))
                                                  )
                                      )

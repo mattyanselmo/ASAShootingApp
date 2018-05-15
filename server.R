@@ -160,7 +160,23 @@ shinyServer(function(input, output, session) {
     dt_per96 %>% filter(Pos %in% shooter_inputs$shooting_position)
   })
   
-  playerplotvalues <- reactiveValues(shooterplot_xvar = "xG", shooterplot_yvar = "Goals")
+  dt_playershootingplot <- reactive({
+    dt <- dt_total() %>%
+      left_join(dt_per96(),
+                by = c("Player", "Team", "Season")[c(TRUE, shooter_inputs$shooting_byteams, shooter_inputs$shooting_byseasons)],
+                suffix = c("", "/96"))
+    
+    dt[['extreme']] <- rank(dt[[shooter_inputs$shooterplot_xvar]]) + rank(dt[[shooter_inputs$shooterplot_yvar]])
+    if(length(unique(dt$Season)) > 1){
+      dt[['plotnames']] <- paste(unlist(lapply(strsplit(dt$Player, " "), function(x) { return(x[length(x)]) })), dt$Season)
+      
+    }else{
+      dt[['plotnames']] <- unlist(lapply(strsplit(dt$Player, " "), function(x) { return(x[length(x)]) }))
+    }
+    dt
+  })
+  
+  playershooting_plotvalues <- reactiveValues(shooterplot_xvar = "xG", shooterplot_yvar = "Goals")
   
   observeEvent(input$shooting_action, {
     choices.total <- names(dt_total())[!(names(dt_total()) %in% c("Player", "Team", "Season", "Pos"))]
@@ -173,13 +189,13 @@ shinyServer(function(input, output, session) {
                       inputId = 'shooterplot_xvar',
                       label = 'X-axis variable',
                       choices = c(choices.total, choices.96),
-                      selected = playerplotvalues$shooterplot_xvar)
+                      selected = playershooting_plotvalues$shooterplot_xvar)
     
     updateSelectInput(session,
                       inputId = 'shooterplot_yvar',
                       label = 'Y-axis variable',
                       choices = c(choices.total, choices.96),
-                      selected = playerplotvalues$shooterplot_yvar)
+                      selected = playershooting_plotvalues$shooterplot_yvar)
   })
   
   observeEvent({
@@ -211,25 +227,8 @@ shinyServer(function(input, output, session) {
     input$shooterplot_yvar
   }, 
   {
-    playerplotvalues$shooterplot_xvar <- input$shooterplot_xvar
-    playerplotvalues$shooterplot_yvar <- input$shooterplot_yvar
-  })
-
-  
-  dt_playershootingplot <- reactive({
-    dt <- dt_total() %>%
-      left_join(dt_per96(),
-                by = c("Player", "Team", "Season")[c(TRUE, shooter_inputs$shooting_byteams, shooter_inputs$shooting_byseasons)],
-                suffix = c("", "/96"))
-    
-    dt[['extreme']] <- rank(dt[[shooter_inputs$shooterplot_xvar]]) + rank(dt[[shooter_inputs$shooterplot_yvar]])
-    if(length(unique(dt$Season)) > 1){
-      dt[['plotnames']] <- paste(unlist(lapply(strsplit(dt$Player, " "), function(x) { return(x[length(x)]) })), dt$Season)
-      
-    }else{
-      dt[['plotnames']] <- unlist(lapply(strsplit(dt$Player, " "), function(x) { return(x[length(x)]) }))
-    }
-    dt
+    playershooting_plotvalues$shooterplot_xvar <- input$shooterplot_xvar
+    playershooting_plotvalues$shooterplot_yvar <- input$shooterplot_yvar
   })
   
   # Player table - totals
@@ -939,17 +938,29 @@ shinyServer(function(input, output, session) {
     
   })
   
-  output$teamshotsplot_axes <- renderUI({
-    tagList(
-      selectInput('teamplot_xvar',
-                  label = 'X-axis variable',
-                  choices = setdiff(names(dt_teamshots_plot()), c("Team", "Season", "Games", "Conf")),
-                  selected = 'xGF'),
-      selectInput('teamplot_yvar',
-                  label = 'Y-axis variable',
-                  choices = setdiff(names(dt_teamshots_plot()), c("Team", "Season", "Games", "Conf")),
-                  selected = 'GF')
-    )
+  teamshooting_plotvalues <- reactiveValues(teamplot_xvar = "xGF", teamplot_yvar = "GF")
+  
+  observeEvent({
+    input$teamplot_xvar 
+    input$teamplot_yvar
+  }, 
+  {
+    teamshooting_plotvalues$teamplot_xvar <- input$teamplot_xvar
+    teamshooting_plotvalues$teamplot_yvar <- input$teamplot_yvar
+  })
+  
+  observeEvent(dt_teamshots_plot(), {
+    updateSelectInput(session,
+                      inputId = 'teamplot_xvar',
+                      label = 'X-axis variable',
+                      choices = setdiff(names(dt_teamshots_plot()), c("Team", "Season", "Games", "Conf")),
+                      selected = teamshooting_plotvalues$teamplot_xvar)
+    
+    updateSelectInput(session,
+                      inputId = 'teamplot_yvar',
+                      label = 'Y-axis variable',
+                      choices = setdiff(names(dt_teamshots_plot()), c("Team", "Season", "Games", "Conf")),
+                      selected = teamshooting_plotvalues$teamplot_yvar)
   })
   
   output$teamplot <- renderPlot({
