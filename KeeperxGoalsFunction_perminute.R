@@ -1,7 +1,7 @@
 # library(dplyr)
 # keeperxgoals <- readRDS('IgnoreList/xGoalsByKeeper.rds') %>%
 #   mutate(date = as.Date(date, format = '%m/%d/%Y'))
-# minutes_df <- readRDS("IgnoreList/MinutesByGameID.rds")
+# minutes_df <- readRDS("IgnoreList/MinutesByGameID_forapp.rds")
 # date1 = as.Date('2000-01-01')
 # date2 = as.Date('9999-12-31')
 # season = 2015:2017
@@ -123,10 +123,11 @@ keeperxgoals_per96.func <- function(keeperxgoals = keeperxgoals,
   
 }
 
+# # Function example
 # library(dplyr)
 # keeperxgoals_per96.func(keeperxgoals = readRDS('IgnoreList/xGoalsByKeeper.rds') %>%
 #                           mutate(date = as.Date(date, format = '%m/%d/%Y')),
-#                         minutes_df = readRDS("IgnoreList/MinutesByGameID.rds"),
+#                         minutes_df = readRDS("IgnoreList/MinutesByGameID_forapp.rds"),
 #                         date1 = as.Date('2015-01-01'),
 #                         date2 = as.Date('9999-12-31'),
 #                         season = 2011:2018,
