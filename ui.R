@@ -13,7 +13,7 @@ shinyUI(
              theme = 'bootstrap_edited.css',
              id = "headnavbar",
              navbarMenu(strong('xGoals'),
-                        # Players tab panel ####
+                      # Players tab panel ####
                         tabPanel('Players',
                                  value = "playerxgoals",
                                  sidebarLayout(
@@ -131,7 +131,7 @@ shinyUI(
                                                  ),
                                                  tabPanel('Scatter plots',
                                                           value = "plots",
-                                                          p(HTML("<i>Per-minutes data only goes back to 2015. Please allow a few seconds for the plot to load.</i>")),
+                                                          p(HTML("<i>Per-minutes data and position information only goes back to 2015. Please allow a few seconds for the plot to load.</i>")),
                                                           fluidPage(fluidRow(
                                                             column(3,
                                                                    selectInput('shooterplot_xvar',
@@ -326,10 +326,15 @@ shinyUI(
                                      width = 2,
                                      actionButton('keeper_action',
                                                   label = "Refresh filters"),
-                                     numericInput("keeper_minfilter",
-                                                  label = "Minimum minutes:",
-                                                  value = 0,
-                                                  min = 0, max = 10000, step = 500),
+                                     conditionalPanel(
+                                       condition = "(input.keeper_seasonordate == 'Season' && 
+                                                      Math.min(parseInt(input.keeper_seasonfilter)) >= 2015) ||
+                                        (input.keeper_seasonordate == 'Date' && 
+                                        parseInt(input.keeper_date1.substring(0,4)) >= 2015)",  
+                                       numericInput("keeper_minfilter",
+                                                    label = "Minimum minutes:",
+                                                    value = 0,
+                                                    min = 0, max = 10000, step = 500)),
                                      numericInput('keeper_minshots',
                                                   "Minimum shots faced:",
                                                   value = 0,
@@ -383,10 +388,17 @@ shinyUI(
                                      tabsetPanel(id = 'keeper_subtab',
                                                  tabPanel('Tables: totals',
                                                           value = "tablestotals",
+                                                          p(HTML("<i>Per-minutes data only goes back to 2015.</i>")),
                                                           DT::dataTableOutput('keepertable')),
-                                                 tabPanel('Scatter plots: totals',
+                                                 tabPanel("Tables: per 96",
+                                                          value = "tablesper96",
+                                                          p(HTML("<i>Per-minutes data only goes back to 2015.</i>")),
+                                                          DT::dataTableOutput("keepertable_per96")
+                                                 ),
+                                                 tabPanel('Scatter plots',
                                                           value = "plotstotals",
                                                           fluidPage(fluidRow(
+                                                            p(HTML("<i>Per-minutes data only goes back to 2015. Please allow a few seconds for the plot to load.</i>")),
                                                             column(4,
                                                                    selectInput('keeperplot_xvar',
                                                                                label = 'X-axis variable',
@@ -406,15 +418,6 @@ shinyUI(
                                                                                            'xG faced' = 'xG', 'GA above average' = 'G-xG'),
                                                                                selected = 'G-xG')),
                                                             plotOutput('keeperplot')))
-                                                 ),
-                                                 tabPanel("Tables: per 96",
-                                                          value = "tablesper96",
-                                                          p(HTML("<i>Per-minutes data only goes back to 2015.</i>")),
-                                                          DT::dataTableOutput("keepertable_per96")
-                                                 ),
-                                                 tabPanel("Scatter plots: per 96",
-                                                          value = "plotsper96",
-                                                          p(HTML("<i>This tab is still being developed!</i>"))
                                                  )
                                      ))
                                  )
