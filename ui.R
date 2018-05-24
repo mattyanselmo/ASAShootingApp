@@ -584,32 +584,18 @@ shinyUI(
                                                           br(),
                                                           DT::dataTableOutput("teampassing_pergame")),
                                                  tabPanel('Scatter plots',
-                                                          p("This tab is still being developed!")
-                                                          # p(div(HTML("<i> All statistics on a per game basis. Not all teams labeled. </i>"))),
-                                                          # actionButton('team_action',
-                                                          #              label = "Refresh filters"),
-                                                          # fluidPage(fluidRow(
-                                                          #   column(4,
-                                                          #          selectInput('teamplot_xvar',
-                                                          #                      label = 'X-axis variable',
-                                                          #                      choices = c('Shots for' = 'ShtF', 'Shots against' = 'ShtA',
-                                                          #                                  'Unassisted % for' = 'Solo%F',
-                                                          #                                  'Unassisted % against' = 'Solo%A',
-                                                          #                                  'Cross % for' = 'CrossPctF', 'Cross % against' = 'CrossPctA',
-                                                          #                                  'Shots on target for' = 'OnTargetF', 'Shots on target against' = 'OnTargetA',
-                                                          #                                  'GF', 'GA', 'GD', 'xGF', 'xGA', 'xGD', 'TSR', 'PDO', 'Points' = 'Pts'),
-                                                          #                      selected = 'xGF')),
-                                                          #   column(4,
-                                                          #          selectInput('teamplot_yvar',
-                                                          #                      label = 'Y-axis variable',
-                                                          #                      choices = c('Shots for' = 'ShtF', 'Shots against' = 'ShtA',
-                                                          #                                  'Unassisted % for' = 'Solo%F',
-                                                          #                                  'Unassisted % against' = 'Solo%A',
-                                                          #                                  'Cross % for' = 'CrossPctF', 'Cross % against' = 'CrossPctA',
-                                                          #                                  'Shots on target for' = 'OnTargetF', 'Shots on target against' = 'OnTargetA',
-                                                          #                                  'GF', 'GA', 'GD', 'xGF', 'xGA', 'xGD', 'TSR', 'PDO', 'Points' = 'Pts'),
-                                                          #                      selected = 'xGA')),
-                                                          #   plotOutput('teamplot')))
+                                                          fluidPage(fluidRow(
+                                                            column(3,
+                                                                   selectInput('teampassingplot_xvar',
+                                                                               label = 'X-axis variable',
+                                                                               choices = "xPctF",
+                                                                               selected = 'xPctF')),
+                                                            column(3,
+                                                                   selectInput('teampassingplot_yvar',
+                                                                               label = 'Y-axis variable',
+                                                                               choices = c("PctF"),
+                                                                               selected = "PctF")),
+                                                            plotOutput('teampassingplot')))
                                                  )
                                      )
                                    )

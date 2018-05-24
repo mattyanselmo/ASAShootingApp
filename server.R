@@ -949,7 +949,7 @@ shinyServer(function(input, output, session) {
   #                
   #              })
   
-  # Team plots ####
+  # Team shooting plots ####
   dt_teamshots_plot <- reactive({
     
     if(input$team_seasonordate == 'Season'){
@@ -1015,6 +1015,10 @@ shinyServer(function(input, output, session) {
   output$teamplot <- renderPlot({
     req(input$teamplot_xvar, input$teamplot_yvar)
     dt <- dt_teamshots_plot()
+    
+    xlim <- min(dt[[input$teamplot_xvar]]) - 0.05*(max(dt[[input$teamplot_xvar]]) - min(dt[[input$teamplot_xvar]]))
+    ylim <- min(dt[[input$teamplot_yvar]]) - 0.05*(max(dt[[input$teamplot_yvar]]) - min(dt[[input$teamplot_yvar]]))
+    
     # dt[['extreme']] <- rank(dt[[input$teamplot_xvar]]) + rank(dt[[input$teamplot_yvar]])
     if(length(unique(dt$Season)) > 1){
       dt[['plotnames']] <- paste(unlist(lapply(strsplit(dt$Team, " "), function(x) { return(x[length(x)]) })), dt$Season)
@@ -1031,10 +1035,13 @@ shinyServer(function(input, output, session) {
                     hjust = 'inward'),
                 size = 5,
                 check_overlap = T,
-                color = '#ff3300')
+                color = '#ff3300') +
+      expand_limits(x = xlim,
+                    y = ylim)
+    
     p + geom_smooth(method = 'lm', se = F) +
-      geom_text(x = min(dt[[input$teamplot_xvar]]),
-                y = min(dt[[input$teamplot_yvar]]),
+      geom_text(x = xlim,
+                y = ylim,
                 hjust = 0,
                 label = lm_eqn(dt, paste0("`", input$teamplot_xvar, "`"), paste0("`", input$teamplot_yvar, "`")),
                 parse = TRUE,
@@ -1106,6 +1113,84 @@ shinyServer(function(input, output, session) {
       formatRound(columns = columns.dec2, digits = 2)
   })
   
+  # Team passing plots ####
+  dt_teampassing_plot <- reactive({
+    dt_team_passing_pergame()
+    # If you ever want to join totals and pergame (currently just plotting per game)    
+    # dt_team_passing() %>%
+    #   left_join(dt_team_passing_pergame() %>% 
+    #               select(one_of(c("Team", "Season", 
+    #                               setdiff(names(dt_team_passing_pergame()), names(dt_team_passing()))))),
+    #             by = c("Team", "Season")[c(T, input$teampassing_byseasons)]) %>%
+    #   select(-one_of(c("Conf")))
+    
+  })
+  
+  teampassing_plotvalues <- reactiveValues(teampassingplot_xvar = "xPctF", teampassingplot_yvar = "PctF")
+  
+  observeEvent({
+    input$teampassingplot_xvar 
+    input$teampassingplot_yvar
+  }, 
+  {
+    teampassing_plotvalues$teampassingplot_xvar <- input$teampassingplot_xvar
+    teampassing_plotvalues$teampassingplot_yvar <- input$teampassingplot_yvar
+  })
+  
+  observeEvent(dt_teampassing_plot(), {
+    updateSelectInput(session,
+                      inputId = 'teampassingplot_xvar',
+                      label = 'X-axis variable',
+                      choices = setdiff(names(dt_teampassing_plot()), c("Team", "Season", "Games", "Conf")),
+                      selected = teampassing_plotvalues$teampassingplot_xvar)
+    
+    updateSelectInput(session,
+                      inputId = 'teampassingplot_yvar',
+                      label = 'Y-axis variable',
+                      choices = setdiff(names(dt_teampassing_plot()), c("Team", "Season", "Games", "Conf")),
+                      selected = teampassing_plotvalues$teampassingplot_yvar)
+  })
+  
+  output$teampassingplot <- renderPlot({
+    req(input$teampassingplot_xvar, input$teampassingplot_yvar)
+    dt <- dt_teampassing_plot()
+    
+    xlim <- min(dt[[input$teampassingplot_xvar]]) - 0.05*(max(dt[[input$teampassingplot_xvar]]) - min(dt[[input$teampassingplot_xvar]]))
+    ylim <- min(dt[[input$teampassingplot_yvar]]) - 0.05*(max(dt[[input$teampassingplot_yvar]]) - min(dt[[input$teampassingplot_yvar]]))
+    
+    if(length(unique(dt$Season)) > 1){
+      dt[['plotnames']] <- paste(unlist(lapply(strsplit(as.character(dt$Team), " "), function(x) { return(x[length(x)]) })), dt$Season)
+    }else{
+      dt[['plotnames']] <- unlist(lapply(strsplit(as.character(dt$Team), " "), function(x) { return(x[length(x)]) }))
+    }
+    
+    p <- dt %>%
+      ggplot(
+        aes_string(x = paste0('`', input$teampassingplot_xvar, '`'), 
+                   y = paste0('`', input$teampassingplot_yvar, '`'))) +
+      geom_point(color = '#0000cc') +
+      geom_text(aes(label = plotnames,
+                    hjust = 'inward'),
+                size = 5,
+                check_overlap = T,
+                color = '#ff3300') +
+      expand_limits(x = xlim,
+                    y = ylim)
+    p + geom_smooth(method = 'lm', se = F) +
+      geom_text(x = xlim,
+                y = ylim,
+                hjust = 0,
+                label = lm_eqn(dt, 
+                               paste0('`', input$teampassingplot_xvar, '`'), 
+                               paste0('`', input$teampassingplot_yvar, '`')),
+                parse = TRUE,
+                color = 'black',
+                size = 7) +
+      ggtheme
+    
+  }, height = 500, width = 700)
+  
+  # Team passing downloads ####
   output$teampassing_download <- downloadHandler(
     filename = 'ASAteampassingtable_total.csv',
     
