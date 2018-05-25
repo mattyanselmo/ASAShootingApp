@@ -424,7 +424,7 @@ shinyUI(
                         )),
              # Passing navbar ####
              navbarMenu(strong('xPasses'),
-                        # Passing: Players totals tab panel ####
+                        # Passing: Players tab panel ####
                         tabPanel('Players',
                                  value = "playerpassing",
                                  sidebarLayout(
@@ -489,27 +489,25 @@ shinyUI(
                                              br(),
                                              tabsetPanel(id = 'passing_subtab',
                                                          tabPanel('Tables: totals',
+                                                                  value = "tablestotals",
                                                                   DT::dataTableOutput('passingtable_player')),
-                                                         tabPanel("Scatter plots: totals",
-                                                                  p("This tab is still being developed!")),
                                                          tabPanel("Tables: per 96",
-                                                                  p("This tab is still being developed!")),
-                                                         tabPanel("Scatter plots: per 96",
-                                                                  p("This tab is still being developed!"))
-                                                         
-                                                         # tabPanel('Scatter plots',
-                                                         #          fluidPage(fluidRow(
-                                                         #            column(3,
-                                                         #                   selectInput('passerplot_xvar',
-                                                         #                               label = 'X-axis variable',
-                                                         #                               choices = sort(c()),
-                                                         #                               selected = '')),
-                                                         #            column(3,
-                                                         #                   selectInput('passerplot_yvar',
-                                                         #                               label = 'Y-axis variable',
-                                                         #                               choices = sort(c()),
-                                                         #                               selected ='')),
-                                                         #            plotOutput('passerplot'))))
+                                                                  value = "tablesper96",
+                                                                  DT::dataTableOutput("passingtable_player_per96")),
+                                                         tabPanel("Scatter plots",
+                                                                  value = "plots",
+                                                                  fluidPage(fluidRow(
+                                                                    column(3,
+                                                                           selectInput('passerplot_xvar',
+                                                                                       label = 'X-axis variable',
+                                                                                       choices = "xPassPct",
+                                                                                       selected = "xPassPct")),
+                                                                    column(3,
+                                                                           selectInput('passerplot_yvar',
+                                                                                       label = 'Y-axis variable',
+                                                                                       choices = "PassPct",
+                                                                                       selected = "PassPct")),
+                                                                    plotOutput('passerplot'))))
                                              )))),
                         # Passing: Teams ####
                         tabPanel('Teams',
