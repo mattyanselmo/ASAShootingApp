@@ -200,7 +200,10 @@ shinyUI(
                                                   'Stats option:',
                                                   choices = c('Basic' = "Basic stats", 'Advanced' = "Advanced stats"),
                                                   inline = T),
-                                     conditionalPanel("input.team_seasonordate == 'Season' && input.team_seasonfilter.length == 1",
+                                     conditionalPanel("(input.team_seasonordate == 'Season' && 
+                                                      input.team_seasonfilter.length == 1) ||
+                                                      (input.team_seasonordate == 'Date' && 
+                                                      parseInt(input.team_date1.substring(0,4)) == parseInt(input.team_date2.substring(0,4)))",
                                                       checkboxInput('team_conferenceview',
                                                                     'View by conference',
                                                                     value = T)),
