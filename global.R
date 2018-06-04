@@ -3,6 +3,8 @@ library(shiny)
 library(DT)
 library(shinyjs)
 library(ggplot2)
+library(plotly)
+library(ggrepel)
 
 playerxgoals <- readRDS('IgnoreList/xGoalsByPlayer.rds') 
 # Create made-up players
@@ -74,6 +76,14 @@ lm_eqn <- function(df, x, y){
                         b = format(coef(m)[2], digits = 2), 
                         r2 = format(summary(m)$r.squared, digits = 3)))
   as.character(as.expression(eq));                 
+}
+
+lm_eqn2 <- function(df, x, y){
+  m <- lm(formula(paste0(y, " ~ ", x)), df);
+  a <- format(coef(m)[1], digits = 3) 
+  b <- format(coef(m)[2], digits = 3) 
+  r2 <- format(summary(m)$r.squared, digits = 3)
+  paste0("y = ", b, "x + ", a, " ; R-squared = ", r2)                 
 }
 
 Mode <- function(x) {

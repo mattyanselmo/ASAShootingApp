@@ -142,9 +142,12 @@ shinyUI(
                                                                    selectInput('shooterplot_yvar',
                                                                                label = 'Y-axis variable',
                                                                                choices = "Goals",
-                                                                               selected = "Goals")),
-                                                            plotOutput('shooterplot'))))
-                                     )))),
+                                                                               selected = "Goals")))),
+                                                            br(),
+                                                            htmlOutput("shooterplot_text"),
+                                                            br(),
+                                                            plotlyOutput('shooterplot')                                                            )))
+                                     )),
                         
                         # Team xG tab panel ####
                         tabPanel('Teams',
@@ -489,13 +492,13 @@ shinyUI(
                                              br(),
                                              tabsetPanel(id = 'passing_subtab',
                                                          tabPanel('Tables: totals',
-                                                                  value = "tablestotals",
+                                                                  value = "passingtablestotals",
                                                                   DT::dataTableOutput('passingtable_player')),
                                                          tabPanel("Tables: per 96",
-                                                                  value = "tablesper96",
+                                                                  value = "passingtablesper96",
                                                                   DT::dataTableOutput("passingtable_player_per96")),
                                                          tabPanel("Scatter plots",
-                                                                  value = "plots",
+                                                                  value = "passingplots",
                                                                   fluidPage(fluidRow(
                                                                     column(3,
                                                                            selectInput('passerplot_xvar',
@@ -506,8 +509,11 @@ shinyUI(
                                                                            selectInput('passerplot_yvar',
                                                                                        label = 'Y-axis variable',
                                                                                        choices = "PassPct",
-                                                                                       selected = "PassPct")),
-                                                                    plotOutput('passerplot'))))
+                                                                                       selected = "PassPct")))),
+                                                                    br(),
+                                                                    htmlOutput("passerplot_text"),
+                                                                    br(),
+                                                                    plotlyOutput('passerplot'))
                                              )))),
                         # Passing: Teams ####
                         tabPanel('Teams',
