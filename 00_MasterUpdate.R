@@ -19,7 +19,9 @@ source("02_CompressPlayerTouches.R")
 # source('03_TeamPMData.R')
 # source('03_TeamPredictiveModelFunction.R')
 
-source("03_CreateHTMLTables.R")
+if(length(grep("_master", getwd())) > 0){
+  source("03_CreateHTMLTables.R")
+}
 gc()
 
 source('IgnoreList/ConnectOnline.R')
