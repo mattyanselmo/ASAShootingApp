@@ -94,7 +94,8 @@ shooterxgoals_perminute <- function(playerxgoals = playerxgoals,
         select(Player = player, Team, Min, Pos, Shots:`xG+xA`) %>%
         mutate_at(.vars = vars(Shots:`xG+xA`),
                   .funs = funs(.*96/Min)) %>%
-      filter(Min >= minfilter)
+      filter(Min >= minfilter) %>%
+      ungroup()
     
   } else if(!byteams & byseasons){
     aggdata <- tempdat %>%
@@ -121,7 +122,8 @@ shooterxgoals_perminute <- function(playerxgoals = playerxgoals,
       select(Player = player, Team, Season, Min, Pos, Shots:`xG+xA`) %>%
       mutate_at(.vars = vars(Shots:`xG+xA`),
                 .funs = funs(.*96/Min)) %>%
-      filter(Min >= minfilter)
+      filter(Min >= minfilter) %>%
+      ungroup()
     
   } else{
     aggdata <- tempdat %>%
@@ -148,7 +150,8 @@ shooterxgoals_perminute <- function(playerxgoals = playerxgoals,
         select(Player = player, Team, Min, Pos, Shots:`xG+xA`) %>%
       mutate_at(.vars = vars(Shots:`xG+xA`),
                 .funs = funs(.*96/Min)) %>%
-      filter(Min >= minfilter)
+      filter(Min >= minfilter) %>%
+      ungroup()
   }
   
   return(aggdata %>% 

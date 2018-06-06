@@ -60,7 +60,8 @@ shooterxgoals.func <- function(playerxgoals = playerxgoals,
                 `A-xA` = sum(`A-xA`),
                 `xG+xA` = sum(xG + xA)) %>%
       filter(Shots >= shotfilter,
-             KeyP >= keyfilter)
+             KeyP >= keyfilter) %>%
+      ungroup()
     
     if(min(season) >= 2015){
       aggdata <- aggdata %>%
@@ -69,7 +70,8 @@ shooterxgoals.func <- function(playerxgoals = playerxgoals,
                     summarize(Min = sum(minutes)),
                   by = c("player", "Team", "Season")) %>%
         select(Player = player, Team, Season, Min, Pos, Shots:`xG+xA`) %>%
-        filter(Min >= minfilter | (rep(minfilter == 0, n()) & is.na(Min)))
+        filter(Min >= minfilter | (rep(minfilter == 0, n()) & is.na(Min))) %>%
+        ungroup()
     } else{
       aggdata <- aggdata %>%
         select(Player = player, Team, Season, Shots:`xG+xA`)
@@ -94,7 +96,8 @@ shooterxgoals.func <- function(playerxgoals = playerxgoals,
                 `A-xA` = sum(`A-xA`),
                 `xG+xA` = sum(xG + xA)) %>%
       filter(Shots >= shotfilter,
-             KeyP >= keyfilter)
+             KeyP >= keyfilter) %>%
+      ungroup()
     
     if(min(season) >= 2015){
       aggdata <- aggdata %>%
@@ -103,7 +106,8 @@ shooterxgoals.func <- function(playerxgoals = playerxgoals,
                     summarize(Min = sum(minutes)),
                   by = c("player", "Team")) %>%
         select(Player = player, Team, Min, Pos, Shots:`xG+xA`) %>%
-        filter(Min >= minfilter | (rep(minfilter == 0, n()) & is.na(Min)))
+        filter(Min >= minfilter | (rep(minfilter == 0, n()) & is.na(Min))) %>%
+        ungroup()
     } else{
       aggdata <- aggdata %>%
         select(Player = player, Team, Shots:`xG+xA`)
@@ -130,7 +134,8 @@ shooterxgoals.func <- function(playerxgoals = playerxgoals,
                 `A-xA` = sum(`A-xA`),
                 `xG+xA` = sum(xG + xA)) %>%
       filter(Shots >= shotfilter,
-             KeyP >= keyfilter)
+             KeyP >= keyfilter) %>%
+      ungroup()
     
     if(min(season) >= 2015){
     aggdata <- aggdata  %>%
@@ -139,7 +144,8 @@ shooterxgoals.func <- function(playerxgoals = playerxgoals,
                   summarize(Min = sum(minutes)),
                 by = c("player", "Season")) %>%
       select(Player = player, Team, Season, Min, Pos, Shots:`xG+xA`) %>%
-      filter(Min >= minfilter | (rep(minfilter == 0, n()) & is.na(Min)))
+      filter(Min >= minfilter | (rep(minfilter == 0, n()) & is.na(Min))) %>%
+      ungroup()
     } else{
       aggdata <- aggdata %>%
         select(Player = player, Team, Season, Shots:`xG+xA`)
@@ -165,7 +171,8 @@ shooterxgoals.func <- function(playerxgoals = playerxgoals,
                 `A-xA` = sum(`A-xA`),
                 `xG+xA` = sum(xG + xA)) %>%
       filter(Shots >= shotfilter,
-             KeyP >= keyfilter)
+             KeyP >= keyfilter) %>%
+      ungroup()
     
     if(min(season) >= 2015){
       aggdata <- aggdata %>%
@@ -174,7 +181,8 @@ shooterxgoals.func <- function(playerxgoals = playerxgoals,
                     summarize(Min = sum(minutes)),
                   by = c("player")) %>%
         select(Player = player, Team, Min, Pos, Shots:`xG+xA`) %>%
-        filter(Min >= minfilter | (rep(minfilter == 0, n()) & is.na(Min)))
+        filter(Min >= minfilter | (rep(minfilter == 0, n()) & is.na(Min))) %>%
+        ungroup()
     } else{
       aggdata <- aggdata %>%
         select(Player = player, Team, Shots:`xG+xA`)

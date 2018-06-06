@@ -193,8 +193,8 @@ shinyServer(function(input, output, session) {
                 by = c("Player", "Team", "Season")[c(TRUE, shooter_inputs$shooting_byteams, shooter_inputs$shooting_byseasons)],
                 suffix = c("", "/96"))
     
-    dt[['extreme1']] <- (rank(dt[[shooter_inputs$shooterplot_xvar]], ties.method = "first") - (nrow(dt) + 1)/2)^2
-    dt[["extreme2"]] <- (rank(dt[[shooter_inputs$shooterplot_yvar]], ties.method = "first") - (nrow(dt) + 1)/2)^2
+    dt[["extreme1"]] <- rank(dt[[shooter_inputs$shooterplot_xvar]], ties.method = "random")
+    dt[["extreme2"]] <- rank(dt[[shooter_inputs$shooterplot_yvar]], ties.method = "random")
     
     if(length(unique(dt$Season)) > 1){
       dt[['plotnames']] <- paste(unlist(lapply(strsplit(dt$Player, " "), function(x) { return(x[length(x)]) })), dt$Season)
@@ -261,8 +261,8 @@ shinyServer(function(input, output, session) {
   })
   
   output$shooterplot <- renderPlotly({
-    xlim <- min(dt_playershootingplot()[[shooter_inputs$shooterplot_xvar]]) - 0.05*(max(dt_playershootingplot()[[shooter_inputs$shooterplot_xvar]]) - min(dt_playershootingplot()[[shooter_inputs$shooterplot_xvar]]))
-    ylim <- min(dt_playershootingplot()[[shooter_inputs$shooterplot_yvar]]) - 0.05*(max(dt_playershootingplot()[[shooter_inputs$shooterplot_yvar]]) - min(dt_playershootingplot()[[shooter_inputs$shooterplot_yvar]]))
+    xlim <- min(dt_playershootingplot()[[passer_inputs$passerplot_xvar]]) - 0*(max(dt_playershootingplot()[[passer_inputs$passerplot_xvar]]) - min(dt_playershootingplot()[[passer_inputs$passerplot_xvar]]))
+    ylim <- min(dt_playershootingplot()[[passer_inputs$passerplot_yvar]]) - 0*(max(dt_playershootingplot()[[passer_inputs$passerplot_yvar]]) - min(dt_playershootingplot()[[passer_inputs$passerplot_yvar]]))
     
     p <- dt_playershootingplot() %>%
       ggplot(
@@ -277,10 +277,33 @@ shinyServer(function(input, output, session) {
       geom_smooth(method = 'lm', se = F, color = "black") +
       ggtheme
     
+    m <- dt_playershootingplot() %>% 
+      filter(extreme1 >= sort(extreme1, decreasing = T)[2] |
+               extreme1 <= sort(extreme1, decreasing = F)[2] |
+               extreme2 >= sort(extreme2, decreasing = T)[2] |
+               extreme2 <= sort(extreme2, decreasing = F)[2])
+    
+    a <- list(
+      x = m[[shooter_inputs$shooterplot_xvar]],
+      y = m[[shooter_inputs$shooterplot_yvar]],
+      text = m$plotnames,
+      xref = "x",
+      yref = "y",
+      showarrow = F,
+      xanchor = "center",
+      yanchor = "top",
+      font = list(color = "#ff3300",
+                  size = 10)
+    )
+    
     ggplotly(p,
              tooltip = c("x", "y", "text"),
              width = 700,
-             height = 500)
+             height = 500) %>%
+      add_markers() %>%
+      layout(annotations = a,
+             showarrow = F)
+    
   })
   
   output$shooterplot_text <- renderText({
@@ -417,7 +440,9 @@ shinyServer(function(input, output, session) {
                 by = c("Player", "Season")[c(T, passer_inputs$passing_byseasons)],
                 suffix = c("", "/96"))
     
-    dt[['extreme']] <- rank(dt[[passer_inputs$passerplot_xvar]]) + rank(dt[[passer_inputs$passerplot_yvar]])
+    dt[["extreme1"]] <- rank(dt[[passer_inputs$passerplot_xvar]], ties.method = "random")
+    dt[["extreme2"]] <- rank(dt[[passer_inputs$passerplot_yvar]], ties.method = "random")
+    
     if(length(unique(dt$Season)) > 1){
       dt[['plotnames']] <- paste(unlist(lapply(strsplit(dt$Player, " "), function(x) { return(x[length(x)]) })), dt$Season)
       
@@ -478,8 +503,8 @@ shinyServer(function(input, output, session) {
   })
   
   output$passerplot <- renderPlotly({
-    xlim <- min(dt_passer_plot()[[passer_inputs$passerplot_xvar]]) - 0.05*(max(dt_passer_plot()[[passer_inputs$passerplot_xvar]]) - min(dt_passer_plot()[[passer_inputs$passerplot_xvar]]))
-    ylim <- min(dt_passer_plot()[[passer_inputs$passerplot_yvar]]) - 0.05*(max(dt_passer_plot()[[passer_inputs$passerplot_yvar]]) - min(dt_passer_plot()[[passer_inputs$passerplot_yvar]]))
+    xlim <- min(dt_passer_plot()[[passer_inputs$passerplot_xvar]]) - 0*(max(dt_passer_plot()[[passer_inputs$passerplot_xvar]]) - min(dt_passer_plot()[[passer_inputs$passerplot_xvar]]))
+    ylim <- min(dt_passer_plot()[[passer_inputs$passerplot_yvar]]) - 0*(max(dt_passer_plot()[[passer_inputs$passerplot_yvar]]) - min(dt_passer_plot()[[passer_inputs$passerplot_yvar]]))
     
     p <- dt_passer_plot() %>%
       ggplot(
@@ -491,10 +516,31 @@ shinyServer(function(input, output, session) {
       geom_smooth(method = 'lm', se = F, color = "black") +
       ggtheme
     
-    ggplotly(p, 
-             tooltip = c("x", "y", "text"), 
-             width = 700, 
-             height = 500)
+    m <- dt_passer_plot() %>% 
+      filter(extreme1 >= sort(extreme1, decreasing = T)[2] |
+               extreme1 <= sort(extreme1, decreasing = F)[2] |
+               extreme2 >= sort(extreme2, decreasing = T)[2] |
+               extreme2 <= sort(extreme2, decreasing = F)[2])
+    
+    a <- list(
+      x = m[[passer_inputs$passerplot_xvar]],
+      y = m[[passer_inputs$passerplot_yvar]],
+      text = m$plotnames,
+      xref = "x",
+      yref = "y",
+      showarrow = F,
+      xanchor = "center",
+      yanchor = "top",
+      font = list(color = '#ff3300',
+                  size = 10)
+    )
+    
+    ggplotly(p,
+             tooltip = c("x", "y", "text"),
+             width = 700,
+             height = 500) %>%
+      add_markers() %>%
+      layout(annotations = a)
 
   })
   
