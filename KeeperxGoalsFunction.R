@@ -117,7 +117,10 @@ keeperxgoals.func <- function(keeperxgoals = keeperxgoals,
            filter(!is.na(goalie)) %>%
            rename(Keeper = goalie) %>%
            arrange(`G-xG`)) %>%
-    select(one_of(c("Keeper", "Team", "Season", "Min", "Shots", "Goals", "Saves", "Header%", "Dist", "xG", "G-xG")))
+    select(one_of(c("Keeper", "Team", "Season", "Min", 
+                    "Shots", "Goals", "Saves", "Header%", 
+                    "Dist", "xG", "G-xG"))) %>%
+    ungroup()
   
 }
 

@@ -510,7 +510,7 @@ shinyServer(function(input, output, session) {
       ggplot(
         aes_string(x = paste0('`', passer_inputs$passerplot_xvar, '`'), 
                    y = paste0('`', passer_inputs$passerplot_yvar, '`'))) +
-      geom_point(aes(text = ifelse(rep("Season" %in% names(dt_passer_plot()), length(Player)), paste0(Player, " ", Season), Player)), color = '#0000cc') +
+      geom_point(aes(text = plotnames), color = '#0000cc') +
       expand_limits(x = xlim,
                     y = ylim) +
       geom_smooth(method = 'lm', se = F, color = "black") +
@@ -730,7 +730,9 @@ shinyServer(function(input, output, session) {
                 by = c("Keeper", "Team", "Season")[c(TRUE, keeper_inputs$keeper_byteams, keeper_inputs$keeper_byseasons)],
                 suffix = c("", "/96"))
     
-    dt[['extreme']] <- rank(dt[[keeper_inputs$keeperplot_xvar]]) + rank(dt[[keeper_inputs$keeperplot_yvar]])
+    dt[["extreme1"]] <- rank(dt[[keeper_inputs$keeperplot_xvar]], ties.method = "random")
+    dt[["extreme2"]] <- rank(dt[[keeper_inputs$keeperplot_yvar]], ties.method = "random") 
+
     if(length(unique(dt$Season)) > 1){
       dt[['plotnames']] <- paste(unlist(lapply(strsplit(dt$Keeper, " "), function(x) { return(x[length(x)]) })), dt$Season)
       
@@ -795,41 +797,67 @@ shinyServer(function(input, output, session) {
     keeper_plotvalues$keeperplot_yvar <- input$keeperplot_yvar
   })
   
-  output$keeperplot <- renderPlot({
+  output$keeperplot <- renderPlotly({
     
     xlim <- min(dt_keeperplot()[[keeper_inputs$keeperplot_xvar]]) - 0.05*(max(dt_keeperplot()[[keeper_inputs$keeperplot_xvar]]) - min(dt_keeperplot()[[keeper_inputs$keeperplot_xvar]]))
     ylim <- min(dt_keeperplot()[[keeper_inputs$keeperplot_yvar]]) - 0.05*(max(dt_keeperplot()[[keeper_inputs$keeperplot_yvar]]) - min(dt_keeperplot()[[keeper_inputs$keeperplot_yvar]]))
     
     p <- dt_keeperplot()  %>%
-      ggplot(
-        aes_string(x = paste0('`', keeper_inputs$keeperplot_xvar, '`'), 
-                   y = paste0('`', keeper_inputs$keeperplot_yvar, '`'))) +
-      geom_point(color = '#0000cc') +
-      geom_text(aes(label = ifelse(dt_keeperplot()$extreme >= sort(dt_keeperplot()$extreme, decreasing = T)[min(3, nrow(dt_keeperplot()))] |
-                                     dt_keeperplot()$extreme <= sort(dt_keeperplot()$extreme)[min(3, nrow(dt_keeperplot()))] |
-                                     dt_keeperplot()[[keeper_inputs$keeperplot_xvar]] == max(dt_keeperplot()[[keeper_inputs$keeperplot_xvar]]) |
-                                     dt_keeperplot()[[keeper_inputs$keeperplot_yvar]] == max(dt_keeperplot()[[keeper_inputs$keeperplot_yvar]]),
-                                   dt_keeperplot()$plotnames, ''), 
-                    hjust = "inward",
-                    vjust = "inward"),
-                size = 5,
-                check_overlap = T,
-                color = '#ff3300') +
+      ggplot(aes_string(x = paste0('`', keeper_inputs$keeperplot_xvar, '`'), 
+                        y = paste0('`', keeper_inputs$keeperplot_yvar, '`'))) +
+        geom_point(aes(text = plotnames), 
+                   color = '#0000cc') +
+      # geom_text(aes(label = ifelse(dt_keeperplot()$extreme >= sort(dt_keeperplot()$extreme, decreasing = T)[min(3, nrow(dt_keeperplot()))] |
+      #                                dt_keeperplot()$extreme <= sort(dt_keeperplot()$extreme)[min(3, nrow(dt_keeperplot()))] |
+      #                                dt_keeperplot()[[keeper_inputs$keeperplot_xvar]] == max(dt_keeperplot()[[keeper_inputs$keeperplot_xvar]]) |
+      #                                dt_keeperplot()[[keeper_inputs$keeperplot_yvar]] == max(dt_keeperplot()[[keeper_inputs$keeperplot_yvar]]),
+      #                              dt_keeperplot()$plotnames, ''), 
+      #               hjust = "inward",
+      #               vjust = "inward"),
+      #           size = 5,
+      #           check_overlap = T,
+      #           color = '#ff3300') +
       expand_limits(x = xlim,
-                    y = ylim)
-    p + geom_smooth(method = 'lm', se = F) +
-      geom_text(x = min(dt_keeperplot()[[keeper_inputs$keeperplot_xvar]]) - 0.05*(max(dt_keeperplot()[[keeper_inputs$keeperplot_xvar]]) - min(dt_keeperplot()[[keeper_inputs$keeperplot_xvar]])),
-                y = min(dt_keeperplot()[[keeper_inputs$keeperplot_yvar]]) - 0.05*(max(dt_keeperplot()[[keeper_inputs$keeperplot_yvar]]) - min(dt_keeperplot()[[keeper_inputs$keeperplot_yvar]])),
-                hjust = 0,
-                label = lm_eqn(dt_keeperplot(), 
-                               paste0('`', keeper_inputs$keeperplot_xvar, '`'), 
-                               paste0('`', keeper_inputs$keeperplot_yvar, '`')),
-                parse = TRUE,
-                color = 'black',
-                size = 7) +
+                    y = ylim) +
+      geom_smooth(method = 'lm', se = F, color = "black") +
       ggtheme
     
-  }, height = 500, width = 700)
+    m <- dt_keeperplot() %>% 
+      filter(extreme1 >= sort(extreme1, decreasing = T)[2] |
+               extreme1 <= sort(extreme1, decreasing = F)[2] |
+               extreme2 >= sort(extreme2, decreasing = T)[2] |
+               extreme2 <= sort(extreme2, decreasing = F)[2])
+    print(m %>% select(Keeper, extreme1, extreme2))
+    
+    a <- list(
+      x = m[[keeper_inputs$keeperplot_xvar]],
+      y = m[[keeper_inputs$keeperplot_yvar]],
+      text = m$plotnames,
+      xref = "x",
+      yref = "y",
+      showarrow = F,
+      xanchor = "center",
+      yanchor = "top",
+      font = list(color = '#ff3300',
+                  size = 10)
+    )
+    
+    ggplotly(p,
+             tooltip = c("x", "y", "text"),
+             width = 700,
+             height = 500) %>%
+      add_markers() %>%
+      layout(annotations = a)
+    
+  })
+  
+  output$keeperplot_text <- renderText({
+    paste0('<font size = "4">', 
+           lm_eqn2(dt_keeperplot(), 
+                   paste0('`', keeper_inputs$keeperplot_xvar, '`'),
+                   paste0('`', keeper_inputs$keeperplot_yvar, '`')),
+           "</font>")
+  })
   
   # Team shots tables ####
   dt_team <- reactive({

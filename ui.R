@@ -419,8 +419,11 @@ shinyUI(
                                                                                            'G-xG/shot' = 'GmxGperShot',
                                                                                            '%Shots headed' = 'Header%', 'Avg. distance' = 'Dist',
                                                                                            'xG faced' = 'xG', 'GA above average' = 'G-xG'),
-                                                                               selected = 'G-xG')),
-                                                            plotOutput('keeperplot')))
+                                                                               selected = 'G-xG')))),
+                                                          br(),
+                                                          htmlOutput("keeperplot_text"),
+                                                          br(),
+                                                          plotlyOutput('keeperplot')
                                                  )
                                      ))
                                  )
