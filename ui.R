@@ -252,7 +252,7 @@ shinyUI(
                                                  ),
                                                  tabPanel('Scatter plots',
                                                           value = "teamxgoalplots",
-                                                          p(HTML("<i>Please allow a few seconds for the plot to load.</>")),
+                                                          p(HTML("<i>Please allow a few seconds for the plot to load.</i>")),
                                                           fluidPage(fluidRow(
                                                             column(3,
                                                                    selectInput('teamplot_xvar',
@@ -500,7 +500,7 @@ shinyUI(
                                                                   DT::dataTableOutput("passingtable_player_per96")),
                                                          tabPanel("Scatter plots",
                                                                   value = "passingplots",
-                                                                  p(HTML("<i>Please allow a few seconds for the plot to load.</>")),
+                                                                  p(HTML("<i>Please allow a few seconds for the plot to load.</i>")),
                                                                   fluidPage(fluidRow(
                                                                     column(3,
                                                                            selectInput('passerplot_xvar',
@@ -589,7 +589,7 @@ shinyUI(
                                                           DT::dataTableOutput("teampassing_pergame")),
                                                  tabPanel('Scatter plots',
                                                           value = "teampassingplots",
-                                                          p(HTML("<i>Please allow a few seconds for the plot to load.</>")),
+                                                          p(HTML("<i>Please allow a few seconds for the plot to load.</i>")),
                                                           fluidPage(fluidRow(
                                                             column(3,
                                                                    selectInput('teampassingplot_xvar',

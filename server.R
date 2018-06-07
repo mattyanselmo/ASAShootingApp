@@ -268,9 +268,7 @@ shinyServer(function(input, output, session) {
       ggplot(
         aes_string(x = paste0('`', shooter_inputs$shooterplot_xvar, '`'), 
                    y = paste0('`', shooter_inputs$shooterplot_yvar, '`'))) +
-      geom_point(aes(text = ifelse(rep("Season" %in% names(dt_playershootingplot()), length(Player)), 
-                                   paste0(Player, " ", Season), 
-                                   Player)), 
+      geom_point(aes(text = paste0(plotnames, "<br>Shots:", Shots)), 
                  color = '#0000cc') +
       expand_limits(x = xlim,
                     y = ylim) +
@@ -510,7 +508,7 @@ shinyServer(function(input, output, session) {
       ggplot(
         aes_string(x = paste0('`', passer_inputs$passerplot_xvar, '`'), 
                    y = paste0('`', passer_inputs$passerplot_yvar, '`'))) +
-      geom_point(aes(text = plotnames), color = '#0000cc') +
+      geom_point(aes(text = paste0(plotnames, "<br>Passes:", Passes)), color = '#0000cc') +
       expand_limits(x = xlim,
                     y = ylim) +
       geom_smooth(method = 'lm', se = F, color = "black") +
@@ -805,7 +803,7 @@ shinyServer(function(input, output, session) {
     p <- dt_keeperplot()  %>%
       ggplot(aes_string(x = paste0('`', keeper_inputs$keeperplot_xvar, '`'), 
                         y = paste0('`', keeper_inputs$keeperplot_yvar, '`'))) +
-        geom_point(aes(text = plotnames), 
+        geom_point(aes(text = paste0(plotnames, "<br>Shots faced:", Shots)), 
                    color = '#0000cc') +
       # geom_text(aes(label = ifelse(dt_keeperplot()$extreme >= sort(dt_keeperplot()$extreme, decreasing = T)[min(3, nrow(dt_keeperplot()))] |
       #                                dt_keeperplot()$extreme <= sort(dt_keeperplot()$extreme)[min(3, nrow(dt_keeperplot()))] |
