@@ -143,9 +143,7 @@ shinyUI(
                                                                                label = 'Y-axis variable',
                                                                                choices = "Goals",
                                                                                selected = "Goals")))),
-                                                            br(),
                                                             htmlOutput("shooterplot_text"),
-                                                            br(),
                                                             plotlyOutput('shooterplot')                                                            )))
                                      )),
                         
@@ -253,6 +251,8 @@ shinyUI(
                                                                            div(DT::dataTableOutput('teampergamexgoalseast')))
                                                  ),
                                                  tabPanel('Scatter plots',
+                                                          value = "teamxgoalplots",
+                                                          p(HTML("<i>Please allow a few seconds for the plot to load.</>")),
                                                           fluidPage(fluidRow(
                                                             column(3,
                                                                    selectInput('teamplot_xvar',
@@ -264,9 +264,7 @@ shinyUI(
                                                                                label = 'Y-axis variable',
                                                                                choices = "GF",
                                                                                selected = 'GF')))),
-                                                          br(),
                                                           htmlOutput("teamshootingplot_text"),
-                                                          br(),
                                                           plotlyOutput("teamplot"))
                                                  )
                                      )
@@ -422,9 +420,7 @@ shinyUI(
                                                                                            '%Shots headed' = 'Header%', 'Avg. distance' = 'Dist',
                                                                                            'xG faced' = 'xG', 'GA above average' = 'G-xG'),
                                                                                selected = 'G-xG')))),
-                                                          br(),
                                                           htmlOutput("keeperplot_text"),
-                                                          br(),
                                                           plotlyOutput('keeperplot')
                                                  )
                                      ))
@@ -504,6 +500,7 @@ shinyUI(
                                                                   DT::dataTableOutput("passingtable_player_per96")),
                                                          tabPanel("Scatter plots",
                                                                   value = "passingplots",
+                                                                  p(HTML("<i>Please allow a few seconds for the plot to load.</>")),
                                                                   fluidPage(fluidRow(
                                                                     column(3,
                                                                            selectInput('passerplot_xvar',
@@ -515,9 +512,7 @@ shinyUI(
                                                                                        label = 'Y-axis variable',
                                                                                        choices = "PassPct",
                                                                                        selected = "PassPct")))),
-                                                                    br(),
                                                                     htmlOutput("passerplot_text"),
-                                                                    br(),
                                                                     plotlyOutput('passerplot'))
                                              )))),
                         # Passing: Teams ####
@@ -593,6 +588,8 @@ shinyUI(
                                                           br(),
                                                           DT::dataTableOutput("teampassing_pergame")),
                                                  tabPanel('Scatter plots',
+                                                          value = "teampassingplots",
+                                                          p(HTML("<i>Please allow a few seconds for the plot to load.</>")),
                                                           fluidPage(fluidRow(
                                                             column(3,
                                                                    selectInput('teampassingplot_xvar',
@@ -603,8 +600,9 @@ shinyUI(
                                                                    selectInput('teampassingplot_yvar',
                                                                                label = 'Y-axis variable',
                                                                                choices = c("PctF"),
-                                                                               selected = "PctF")),
-                                                            plotOutput('teampassingplot')))
+                                                                               selected = "PctF")))),
+                                                          htmlOutput("teampassingplot_text"),
+                                                          plotlyOutput('teampassingplot')
                                                  )
                                      )
                                    )

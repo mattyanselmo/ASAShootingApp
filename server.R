@@ -1332,12 +1332,15 @@ shinyServer(function(input, output, session) {
                       selected = teampassing_plotvalues$teampassingplot_yvar)
   })
   
-  output$teampassingplot <- renderPlot({
+  output$teampassingplot <- renderPlotly({
     req(input$teampassingplot_xvar, input$teampassingplot_yvar)
     dt <- dt_teampassing_plot()
-    
-    xlim <- min(dt[[input$teampassingplot_xvar]]) - 0.05*(max(dt[[input$teampassingplot_xvar]]) - min(dt[[input$teampassingplot_xvar]]))
+
+        xlim <- min(dt[[input$teampassingplot_xvar]]) - 0.05*(max(dt[[input$teampassingplot_xvar]]) - min(dt[[input$teampassingplot_xvar]]))
     ylim <- min(dt[[input$teampassingplot_yvar]]) - 0.05*(max(dt[[input$teampassingplot_yvar]]) - min(dt[[input$teampassingplot_yvar]]))
+    
+    dt[["extreme1"]] <- rank(dt[[input$teampassingplot_xvar]], ties.method = "random")
+    dt[["extreme2"]] <- rank(dt[[input$teampassingplot_yvar]], ties.method = "random")
     
     if(length(unique(dt$Season)) > 1){
       dt[['plotnames']] <- paste(unlist(lapply(strsplit(as.character(dt$Team), " "), function(x) { return(x[length(x)]) })), dt$Season)
@@ -1345,32 +1348,53 @@ shinyServer(function(input, output, session) {
       dt[['plotnames']] <- unlist(lapply(strsplit(as.character(dt$Team), " "), function(x) { return(x[length(x)]) }))
     }
     
-    p <- dt %>%
-      ggplot(
-        aes_string(x = paste0('`', input$teampassingplot_xvar, '`'), 
-                   y = paste0('`', input$teampassingplot_yvar, '`'))) +
-      geom_point(color = '#0000cc') +
-      geom_text(aes(label = plotnames,
-                    hjust = "inward",
-                    vjust = "inward"),
-                size = 5,
-                check_overlap = T,
-                color = '#ff3300') +
+    p <- dt  %>%
+      ggplot(aes_string(x = paste0('`', input$teampassingplot_xvar, '`'),
+                        y = paste0('`', input$teampassingplot_yvar, '`'))) +
+      geom_point(aes(text = plotnames), color = '#0000cc') +
       expand_limits(x = xlim,
-                    y = ylim)
-    p + geom_smooth(method = 'lm', se = F) +
-      geom_text(x = xlim,
-                y = ylim,
-                hjust = 0,
-                label = lm_eqn(dt, 
-                               paste0('`', input$teampassingplot_xvar, '`'), 
-                               paste0('`', input$teampassingplot_yvar, '`')),
-                parse = TRUE,
-                color = 'black',
-                size = 7) +
+                    y = ylim) +
+      geom_smooth(method = 'lm', se = F) +
       ggtheme
     
-  }, height = 500, width = 700)
+    m <- dt %>% 
+      ungroup() %>%
+      filter(extreme1 >= sort(extreme1, decreasing = T)[2] |
+               extreme1 <= sort(extreme1, decreasing = F)[2] |
+               extreme2 >= sort(extreme2, decreasing = T)[2] |
+               extreme2 <= sort(extreme2, decreasing = F)[2])
+    
+    a <- list(
+      x = m[[input$teampassingplot_xvar]],
+      y = m[[input$teampassingplot_yvar]],
+      text = m$plotnames,
+      xref = "x",
+      yref = "y",
+      showarrow = F,
+      xanchor = "center",
+      yanchor = "top",
+      font = list(color = '#ff3300',
+                  size = 10)
+    )
+    
+    ggplotly(p,
+             tooltip = c("x", "y", "text"),
+             width = 700,
+             height = 500) %>%
+      add_markers() %>%
+      layout(annotations = a)
+    
+  })
+  
+  output$teampassingplot_text <- renderText({
+    req(input$teampassingplot_xvar, input$teampassingplot_yvar)
+    
+    paste0('<font size = "4">',
+           lm_eqn2(dt_teampassing_plot(),
+                   paste0('`', input$teampassingplot_xvar, '`'),
+                   paste0('`', input$teampassingplot_yvar, '`')),
+           "</font>")
+  })
   
   # Team passing downloads ####
   output$teampassing_download <- downloadHandler(
