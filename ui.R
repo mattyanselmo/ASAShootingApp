@@ -263,12 +263,14 @@ shinyUI(
                                                                    selectInput('teamplot_yvar',
                                                                                label = 'Y-axis variable',
                                                                                choices = "GF",
-                                                                               selected = 'GF')),
-                                                            plotOutput('teamplot')))
+                                                                               selected = 'GF')))),
+                                                          br(),
+                                                          htmlOutput("teamshootingplot_text"),
+                                                          br(),
+                                                          plotlyOutput("teamplot"))
                                                  )
                                      )
                                    )
-                                 )
                         ),
                         tabPanel('Game-by-game xG',
                                  value = "gamebygamexg",

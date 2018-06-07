@@ -278,10 +278,10 @@ shinyServer(function(input, output, session) {
       ggtheme
     
     m <- dt_playershootingplot() %>% 
-      filter(extreme1 >= sort(extreme1, decreasing = T)[2] |
-               extreme1 <= sort(extreme1, decreasing = F)[2] |
-               extreme2 >= sort(extreme2, decreasing = T)[2] |
-               extreme2 <= sort(extreme2, decreasing = F)[2])
+      filter(extreme1 >= sort(extreme1, decreasing = T)[1] |
+               extreme1 <= sort(extreme1, decreasing = F)[1] |
+               extreme2 >= sort(extreme2, decreasing = T)[1] |
+               extreme2 <= sort(extreme2, decreasing = F)[1])
     
     a <- list(
       x = m[[shooter_inputs$shooterplot_xvar]],
@@ -517,10 +517,10 @@ shinyServer(function(input, output, session) {
       ggtheme
     
     m <- dt_passer_plot() %>% 
-      filter(extreme1 >= sort(extreme1, decreasing = T)[2] |
-               extreme1 <= sort(extreme1, decreasing = F)[2] |
-               extreme2 >= sort(extreme2, decreasing = T)[2] |
-               extreme2 <= sort(extreme2, decreasing = F)[2])
+      filter(extreme1 >= sort(extreme1, decreasing = T)[1] |
+               extreme1 <= sort(extreme1, decreasing = F)[1] |
+               extreme2 >= sort(extreme2, decreasing = T)[1] |
+               extreme2 <= sort(extreme2, decreasing = F)[1])
     
     a <- list(
       x = m[[passer_inputs$passerplot_xvar]],
@@ -823,10 +823,10 @@ shinyServer(function(input, output, session) {
       ggtheme
     
     m <- dt_keeperplot() %>% 
-      filter(extreme1 >= sort(extreme1, decreasing = T)[2] |
-               extreme1 <= sort(extreme1, decreasing = F)[2] |
-               extreme2 >= sort(extreme2, decreasing = T)[2] |
-               extreme2 <= sort(extreme2, decreasing = F)[2])
+      filter(extreme1 >= sort(extreme1, decreasing = T)[1] |
+               extreme1 <= sort(extreme1, decreasing = F)[1] |
+               extreme2 >= sort(extreme2, decreasing = T)[1] |
+               extreme2 <= sort(extreme2, decreasing = F)[1])
     print(m %>% select(Keeper, extreme1, extreme2))
     
     a <- list(
@@ -1141,7 +1141,6 @@ shinyServer(function(input, output, session) {
                                                       setdiff(names(dt_team_pergame()), names(dt))))),
                 by = c("Team", "Season")[c(T, input$team_byseasons)]) %>%
       select(-one_of(c("Conf")))
-    
   })
   
   teamshooting_plotvalues <- reactiveValues(teamplot_xvar = "xGF", teamplot_yvar = "GF")
@@ -1169,14 +1168,16 @@ shinyServer(function(input, output, session) {
                       selected = teamshooting_plotvalues$teamplot_yvar)
   })
   
-  output$teamplot <- renderPlot({
+  output$teamplot <- renderPlotly({
     req(input$teamplot_xvar, input$teamplot_yvar)
     dt <- dt_teamshots_plot()
     
     xlim <- min(dt[[input$teamplot_xvar]]) - 0.05*(max(dt[[input$teamplot_xvar]]) - min(dt[[input$teamplot_xvar]]))
     ylim <- min(dt[[input$teamplot_yvar]]) - 0.05*(max(dt[[input$teamplot_yvar]]) - min(dt[[input$teamplot_yvar]]))
     
-    # dt[['extreme']] <- rank(dt[[input$teamplot_xvar]]) + rank(dt[[input$teamplot_yvar]])
+    dt[["extreme1"]] <- rank(dt[[input$teamplot_xvar]], ties.method = "random")
+    dt[["extreme2"]] <- rank(dt[[input$teamplot_yvar]], ties.method = "random")
+    
     if(length(unique(dt$Season)) > 1){
       dt[['plotnames']] <- paste(unlist(lapply(strsplit(dt$Team, " "), function(x) { return(x[length(x)]) })), dt$Season)
     }else{
@@ -1187,27 +1188,49 @@ shinyServer(function(input, output, session) {
       ggplot(
         aes_string(x = paste0('`', input$teamplot_xvar, '`'),
                    y = paste0('`', input$teamplot_yvar, '`'))) +
-      geom_point(color = '#0000cc') +
-      geom_text(aes(label = plotnames,
-                    hjust = "inward",
-                    vjust = "inward"),
-                size = 5,
-                check_overlap = T,
-                color = '#ff3300') +
+      geom_point(aes(text = plotnames), color = '#0000cc') +
       expand_limits(x = xlim,
-                    y = ylim)
-    
-    p + geom_smooth(method = 'lm', se = F) +
-      geom_text(x = xlim,
-                y = ylim,
-                hjust = 0,
-                label = lm_eqn(dt, paste0("`", input$teamplot_xvar, "`"), paste0("`", input$teamplot_yvar, "`")),
-                parse = TRUE,
-                color = 'black',
-                size = 7) +
+                    y = ylim) +
+      geom_smooth(method = 'lm', se = F) +
       ggtheme
     
-  }, height = 500, width = 700)
+    m <- dt %>% 
+      ungroup() %>%
+      filter(extreme1 >= sort(extreme1, decreasing = T)[2] |
+               extreme1 <= sort(extreme1, decreasing = F)[2] |
+               extreme2 >= sort(extreme2, decreasing = T)[2] |
+               extreme2 <= sort(extreme2, decreasing = F)[2])
+    
+    a <- list(
+      x = m[[input$teamplot_xvar]],
+      y = m[[input$teamplot_yvar]],
+      text = m$plotnames,
+      xref = "x",
+      yref = "y",
+      showarrow = F,
+      xanchor = "center",
+      yanchor = "top",
+      font = list(color = '#ff3300',
+                  size = 10)
+    )
+    
+    ggplotly(p,
+             tooltip = c("x", "y", "text"),
+             width = 700,
+             height = 500) %>%
+      add_markers() %>%
+      layout(annotations = a)
+    
+  })
+  
+  output$teamshootingplot_text <- renderText({
+    req(input$teamplot_xvar, input$teamplot_yvar)
+    paste0('<font size = "4">',
+           lm_eqn2(dt_teamshots_plot(),
+                   paste0('`', input$teamplot_xvar, '`'),
+                   paste0('`', input$teamplot_yvar, '`')),
+           "</font>")
+  })
   
   # Team passing tables ####
   dt_team_passing <- reactive({
