@@ -66,7 +66,7 @@ gamesplayed <- readRDS("IgnoreList/GamesPlayed_forTeamPassing.rds")
 #load('IgnoreList/UnivariatePoissonModels.Rdata')
 
 ggtheme <- theme(legend.position = "none",
-                 axis.text=element_text(size = 14),
+                 axis.text=element_text(size = 12),
                  axis.title=element_text(size = 16, face = "bold"))
 
 lm_eqn <- function(df, x, y){
