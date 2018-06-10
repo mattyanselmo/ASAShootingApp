@@ -834,8 +834,7 @@ shinyServer(function(input, output, session) {
                extreme1 <= sort(extreme1, decreasing = F)[1] |
                extreme2 >= sort(extreme2, decreasing = T)[1] |
                extreme2 <= sort(extreme2, decreasing = F)[1])
-    print(m %>% select(Keeper, extreme1, extreme2))
-    
+
     a <- list(
       x = m[[keeper_inputs$keeperplot_xvar]],
       y = m[[keeper_inputs$keeperplot_yvar]],
