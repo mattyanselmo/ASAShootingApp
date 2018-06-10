@@ -196,6 +196,9 @@ shinyServer(function(input, output, session) {
     dt[["extreme1"]] <- rank(dt[[shooter_inputs$shooterplot_xvar]], ties.method = "random")
     dt[["extreme2"]] <- rank(dt[[shooter_inputs$shooterplot_yvar]], ties.method = "random")
     
+    dt[[shooter_inputs$shooterplot_xvar]] <- round(dt[[shooter_inputs$shooterplot_xvar]], 3)
+    dt[[shooter_inputs$shooterplot_yvar]] <- round(dt[[shooter_inputs$shooterplot_yvar]], 3)
+    
     if(length(unique(dt$Season)) > 1){
       dt[['plotnames']] <- paste(unlist(lapply(strsplit(dt$Player, " "), function(x) { return(x[length(x)]) })), dt$Season)
       
@@ -261,8 +264,8 @@ shinyServer(function(input, output, session) {
   })
   
   output$shooterplot <- renderPlotly({
-    xlim <- min(dt_playershootingplot()[[passer_inputs$passerplot_xvar]]) - 0*(max(dt_playershootingplot()[[passer_inputs$passerplot_xvar]]) - min(dt_playershootingplot()[[passer_inputs$passerplot_xvar]]))
-    ylim <- min(dt_playershootingplot()[[passer_inputs$passerplot_yvar]]) - 0*(max(dt_playershootingplot()[[passer_inputs$passerplot_yvar]]) - min(dt_playershootingplot()[[passer_inputs$passerplot_yvar]]))
+    xlim <- min(dt_playershootingplot()[[shooter_inputs$shooterplot_xvar]]) - 0*(max(dt_playershootingplot()[[passer_inputs$passerplot_xvar]]) - min(dt_playershootingplot()[[shooter_inputs$shooterplot_xvar]]))
+    ylim <- min(dt_playershootingplot()[[passer_inputs$passerplot_yvar]]) - 0*(max(dt_playershootingplot()[[shooter_inputs$shooterplot_yvar]]) - min(dt_playershootingplot()[[shooter_inputs$shooterplot_yvar]]))
     
     p <- dt_playershootingplot() %>%
       ggplot(
@@ -441,6 +444,9 @@ shinyServer(function(input, output, session) {
     dt[["extreme1"]] <- rank(dt[[passer_inputs$passerplot_xvar]], ties.method = "random")
     dt[["extreme2"]] <- rank(dt[[passer_inputs$passerplot_yvar]], ties.method = "random")
     
+    dt[[passer_inputs$passerplot_xvar]] <- round(dt[[passer_inputs$passerplot_xvar]], 3)
+    dt[[passer_inputs$passerplot_yvar]] <- round(dt[[passer_inputs$passerplot_yvar]], 3)
+    
     if(length(unique(dt$Season)) > 1){
       dt[['plotnames']] <- paste(unlist(lapply(strsplit(dt$Player, " "), function(x) { return(x[length(x)]) })), dt$Season)
       
@@ -539,14 +545,14 @@ shinyServer(function(input, output, session) {
              height = 500) %>%
       add_markers() %>%
       layout(annotations = a)
-
+    
   })
   
   output$passerplot_text <- renderText({
     paste0('<font size = "4">', 
            lm_eqn2(dt_passer_plot(), 
-           paste0('`', passer_inputs$passerplot_xvar, '`'),
-           paste0('`', passer_inputs$passerplot_yvar, '`')),
+                   paste0('`', passer_inputs$passerplot_xvar, '`'),
+                   paste0('`', passer_inputs$passerplot_yvar, '`')),
            "</font>")
   })
   
@@ -730,7 +736,10 @@ shinyServer(function(input, output, session) {
     
     dt[["extreme1"]] <- rank(dt[[keeper_inputs$keeperplot_xvar]], ties.method = "random")
     dt[["extreme2"]] <- rank(dt[[keeper_inputs$keeperplot_yvar]], ties.method = "random") 
-
+    
+    dt[[keeper_inputs$keeperplot_xvar]] <- round(dt[[keeper_inputs$keeperplot_xvar]], 3)
+    dt[[keeper_inputs$keeperplot_yvar]] <- round(dt[[keeper_inputs$keeperplot_yvar]], 3)
+    
     if(length(unique(dt$Season)) > 1){
       dt[['plotnames']] <- paste(unlist(lapply(strsplit(dt$Keeper, " "), function(x) { return(x[length(x)]) })), dt$Season)
       
@@ -803,8 +812,8 @@ shinyServer(function(input, output, session) {
     p <- dt_keeperplot()  %>%
       ggplot(aes_string(x = paste0('`', keeper_inputs$keeperplot_xvar, '`'), 
                         y = paste0('`', keeper_inputs$keeperplot_yvar, '`'))) +
-        geom_point(aes(text = paste0(plotnames, "<br>Shots faced:", Shots)), 
-                   color = '#0000cc') +
+      geom_point(aes(text = paste0(plotnames, "<br>Shots faced:", Shots)), 
+                 color = '#0000cc') +
       # geom_text(aes(label = ifelse(dt_keeperplot()$extreme >= sort(dt_keeperplot()$extreme, decreasing = T)[min(3, nrow(dt_keeperplot()))] |
       #                                dt_keeperplot()$extreme <= sort(dt_keeperplot()$extreme)[min(3, nrow(dt_keeperplot()))] |
       #                                dt_keeperplot()[[keeper_inputs$keeperplot_xvar]] == max(dt_keeperplot()[[keeper_inputs$keeperplot_xvar]]) |
@@ -1176,6 +1185,9 @@ shinyServer(function(input, output, session) {
     dt[["extreme1"]] <- rank(dt[[input$teamplot_xvar]], ties.method = "random")
     dt[["extreme2"]] <- rank(dt[[input$teamplot_yvar]], ties.method = "random")
     
+    dt[[input$teamplot_xvar]] <- round(dt[[input$teamplot_xvar]], 3)
+    dt[[input$teamplot_yvar]] <- round(dt[[input$teamplot_yvar]], 3)
+    
     if(length(unique(dt$Season)) > 1){
       dt[['plotnames']] <- paste(unlist(lapply(strsplit(dt$Team, " "), function(x) { return(x[length(x)]) })), dt$Season)
     }else{
@@ -1333,12 +1345,15 @@ shinyServer(function(input, output, session) {
   output$teampassingplot <- renderPlotly({
     req(input$teampassingplot_xvar, input$teampassingplot_yvar)
     dt <- dt_teampassing_plot()
-
-        xlim <- min(dt[[input$teampassingplot_xvar]]) - 0.05*(max(dt[[input$teampassingplot_xvar]]) - min(dt[[input$teampassingplot_xvar]]))
+    
+    xlim <- min(dt[[input$teampassingplot_xvar]]) - 0.05*(max(dt[[input$teampassingplot_xvar]]) - min(dt[[input$teampassingplot_xvar]]))
     ylim <- min(dt[[input$teampassingplot_yvar]]) - 0.05*(max(dt[[input$teampassingplot_yvar]]) - min(dt[[input$teampassingplot_yvar]]))
     
     dt[["extreme1"]] <- rank(dt[[input$teampassingplot_xvar]], ties.method = "random")
     dt[["extreme2"]] <- rank(dt[[input$teampassingplot_yvar]], ties.method = "random")
+    
+    dt[[input$teampassingplot_xvar]] <- round(dt[[input$teampassingplot_xvar]], 3)
+    dt[[input$teampassingplot_yvar]] <- round(dt[[input$teampassingplot_yvar]], 3)
     
     if(length(unique(dt$Season)) > 1){
       dt[['plotnames']] <- paste(unlist(lapply(strsplit(as.character(dt$Team), " "), function(x) { return(x[length(x)]) })), dt$Season)
