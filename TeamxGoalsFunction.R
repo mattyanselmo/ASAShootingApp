@@ -152,7 +152,7 @@ teamxgoals.func <- function(teamxgoals = teamxgoals,
       left_join(ptsdat, by = c('Team', 'Season')[c(T, byseasons)])
   }
   
-  if(length(season) == 1 & confview){
+  if((length(season) == 1 | format(date1, "%Y") == format(date2, "%Y")) & confview){
   aggdata <- aggdata %>%
     left_join(conferences %>% filter(Season == season) %>% select(-Season), 
               by = c('Team'))
@@ -164,6 +164,7 @@ teamxgoals.func <- function(teamxgoals = teamxgoals,
   
 }
 
+# # Function example
 # teamxgoals.func(teamxgoals = teamxgoals,
 #                 date1 = as.Date('2000-01-01'),
 #                 date2 = as.Date('9999-12-31'),
@@ -174,4 +175,4 @@ teamxgoals.func <- function(teamxgoals = teamxgoals,
 #                 advanced = T,
 #                 venue = c('Home', 'Away'),
 #                 byseasons = T,
-#                 plot = F) -> x
+#                 plot = F)

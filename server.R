@@ -35,7 +35,7 @@ shinyServer(function(input, output, session) {
   observe({
     query <- parseQueryString(session$clientData$url_search)
     if(!is.null(query[["headnavbar"]])){
-    updateNavbarPage(session, "headnavbar", selected = query[["headnavbar"]])
+      updateNavbarPage(session, "headnavbar", selected = query[["headnavbar"]])
     }
   })
   
@@ -54,10 +54,10 @@ shinyServer(function(input, output, session) {
                                    shooting_other = T,
                                    shooting_fk = T,
                                    shooting_pk = T,
-                                   shooterplot_xvar = 'xG',
-                                   shooterplot_yvar = 'G-xG',
-                                   shooterplot_per96_xvar = 'xG',
-                                   shooterplot_per96_yvar = 'G-xG')
+                                   shooterplot_xvar = "xG",
+                                   shooterplot_yvar = "Goals",
+                                   shooterplot_per96_xvar = "xG",
+                                   shooterplot_per96_yvar = "Goals")
   
   # Updated values
   observeEvent(input$shooting_action,
@@ -77,8 +77,8 @@ shinyServer(function(input, output, session) {
                  shooter_inputs$shooting_pk <- input$shooting_pk
                  shooter_inputs$shooterplot_xvar <- input$shooterplot_xvar
                  shooter_inputs$shooterplot_yvar <- input$shooterplot_yvar
-                 shooter_inputs$shooterplot_per96_xvar <- input$shooterplot_per96_xvar
-                 shooter_inputs$shooterplot_per96_yvar <- input$shooterplot_per96_yvar
+                 # shooter_inputs$shooterplot_per96_xvar <- input$shooterplot_per96_xvar
+                 # shooter_inputs$shooterplot_per96_yvar <- input$shooterplot_per96_yvar
                })
   
   # Shooter tables ####
@@ -96,10 +96,10 @@ shinyServer(function(input, output, session) {
                                      OtherShots = shooter_inputs$shooting_other,
                                      FK = shooter_inputs$shooting_fk,
                                      PK = shooter_inputs$shooting_pk) %>%
-        mutate(xGperShot = ifelse(Shots > 0, xG/Shots, 0),
-               xAperPass = ifelse(KeyP > 0, xA/KeyP, 0),
-               GmxGperShot = ifelse(Shots > 0, `G-xG`/Shots, 0),
-               AmxAperPass = ifelse(KeyP > 0, `A-xA`/KeyP, 0))
+        mutate(`xG/shot` = ifelse(Shots > 0, xG/Shots, 0),
+               `xA/pass` = ifelse(KeyP > 0, xA/KeyP, 0),
+               `G-xG/shot` = ifelse(Shots > 0, `G-xG`/Shots, 0),
+               `A-xA/pass` = ifelse(KeyP > 0, `A-xA`/KeyP, 0))
     } else{
       dt_total <- shooterxgoals.func(playerxgoals,
                                      date1 = shooter_inputs$shooting_date1,
@@ -113,18 +113,10 @@ shinyServer(function(input, output, session) {
                                      OtherShots = shooter_inputs$shooting_other,
                                      FK = shooter_inputs$shooting_fk,
                                      PK = shooter_inputs$shooting_pk) %>%
-        mutate(xGperShot = ifelse(Shots > 0, xG/Shots, 0),
-               xAperPass = ifelse(KeyP > 0, xA/KeyP, 0),
-               GmxGperShot = ifelse(Shots > 0, `G-xG`/Shots, 0),
-               AmxAperPass = ifelse(KeyP > 0, `A-xA`/KeyP, 0))
-    }
-    
-    dt_total[['extreme']] <- rank(dt_total[[shooter_inputs$shooterplot_xvar]]) + rank(dt_total[[shooter_inputs$shooterplot_yvar]])
-    if(length(unique(dt_total$Season)) > 1){
-      dt_total[['plotnames']] <- paste(unlist(lapply(strsplit(dt_total$Player, " "), function(x) { return(x[length(x)]) })), dt_total$Season)
-      
-    }else{
-      dt_total[['plotnames']] <- unlist(lapply(strsplit(dt_total$Player, " "), function(x) { return(x[length(x)]) }))
+        mutate(`xG/shot` = ifelse(Shots > 0, xG/Shots, 0),
+               `xA/pass` = ifelse(KeyP > 0, xA/KeyP, 0),
+               `G-xG/shot` = ifelse(Shots > 0, `G-xG`/Shots, 0),
+               `A-xA/pass` = ifelse(KeyP > 0, `A-xA`/KeyP, 0))
     }
     
     if("Pos" %in% names(dt_total)){
@@ -165,22 +157,13 @@ shinyServer(function(input, output, session) {
                                           PK = shooter_inputs$shooting_pk)
     }
     
-    dt_per96[['extreme']] <- rank(dt_per96[[shooter_inputs$shooterplot_xvar]]) + rank(dt_per96[[shooter_inputs$shooterplot_yvar]])
-    if(length(unique(dt_per96$Season)) > 1){
-      dt_per96[['plotnames']] <- paste(unlist(lapply(strsplit(dt_per96$Player, " "), function(x) { return(x[length(x)]) })), dt_per96$Season)
-      
-    }else{
-      dt_per96[['plotnames']] <- unlist(lapply(strsplit(dt_per96$Player, " "), function(x) { return(x[length(x)]) }))
-    }
-    
     dt_per96 %>% filter(Pos %in% shooter_inputs$shooting_position)
-    
   })
   
   # Player table - totals
   output$shootertable <- DT::renderDataTable({
     
-    datatable(dt_total() %>% select(-c(Dist.key, xGperShot, xAperPass, GmxGperShot, AmxAperPass, extreme, plotnames)),
+    datatable(dt_total() %>% select(-c(Dist.key, `xG/shot`:`A-xA/pass`)),
               rownames = F,
               options(list(autoWidth = T,
                            pageLength = 25,
@@ -204,91 +187,146 @@ shinyServer(function(input, output, session) {
   })
   
   # Shooter plots ####
-  output$shooterplot <- renderPlot({
-    xlim <- min(dt_total()[[shooter_inputs$shooterplot_xvar]]) - 0.05*(max(dt_total()[[shooter_inputs$shooterplot_xvar]]) - min(dt_total()[[shooter_inputs$shooterplot_xvar]]))
-    ylim <- min(dt_total()[[shooter_inputs$shooterplot_yvar]]) - 0.05*(max(dt_total()[[shooter_inputs$shooterplot_yvar]]) - min(dt_total()[[shooter_inputs$shooterplot_yvar]]))
+  dt_playershootingplot <- reactive({
+    dt <- dt_total() %>%
+      left_join(dt_per96(),
+                by = c("Player", "Team", "Season")[c(TRUE, shooter_inputs$shooting_byteams, shooter_inputs$shooting_byseasons)],
+                suffix = c("", "/96"))
     
-    p <- dt_total() %>%
+    dt[["extreme1"]] <- rank(dt[[shooter_inputs$shooterplot_xvar]], ties.method = "random")
+    dt[["extreme2"]] <- rank(dt[[shooter_inputs$shooterplot_yvar]], ties.method = "random")
+    
+    if(length(unique(dt$Season)) > 1){
+      dt[['plotnames']] <- paste(unlist(lapply(strsplit(dt$Player, " "), function(x) { return(x[length(x)]) })), dt$Season)
+      
+    }else{
+      dt[['plotnames']] <- unlist(lapply(strsplit(dt$Player, " "), function(x) { return(x[length(x)]) }))
+    }
+    dt
+  })
+  
+  playershooting_plotvalues <- reactiveValues(shooterplot_xvar = "xG", shooterplot_yvar = "Goals")
+  
+  observeEvent(input$shooting_action, {
+    choices.total <- names(dt_total())[!(names(dt_total()) %in% c("Player", "Team", "Season", "Pos"))]
+    if(min(input$shooting_seasonfilter) >= 2015){
+      choices.96 <- paste0(names(dt_per96())[!(names(dt_per96()) %in% c("Player", "Team", "Season", "Pos", "Min"))], "/96")
+    } else{
+      choices.96 <- c("")
+    }
+    updateSelectInput(session,
+                      inputId = 'shooterplot_xvar',
+                      label = 'X-axis variable',
+                      choices = c(choices.total, choices.96),
+                      selected = playershooting_plotvalues$shooterplot_xvar)
+    
+    updateSelectInput(session,
+                      inputId = 'shooterplot_yvar',
+                      label = 'Y-axis variable',
+                      choices = c(choices.total, choices.96),
+                      selected = playershooting_plotvalues$shooterplot_yvar)
+  })
+  
+  observeEvent({
+    dt_total()
+    dt_per96()},
+    {
+      choices.total <- names(dt_total())[!(names(dt_total()) %in% c("Player", "Team", "Season", "Pos"))]
+      if(min(input$shooting_seasonfilter) >= 2015){
+        choices.96 <- paste0(names(dt_per96())[!(names(dt_per96()) %in% c("Player", "Team", "Season", "Pos", "Min"))], "/96")
+      } else{
+        choices.96 <- c("")
+      }
+      updateSelectInput(session,
+                        inputId = 'shooterplot_xvar',
+                        label = 'X-axis variable',
+                        choices = c(choices.total, choices.96),
+                        selected = "xG")
+      
+      updateSelectInput(session,
+                        inputId = 'shooterplot_yvar',
+                        label = 'Y-axis variable',
+                        choices = c(choices.total, choices.96),
+                        selected = "Goals")             
+    },
+    once = T)
+  
+  observeEvent({
+    input$shooterplot_xvar 
+    input$shooterplot_yvar
+  }, 
+  {
+    playershooting_plotvalues$shooterplot_xvar <- input$shooterplot_xvar
+    playershooting_plotvalues$shooterplot_yvar <- input$shooterplot_yvar
+  })
+  
+  output$shooterplot <- renderPlotly({
+    xlim <- min(dt_playershootingplot()[[passer_inputs$passerplot_xvar]]) - 0*(max(dt_playershootingplot()[[passer_inputs$passerplot_xvar]]) - min(dt_playershootingplot()[[passer_inputs$passerplot_xvar]]))
+    ylim <- min(dt_playershootingplot()[[passer_inputs$passerplot_yvar]]) - 0*(max(dt_playershootingplot()[[passer_inputs$passerplot_yvar]]) - min(dt_playershootingplot()[[passer_inputs$passerplot_yvar]]))
+    
+    p <- dt_playershootingplot() %>%
       ggplot(
         aes_string(x = paste0('`', shooter_inputs$shooterplot_xvar, '`'), 
                    y = paste0('`', shooter_inputs$shooterplot_yvar, '`'))) +
-      geom_point(color = '#0000cc') +
-      geom_text(aes(label = ifelse(dt_total()$extreme >= sort(dt_total()$extreme, decreasing = T)[min(5, nrow(dt_total()))] |
-                                     dt_total()[[shooter_inputs$shooterplot_xvar]] == max(dt_total()[[shooter_inputs$shooterplot_xvar]]) |
-                                     dt_total()[[shooter_inputs$shooterplot_yvar]] == max(dt_total()[[shooter_inputs$shooterplot_yvar]]),
-                                   dt_total()$plotnames, ''), 
-                    hjust = 'inward'),
-                size = 5,
-                check_overlap = F,
-                color = '#ff3300') +
+      geom_point(aes(text = paste0(plotnames, "<br>Shots:", Shots)), 
+                 color = '#0000cc') +
       expand_limits(x = xlim,
                     y = ylim) +
-      theme(legend.position = "none",
-            axis.text = element_text(size = 14),
-            axis.title = element_text(size = 14))
-    p + geom_smooth(method = 'lm', se = F) +
-      geom_text(x = min(dt_total()[[shooter_inputs$shooterplot_xvar]]) - 0.05*(max(dt_total()[[shooter_inputs$shooterplot_xvar]]) - min(dt_total()[[shooter_inputs$shooterplot_xvar]])),
-                y = min(dt_total()[[shooter_inputs$shooterplot_yvar]]) - 0.05*(max(dt_total()[[shooter_inputs$shooterplot_yvar]]) - min(dt_total()[[shooter_inputs$shooterplot_yvar]])),
-                hjust = 0,
-                label = lm_eqn(dt_total(), 
-                               paste0('`', shooter_inputs$shooterplot_xvar, '`'), 
-                               paste0('`', shooter_inputs$shooterplot_yvar, '`')),
-                parse = TRUE,
-                color = 'black',
-                size = 7)
+      geom_smooth(method = 'lm', se = F, color = "black") +
+      ggtheme
     
+    m <- dt_playershootingplot() %>% 
+      filter(extreme1 >= sort(extreme1, decreasing = T)[1] |
+               extreme1 <= sort(extreme1, decreasing = F)[1] |
+               extreme2 >= sort(extreme2, decreasing = T)[1] |
+               extreme2 <= sort(extreme2, decreasing = F)[1])
     
-  }, height = 500, width = 700)
+    a <- list(
+      x = m[[shooter_inputs$shooterplot_xvar]],
+      y = m[[shooter_inputs$shooterplot_yvar]],
+      text = m$plotnames,
+      xref = "x",
+      yref = "y",
+      showarrow = F,
+      xanchor = "center",
+      yanchor = "top",
+      font = list(color = "#ff3300",
+                  size = 10)
+    )
+    
+    ggplotly(p,
+             tooltip = c("x", "y", "text"),
+             width = 700,
+             height = 500) %>%
+      add_markers() %>%
+      layout(annotations = a,
+             showarrow = F)
+    
+  })
   
-  output$shooterplot_per96 <- renderPlot({
-    xlim <- min(dt_per96()[[shooter_inputs$shooterplot_xvar]]) - 0.05*(max(dt_per96()[[shooter_inputs$shooterplot_xvar]]) - min(dt_per96()[[shooter_inputs$shooterplot_xvar]]))
-    ylim <- min(dt_per96()[[shooter_inputs$shooterplot_yvar]]) - 0.05*(max(dt_per96()[[shooter_inputs$shooterplot_yvar]]) - min(dt_per96()[[shooter_inputs$shooterplot_yvar]]))
-    
-    p <- dt_per96() %>%
-      ggplot(
-        aes_string(x = paste0('`', shooter_inputs$shooterplot_per96_xvar, '`'), 
-                   y = paste0('`', shooter_inputs$shooterplot_per96_yvar, '`'))) +
-      geom_point(color = '#0000cc') +
-      geom_text(aes(label = ifelse(dt_per96()$extreme >= sort(dt_per96()$extreme, decreasing = T)[min(5, nrow(dt_per96()))] |
-                                     dt_per96()[[shooter_inputs$shooterplot_per96_xvar]] == max(dt_per96()[[shooter_inputs$shooterplot_per96_xvar]]) |
-                                     dt_per96()[[shooter_inputs$shooterplot_per96_yvar]] == max(dt_per96()[[shooter_inputs$shooterplot_per96_yvar]]),
-                                   dt_per96()$plotnames, ''), 
-                    hjust = 'inward'),
-                size = 5,
-                check_overlap = F,
-                color = '#ff3300') +
-      expand_limits(x = xlim,
-                    y = ylim) +
-      theme(legend.position = "none",
-            axis.text = element_text(size = 14),
-            axis.title = element_text(size = 14))
-    p + geom_smooth(method = 'lm', se = F) +
-      geom_text(x = min(dt_per96()[[shooter_inputs$shooterplot_per96_xvar]]) - 0.05*(max(dt_per96()[[shooter_inputs$shooterplot_per96_xvar]]) - min(dt_per96()[[shooter_inputs$shooterplot_per96_xvar]])),
-                y = min(dt_per96()[[shooter_inputs$shooterplot_per96_yvar]]) - 0.05*(max(dt_per96()[[shooter_inputs$shooterplot_per96_yvar]]) - min(dt_per96()[[shooter_inputs$shooterplot_per96_yvar]])),
-                hjust = 0,
-                label = lm_eqn(dt_per96(), 
-                               paste0('`', shooter_inputs$shooterplot_per96_xvar, '`'), 
-                               paste0('`', shooter_inputs$shooterplot_per96_yvar, '`')),
-                parse = TRUE,
-                color = 'black',
-                size = 7)
-  }, height = 500, width = 700)
+  output$shooterplot_text <- renderText({
+    paste0('<font size = "4">', 
+           lm_eqn2(dt_playershootingplot(), 
+                   paste0('`', shooter_inputs$shooterplot_xvar, '`'),
+                   paste0('`', shooter_inputs$shooterplot_yvar, '`')),
+           "</font>")
+  })
   
   # Shooter downloads ####
   output$player_download <- downloadHandler(
     filename = paste0("ASAplayertable_", 
-                      ifelse(input$player_subtab %in% c("tablestotals", "plotstotals"), "totals", "per96"),
+                      ifelse(input$player_subtab %in% c("tablestotals", "plots"), "totals", "per96"),
                       ".csv"),
     
     content = function(file){
-      if(input$player_subtab %in% c("tablestotals", "plotstotals")){
+      if(input$player_subtab %in% c("tablestotals", "plots")){
         namesFL <- as.data.frame(do.call("rbind", strsplit(sub(" ", ";", dt_total()$Player), ";")))
         names(namesFL) <- c("First", "Last")
-        write.csv(data.frame(namesFL, dt_total() %>% select(-c(extreme, plotnames))), file, row.names = F)
+        write.csv(data.frame(namesFL, dt_total()), file, row.names = F)
       } else{
         namesFL <- as.data.frame(do.call("rbind", strsplit(sub(" ", ";", dt_per96()$Player), ";")))
         names(namesFL) <- c("First", "Last")
-        write.csv(data.frame(namesFL, dt_per96() %>% select(-c(extreme, plotnames))), file, row.names = F)        
+        write.csv(data.frame(namesFL, dt_per96()), file, row.names = F)        
       }
     }
   )
@@ -303,8 +341,8 @@ shinyServer(function(input, output, session) {
                                   passing_minfilter = 0,
                                   passing_byteams = F,
                                   passing_byseasons = T,
-                                  passerplot_xvar = 'xG',
-                                  passerplot_yvar = 'G-xG')
+                                  passerplot_xvar = 'xPassPct',
+                                  passerplot_yvar = 'PassPct')
   
   # passer_per96_inputs <- reactiveValues(passing_seasonfilter = max(playerxgoals$Season),
   #                                 passing_per96_minpasses = 0,
@@ -355,7 +393,16 @@ shinyServer(function(input, output, session) {
   })
   
   dt_passer_per96 <- reactive({
-    # NEW PASSING FUNCTION(minfilter, minpasses, seasonfilter, byteams, byseasons)
+    dt <- passer.xpasses.p96(playerpassing,
+                             minpasses = passer_inputs$passing_minpasses,
+                             minfilter = passer_inputs$passing_minfilter,
+                             seasonfilter = passer_inputs$passing_seasonfilter,
+                             byteams = passer_inputs$passing_byteams,
+                             byseasons = passer_inputs$passing_byseasons,
+                             third.filter = passer_inputs$passing_third,
+                             pos.filter = passer_inputs$passing_position)
+    
+    dt  
   })
   
   output$passingtable_player <- DT::renderDataTable({
@@ -370,29 +417,158 @@ shinyServer(function(input, output, session) {
                        digits = 1)
   })
   
+  output$passingtable_player_per96 <- DT::renderDataTable({
+    DT::datatable(dt_passer_per96(),
+                  rownames = F,
+                  options(list(autoWidth = T,
+                               pageLength = 25,
+                               lengthMenu = seq(25, 100, 25)))) %>%
+      formatRound(columns = c("Per100", "Distance", "Vertical", "Passes"), 
+                  digits = 1) %>%
+      formatRound(columns = c("Score"),
+                  digits = 2) %>%
+      formatPercentage(columns = c("PassPct", "xPassPct", "Touch%")[c(T, T, passer_inputs$passing_third == "All")], 
+                       digits = 1)
+  })
+  
   # Passer plots ####
+  dt_passer_plot <- reactive({
+    dt <- dt_passer() %>%
+      left_join(dt_passer_per96(),
+                by = c("Player", "Season")[c(T, passer_inputs$passing_byseasons)],
+                suffix = c("", "/96"))
+    
+    dt[["extreme1"]] <- rank(dt[[passer_inputs$passerplot_xvar]], ties.method = "random")
+    dt[["extreme2"]] <- rank(dt[[passer_inputs$passerplot_yvar]], ties.method = "random")
+    
+    if(length(unique(dt$Season)) > 1){
+      dt[['plotnames']] <- paste(unlist(lapply(strsplit(dt$Player, " "), function(x) { return(x[length(x)]) })), dt$Season)
+      
+    }else{
+      dt[['plotnames']] <- unlist(lapply(strsplit(dt$Player, " "), function(x) { return(x[length(x)]) }))
+    }
+    dt
+  })
+  
+  playerpassing_plotvalues <- reactiveValues(passerplot_xvar = "xPassPct", passerplot_yvar = "PassPct")
+  
+  observeEvent(input$passing_action, {
+    choices.total <- setdiff(names(dt_passer()), c("Player", "Team", "Season", "Pos"))
+    choices.96 <- c("Passes/96", "Score/96")
+    
+    updateSelectInput(session,
+                      inputId = 'passerplot_xvar',
+                      label = 'X-axis variable',
+                      choices = c(choices.total, choices.96),
+                      selected = playerpassing_plotvalues$passerplot_xvar)
+    
+    updateSelectInput(session,
+                      inputId = 'passerplot_yvar',
+                      label = 'Y-axis variable',
+                      choices = c(choices.total, choices.96),
+                      selected = playerpassing_plotvalues$passerplot_yvar)
+  })
+  
+  observeEvent({
+    dt_passer()
+    dt_passer_per96()
+  },
+  {
+    choices.total <- setdiff(names(dt_passer()), c("Player", "Team", "Season", "Pos"))
+    choices.96 <- c("Passes/96", "Score/96")
+    
+    updateSelectInput(session,
+                      inputId = 'passerplot_xvar',
+                      label = 'X-axis variable',
+                      choices = c(choices.total, choices.96),
+                      selected = "xPassPct")
+    
+    updateSelectInput(session,
+                      inputId = 'passerplot_yvar',
+                      label = 'Y-axis variable',
+                      choices = c(choices.total, choices.96),
+                      selected = "PassPct")          
+  },
+  once = T)
+  
+  observeEvent({
+    input$passerplot_xvar 
+    input$passerplot_yvar
+  }, 
+  {
+    playerpassing_plotvalues$passerplot_xvar <- input$passerplot_xvar
+    playerpassing_plotvalues$passerplot_yvar <- input$passerplot_yvar
+  })
+  
+  output$passerplot <- renderPlotly({
+    xlim <- min(dt_passer_plot()[[passer_inputs$passerplot_xvar]]) - 0*(max(dt_passer_plot()[[passer_inputs$passerplot_xvar]]) - min(dt_passer_plot()[[passer_inputs$passerplot_xvar]]))
+    ylim <- min(dt_passer_plot()[[passer_inputs$passerplot_yvar]]) - 0*(max(dt_passer_plot()[[passer_inputs$passerplot_yvar]]) - min(dt_passer_plot()[[passer_inputs$passerplot_yvar]]))
+    
+    p <- dt_passer_plot() %>%
+      ggplot(
+        aes_string(x = paste0('`', passer_inputs$passerplot_xvar, '`'), 
+                   y = paste0('`', passer_inputs$passerplot_yvar, '`'))) +
+      geom_point(aes(text = paste0(plotnames, "<br>Passes:", Passes)), color = '#0000cc') +
+      expand_limits(x = xlim,
+                    y = ylim) +
+      geom_smooth(method = 'lm', se = F, color = "black") +
+      ggtheme
+    
+    m <- dt_passer_plot() %>% 
+      filter(extreme1 >= sort(extreme1, decreasing = T)[1] |
+               extreme1 <= sort(extreme1, decreasing = F)[1] |
+               extreme2 >= sort(extreme2, decreasing = T)[1] |
+               extreme2 <= sort(extreme2, decreasing = F)[1])
+    
+    a <- list(
+      x = m[[passer_inputs$passerplot_xvar]],
+      y = m[[passer_inputs$passerplot_yvar]],
+      text = m$plotnames,
+      xref = "x",
+      yref = "y",
+      showarrow = F,
+      xanchor = "center",
+      yanchor = "top",
+      font = list(color = '#ff3300',
+                  size = 10)
+    )
+    
+    ggplotly(p,
+             tooltip = c("x", "y", "text"),
+             width = 700,
+             height = 500) %>%
+      add_markers() %>%
+      layout(annotations = a)
+
+  })
+  
+  output$passerplot_text <- renderText({
+    paste0('<font size = "4">', 
+           lm_eqn2(dt_passer_plot(), 
+           paste0('`', passer_inputs$passerplot_xvar, '`'),
+           paste0('`', passer_inputs$passerplot_yvar, '`')),
+           "</font>")
+  })
   
   # Passer downloads ####
   output$passing_download <- downloadHandler(
-    filename = 'ASApassertable_totals.csv',
-    
+    filename = paste0("ASApassingtable_", 
+                      ifelse(input$passing_subtab %in% c("passingtablestotals", "passingplots"), "totals", "per96"),
+                      ".csv"),
     content = function(file){
-      namesFL <- as.data.frame(do.call("rbind", strsplit(sub(" ", ";", dt_passer()$Player), ";")))
-      names(namesFL) <- c("First", "Last")
-      write.csv(data.frame(namesFL, dt_passer()), file, row.names = F)
+      if(input$passing_subtab %in% c("passingtablestotals", "passingplots")){
+        namesFL <- as.data.frame(do.call("rbind", strsplit(sub(" ", ";", dt_passer()$Player), ";")))
+        names(namesFL) <- c("First", "Last")
+        write.csv(data.frame(namesFL, dt_passer()), file, row.names = F)
+      } else{
+        namesFL <- as.data.frame(do.call("rbind", strsplit(sub(" ", ";", dt_passer()$Player), ";")))
+        names(namesFL) <- c("First", "Last")
+        write.csv(data.frame(namesFL, dt_passer_per96()), file, row.names = F)
+      }
     }
   )
   
-  # output$passer_per96_download <- downloadHandler(
-  #   filename = 'ASApassertable_per96.csv',
-  #   
-  #   content = function(file){
-  #     
-  #     write.csv(dt_passer_per96(), file, row.names = F)
-  #   }
-  # )
   # Keeper reactive values ####
-  
   # Initial values
   keeper_inputs <- reactiveValues(keeper_minshots = 0,
                                   keeper_minfilter = 0,
@@ -441,9 +617,9 @@ shinyServer(function(input, output, session) {
                                      OtherShots = keeper_inputs$keeper_othershots,
                                      FK = keeper_inputs$keeper_fk,
                                      PK = keeper_inputs$keeper_pk) %>%
-        mutate(GAperShot = Goals/Shots, 
-               xGperShot = xG/Shots,
-               GmxGperShot = `G-xG`/Shots)
+        mutate(`Goals/Shot` = Goals/Shots, 
+               `xG/Shot` = xG/Shots,
+               `G-xG/Shot` = `G-xG`/Shots)
     } else{
       dt_keeper <- keeperxgoals.func(keeperxgoals,
                                      minutes_df = minutesPlayed,
@@ -457,69 +633,49 @@ shinyServer(function(input, output, session) {
                                      OtherShots = keeper_inputs$keeper_othershots,
                                      FK = keeper_inputs$keeper_fk,
                                      PK = keeper_inputs$keeper_pk) %>%
-        mutate(GAperShot = Goals/Shots, 
-               xGperShot = xG/Shots,
-               GmxGperShot = `G-xG`/Shots)
+        mutate(`Goals/Shot` = Goals/Shots, 
+               `xG/Shot` = xG/Shots,
+               `G-xG/Shot` = `G-xG`/Shots)
     }
     
-    dt_keeper[['extreme']] <- rank(dt_keeper[[keeper_inputs$keeperplot_yvar]]) # Only show most extreme across y-axis
-    if(length(unique(dt_keeper$Season)) > 1){
-      dt_keeper[['plotnames']] <- paste(unlist(lapply(strsplit(dt_keeper$Keeper, " "), function(x) { return(x[length(x)]) })), dt_keeper$Season)
-      
-    }else{
-      dt_keeper[['plotnames']] <- unlist(lapply(strsplit(dt_keeper$Keeper, " "), function(x) { return(x[length(x)]) }))
-    }
     dt_keeper
   })
   
   dt_keeper_per96 <- reactive({
     if(keeper_inputs$keeper_seasonordate == 'Season'){
       dt_keeper_per96 <- keeperxgoals_per96.func(keeperxgoals,
-                                           minutes_df = minutesPlayed,
-                                           date1 = as.Date('2000-01-01'),
-                                           date2 = as.Date('9999-12-31'),
-                                           season = keeper_inputs$keeper_seasonfilter[keeper_inputs$keeper_seasonfilter >= 2015],
-                                           shotfilter = keeper_inputs$keeper_minshots,
-                                           minfilter = keeper_inputs$keeper_minfilter,
-                                           byteams = keeper_inputs$keeper_byteams,
-                                           byseasons = keeper_inputs$keeper_byseasons,
-                                           OtherShots = keeper_inputs$keeper_othershots,
-                                           FK = keeper_inputs$keeper_fk,
-                                           PK = keeper_inputs$keeper_pk) %>%
-        mutate(GAperShot = Goals/Shots, 
-               xGperShot = xG/Shots,
-               GmxGperShot = `G-xG`/Shots)
+                                                 minutes_df = minutesPlayed,
+                                                 date1 = as.Date('2000-01-01'),
+                                                 date2 = as.Date('9999-12-31'),
+                                                 season = keeper_inputs$keeper_seasonfilter[keeper_inputs$keeper_seasonfilter >= 2015],
+                                                 shotfilter = keeper_inputs$keeper_minshots,
+                                                 minfilter = keeper_inputs$keeper_minfilter,
+                                                 byteams = keeper_inputs$keeper_byteams,
+                                                 byseasons = keeper_inputs$keeper_byseasons,
+                                                 OtherShots = keeper_inputs$keeper_othershots,
+                                                 FK = keeper_inputs$keeper_fk,
+                                                 PK = keeper_inputs$keeper_pk)
     } else{
       dt_keeper_per96 <- keeperxgoals_per96.func(keeperxgoals,
-                                     minutes_df = minutesPlayed,
-                                     date1 = max(keeper_inputs$keeper_date1, as.Date("2015-01-01")),
-                                     date2 = max(keeper_inputs$keeper_date2, as.Date("2015-01-01")),
-                                     season = min(playerxgoals$Season):max(playerxgoals$Season),
-                                     shotfilter = keeper_inputs$keeper_minshots,
-                                     minfilter = keeper_inputs$keeper_minfilter,
-                                     byteams = keeper_inputs$keeper_byteams,
-                                     byseasons = keeper_inputs$keeper_byseasons,
-                                     OtherShots = keeper_inputs$keeper_othershots,
-                                     FK = keeper_inputs$keeper_fk,
-                                     PK = keeper_inputs$keeper_pk) %>%
-        mutate(GAperShot = Goals/Shots, 
-               xGperShot = xG/Shots,
-               GmxGperShot = `G-xG`/Shots)
+                                                 minutes_df = minutesPlayed,
+                                                 date1 = max(keeper_inputs$keeper_date1, as.Date("2015-01-01")),
+                                                 date2 = max(keeper_inputs$keeper_date2, as.Date("2015-01-01")),
+                                                 season = min(playerxgoals$Season):max(playerxgoals$Season),
+                                                 shotfilter = keeper_inputs$keeper_minshots,
+                                                 minfilter = keeper_inputs$keeper_minfilter,
+                                                 byteams = keeper_inputs$keeper_byteams,
+                                                 byseasons = keeper_inputs$keeper_byseasons,
+                                                 OtherShots = keeper_inputs$keeper_othershots,
+                                                 FK = keeper_inputs$keeper_fk,
+                                                 PK = keeper_inputs$keeper_pk)
     }
     
-    dt_keeper_per96[['extreme']] <- rank(dt_keeper_per96[[keeper_inputs$keeperplot_yvar]]) # Only show most extreme across y-axis
-    if(length(unique(dt_keeper_per96$Season)) > 1){
-      dt_keeper_per96[['plotnames']] <- paste(unlist(lapply(strsplit(dt_keeper_per96$Keeper, " "), function(x) { return(x[length(x)]) })), dt_keeper_per96$Season)
-      
-    }else{
-      dt_keeper_per96[['plotnames']] <- unlist(lapply(strsplit(dt_keeper_per96$Keeper, " "), function(x) { return(x[length(x)]) }))
-    }
     dt_keeper_per96
   })
   
   output$keepertable <- DT::renderDataTable({
     
-    datatable(dt_keeper() %>% select(-c(GAperShot, xGperShot, GmxGperShot, extreme, plotnames)),
+    datatable(dt_keeper() %>% select(-c(`Goals/Shot`:`G-xG/Shot`)),
               rownames = F,
               options(list(autoWidth = T,
                            pageLength = 25,
@@ -534,7 +690,7 @@ shinyServer(function(input, output, session) {
   
   output$keepertable_per96 <- DT::renderDataTable({
     
-    datatable(dt_keeper_per96() %>% select(-c(GAperShot, xGperShot, GmxGperShot, extreme, plotnames)),
+    datatable(dt_keeper_per96(),
               rownames = F,
               options(list(autoWidth = T,
                            pageLength = 25,
@@ -566,47 +722,142 @@ shinyServer(function(input, output, session) {
     })
   
   # Keeper plots ####
-  #Figure out how to label these guys better!
-  output$keeperplot <- renderPlot({
+  dt_keeperplot <- reactive({
+    dt <- dt_keeper() %>%
+      left_join(dt_keeper_per96(),
+                by = c("Keeper", "Team", "Season")[c(TRUE, keeper_inputs$keeper_byteams, keeper_inputs$keeper_byseasons)],
+                suffix = c("", "/96"))
     
-    xlim <- min(dt_keeper()[[keeper_inputs$keeperplot_xvar]]) - 0.05*(max(dt_keeper()[[keeper_inputs$keeperplot_xvar]]) - min(dt_keeper()[[keeper_inputs$keeperplot_xvar]]))
-    ylim <- min(dt_keeper()[[keeper_inputs$keeperplot_yvar]]) - 0.05*(max(dt_keeper()[[keeper_inputs$keeperplot_yvar]]) - min(dt_keeper()[[keeper_inputs$keeperplot_yvar]]))
+    dt[["extreme1"]] <- rank(dt[[keeper_inputs$keeperplot_xvar]], ties.method = "random")
+    dt[["extreme2"]] <- rank(dt[[keeper_inputs$keeperplot_yvar]], ties.method = "random") 
+
+    if(length(unique(dt$Season)) > 1){
+      dt[['plotnames']] <- paste(unlist(lapply(strsplit(dt$Keeper, " "), function(x) { return(x[length(x)]) })), dt$Season)
+      
+    }else{
+      dt[['plotnames']] <- unlist(lapply(strsplit(dt$Keeper, " "), function(x) { return(x[length(x)]) }))
+    }
+    dt
+  })
+  
+  keeper_plotvalues <- reactiveValues(keeperplot_xvar = "xG", keeperplot_yvar = "Goals")
+  
+  observeEvent(input$keeper_action, {
+    choices.total <- names(dt_keeper())[!(names(dt_keeper()) %in% c("Keeper", "Team", "Season"))]
+    if(min(input$keeper_seasonfilter) >= 2015){
+      choices.96 <- paste0(names(dt_keeper_per96())[!(names(dt_keeper_per96()) %in% c("Keeper", "Team", "Season"))], "/96")
+    } else{
+      choices.96 <- c("")
+    }
+    updateSelectInput(session,
+                      inputId = 'keeperplot_xvar',
+                      label = 'X-axis variable',
+                      choices = c(choices.total, choices.96),
+                      selected = keeper_plotvalues$keeperplot_xvar)
     
-    p <- dt_keeper()  %>%
-      ggplot(
-        aes_string(x = paste0('`', keeper_inputs$keeperplot_xvar, '`'), 
-                   y = paste0('`', keeper_inputs$keeperplot_yvar, '`'))) +
-      geom_point(color = '#0000cc') +
-      geom_text(aes(label = ifelse(dt_keeper()$extreme >= sort(dt_keeper()$extreme, decreasing = T)[min(3, nrow(dt_keeper()))] |
-                                     dt_keeper()$extreme <= sort(dt_keeper()$extreme)[min(3, nrow(dt_keeper()))] |
-                                     dt_keeper()[[keeper_inputs$keeperplot_xvar]] == max(dt_keeper()[[keeper_inputs$keeperplot_xvar]]) |
-                                     dt_keeper()[[keeper_inputs$keeperplot_yvar]] == max(dt_keeper()[[keeper_inputs$keeperplot_yvar]]),
-                                   dt_keeper()$plotnames, ''), 
-                    hjust = 'inward'),
-                size = 5,
-                check_overlap = F,
-                color = '#ff3300') +
+    updateSelectInput(session,
+                      inputId = 'keeperplot_yvar',
+                      label = 'Y-axis variable',
+                      choices = c(choices.total, choices.96),
+                      selected = keeper_plotvalues$keeperplot_yvar)
+  })
+  
+  observeEvent({
+    dt_keeper()
+    dt_keeper_per96()},
+    {
+      choices.total <- names(dt_keeper())[!(names(dt_keeper()) %in% c("Keeper", "Team", "Season"))]
+      if(min(input$keeper_seasonfilter) >= 2015){
+        choices.96 <- paste0(names(dt_keeper_per96())[!(names(dt_keeper_per96()) %in% c("Keeper", "Team", "Season"))], "/96")
+      } else{
+        choices.96 <- c("")
+      }
+      updateSelectInput(session,
+                        inputId = 'keeperplot_xvar',
+                        label = 'X-axis variable',
+                        choices = c(choices.total, choices.96),
+                        selected = keeper_plotvalues$keeperplot_xvar)
+      
+      updateSelectInput(session,
+                        inputId = 'keeperplot_yvar',
+                        label = 'Y-axis variable',
+                        choices = c(choices.total, choices.96),
+                        selected = keeper_plotvalues$keeperplot_yvar)          
+    },
+    once = T)
+  
+  observeEvent({
+    input$keeperplot_xvar 
+    input$keeperplot_yvar
+  }, 
+  {
+    keeper_plotvalues$keeperplot_xvar <- input$keeperplot_xvar
+    keeper_plotvalues$keeperplot_yvar <- input$keeperplot_yvar
+  })
+  
+  output$keeperplot <- renderPlotly({
+    
+    xlim <- min(dt_keeperplot()[[keeper_inputs$keeperplot_xvar]]) - 0.05*(max(dt_keeperplot()[[keeper_inputs$keeperplot_xvar]]) - min(dt_keeperplot()[[keeper_inputs$keeperplot_xvar]]))
+    ylim <- min(dt_keeperplot()[[keeper_inputs$keeperplot_yvar]]) - 0.05*(max(dt_keeperplot()[[keeper_inputs$keeperplot_yvar]]) - min(dt_keeperplot()[[keeper_inputs$keeperplot_yvar]]))
+    
+    p <- dt_keeperplot()  %>%
+      ggplot(aes_string(x = paste0('`', keeper_inputs$keeperplot_xvar, '`'), 
+                        y = paste0('`', keeper_inputs$keeperplot_yvar, '`'))) +
+        geom_point(aes(text = paste0(plotnames, "<br>Shots faced:", Shots)), 
+                   color = '#0000cc') +
+      # geom_text(aes(label = ifelse(dt_keeperplot()$extreme >= sort(dt_keeperplot()$extreme, decreasing = T)[min(3, nrow(dt_keeperplot()))] |
+      #                                dt_keeperplot()$extreme <= sort(dt_keeperplot()$extreme)[min(3, nrow(dt_keeperplot()))] |
+      #                                dt_keeperplot()[[keeper_inputs$keeperplot_xvar]] == max(dt_keeperplot()[[keeper_inputs$keeperplot_xvar]]) |
+      #                                dt_keeperplot()[[keeper_inputs$keeperplot_yvar]] == max(dt_keeperplot()[[keeper_inputs$keeperplot_yvar]]),
+      #                              dt_keeperplot()$plotnames, ''), 
+      #               hjust = "inward",
+      #               vjust = "inward"),
+      #           size = 5,
+      #           check_overlap = T,
+      #           color = '#ff3300') +
       expand_limits(x = xlim,
                     y = ylim) +
-      theme(legend.position = "none",
-            axis.text = element_text(size = 14),
-            axis.title = element_text(size = 14))
+      geom_smooth(method = 'lm', se = F, color = "black") +
+      ggtheme
     
-    p + geom_smooth(method = 'lm', se = F) +
-      geom_text(x = min(dt_keeper()[[keeper_inputs$keeperplot_xvar]]) - 0.05*(max(dt_keeper()[[keeper_inputs$keeperplot_xvar]]) - min(dt_keeper()[[keeper_inputs$keeperplot_xvar]])),
-                y = min(dt_keeper()[[keeper_inputs$keeperplot_yvar]]) - 0.05*(max(dt_keeper()[[keeper_inputs$keeperplot_yvar]]) - min(dt_keeper()[[keeper_inputs$keeperplot_yvar]])),
-                hjust = 0,
-                label = lm_eqn(dt_keeper(), 
-                               paste0('`', keeper_inputs$keeperplot_xvar, '`'), 
-                               paste0('`', keeper_inputs$keeperplot_yvar, '`')),
-                parse = TRUE,
-                color = 'black',
-                size = 7)
+    m <- dt_keeperplot() %>% 
+      filter(extreme1 >= sort(extreme1, decreasing = T)[1] |
+               extreme1 <= sort(extreme1, decreasing = F)[1] |
+               extreme2 >= sort(extreme2, decreasing = T)[1] |
+               extreme2 <= sort(extreme2, decreasing = F)[1])
+    print(m %>% select(Keeper, extreme1, extreme2))
     
-  }, height = 500, width = 700)
+    a <- list(
+      x = m[[keeper_inputs$keeperplot_xvar]],
+      y = m[[keeper_inputs$keeperplot_yvar]],
+      text = m$plotnames,
+      xref = "x",
+      yref = "y",
+      showarrow = F,
+      xanchor = "center",
+      yanchor = "top",
+      font = list(color = '#ff3300',
+                  size = 10)
+    )
+    
+    ggplotly(p,
+             tooltip = c("x", "y", "text"),
+             width = 700,
+             height = 500) %>%
+      add_markers() %>%
+      layout(annotations = a)
+    
+  })
   
-  # Team tables ####
+  output$keeperplot_text <- renderText({
+    paste0('<font size = "4">', 
+           lm_eqn2(dt_keeperplot(), 
+                   paste0('`', keeper_inputs$keeperplot_xvar, '`'),
+                   paste0('`', keeper_inputs$keeperplot_yvar, '`')),
+           "</font>")
+  })
   
+  # Team shots tables ####
   dt_team <- reactive({
     if(input$team_seasonordate == 'Season'){
       dt <- teamxgoals.func(teamxgoals, 
@@ -640,6 +891,8 @@ shinyServer(function(input, output, session) {
     
     dt
   })
+  
+  
   
   output$teamtotalxgoalswest <- DT::renderDataTable({
     dt <- dt_team()
@@ -820,67 +1073,109 @@ shinyServer(function(input, output, session) {
     }
   )
   
-  # Team reactive values #### Unused
-  team_inputs <- reactiveValues(team_seasonordate = 'Season',
-                                team_date1 = as.Date('2000-01-01'),
-                                team_date2 = as.Date('9999-12-31'),
-                                team_seasonfilter = max(teamxgoals$Season),
-                                team_byseasons = T,
-                                team_conferenceview = T,
-                                team_advanced = 'Basic stats',
-                                team_home = c('Home', 'Away'),
-                                team_pattern =  'All',
-                                team_evenstate = F,
-                                teamplot_xvar = 'xGF',
-                                teamplot_yvar = 'xGA')
+  # Team reactive values ####
+  # team_inputs <- reactiveValues(team_seasonordate = 'Season',
+  #                               team_date1 = as.Date('2000-01-01'),
+  #                               team_date2 = as.Date('9999-12-31'),
+  #                               team_seasonfilter = max(teamxgoals$Season),
+  #                               team_byseasons = T,
+  #                               team_conferenceview = T,
+  #                               team_advanced = 'Basic stats',
+  #                               team_home = c('Home', 'Away'),
+  #                               team_pattern =  'All',
+  #                               team_evenstate = F,
+  #                               teamplot_xvar = 'xGF',
+  #                               teamplot_yvar = 'GF')
+  # 
+  # observeEvent(input$team_action,
+  #              {
+  #                team_inputs$team_seasonordate <- input$team_seasonordate
+  #                team_inputs$team_date1 <- input$team_date1
+  #                team_inputs$team_date2 <- input$team_date2
+  #                team_inputs$team_seasonfilter <- input$team_seasonfilter
+  #                team_inputs$team_conferenceview <- input$team_conferenceview
+  #                team_inputs$team_byseasons <- input$team_byseasons
+  #                team_inputs$team_advanced <- input$team_advanced
+  #                team_inputs$team_home <- input$team_home
+  #                team_inputs$team_pattern <- input$team_pattern
+  #                team_inputs$team_evenstate <- input$team_evenstate
+  #                team_inputs$teamplot_xvar <- input$teamplot_xvar
+  #                team_inputs$teamplot_yvar <- input$teamplot_yvar
+  #                
+  #              })
   
-  observeEvent(input$team_action,
-               {
-                 team_inputs$team_seasonordate <- input$team_seasonordate
-                 team_inputs$team_date1 <- input$team_date1
-                 team_inputs$team_date2 <- input$team_date2
-                 team_inputs$team_seasonfilter <- input$team_seasonfilter
-                 team_inputs$team_conferenceview <- input$team_conferenceview
-                 team_inputs$team_byseasons <- input$team_byseasons
-                 team_inputs$team_advanced <- input$team_advanced
-                 team_inputs$team_home <- input$team_home
-                 team_inputs$team_pattern <- input$team_pattern
-                 team_inputs$team_evenstate <- input$team_evenstate
-                 team_inputs$teamplot_xvar <- input$teamplot_xvar
-                 team_inputs$teamplot_yvar <- input$teamplot_yvar
-                 
-               })
-  
-  # Team plots ####
-  output$teamplot <- renderPlot({
-    if(team_inputs$team_seasonordate == 'Season'){
+  # Team shooting plots ####
+  dt_teamshots_plot <- reactive({
+    
+    if(input$team_seasonordate == 'Season'){
       dt <- teamxgoals.func(teamxgoals, 
                             date1 = as.Date('2000-01-01'), 
                             date2 = as.Date('9999-12-31'),
-                            season = team_inputs$team_seasonfilter,
-                            even = team_inputs$team_evenstate,
-                            pattern = team_inputs$team_pattern,
+                            season = input$team_seasonfilter,
+                            even = input$team_evenstate,
+                            pattern = input$team_pattern,
                             pergame = T,
-                            advanced = T,
-                            venue = team_inputs$team_home,
-                            byseasons = team_inputs$team_byseasons,
-                            plot = T)
+                            advanced = ifelse(input$team_advanced == 'Basic stats', T, F), # Choose opposite of what is selected
+                            venue = input$team_home,
+                            byseasons = input$team_byseasons,
+                            confview = F)
       
     } else{
       dt <- teamxgoals.func(teamxgoals, 
-                            date1 = team_inputs$team_date1, 
-                            date2 = team_inputs$team_date2,
-                            season = min(teamxgoals$Season):max(teamxgoals$Season),
-                            even = team_inputs$team_evenstate,
-                            pattern = team_inputs$team_pattern,
+                            date1 = input$team_date1, 
+                            date2 = input$team_date2,
+                            season = as.numeric(format(input$team_date1, "%Y")):as.numeric(format(input$team_date2, "%Y")),
+                            even = input$team_evenstate,
+                            pattern = input$team_pattern,
                             pergame = T,
-                            advanced = T,
-                            venue = team_inputs$team_home,
-                            byseasons = team_inputs$team_byseasons,
-                            plot = T)
+                            advanced = ifelse(input$team_advanced == 'Basic stats', T, F), # Choose opposite of what is selected
+                            venue = input$team_home,
+                            byseasons = input$team_byseasons,
+                            confview = F)
     }
     
-    # dt[['extreme']] <- rank(dt[[team_inputs$teamplot_xvar]]) + rank(dt[[team_inputs$teamplot_yvar]])
+    dt %>%
+      left_join(dt_team_pergame() %>% select(one_of(c("Team", "Season", 
+                                                      setdiff(names(dt_team_pergame()), names(dt))))),
+                by = c("Team", "Season")[c(T, input$team_byseasons)]) %>%
+      select(-one_of(c("Conf")))
+  })
+  
+  teamshooting_plotvalues <- reactiveValues(teamplot_xvar = "xGF", teamplot_yvar = "GF")
+  
+  observeEvent({
+    input$teamplot_xvar 
+    input$teamplot_yvar
+  }, 
+  {
+    teamshooting_plotvalues$teamplot_xvar <- input$teamplot_xvar
+    teamshooting_plotvalues$teamplot_yvar <- input$teamplot_yvar
+  })
+  
+  observeEvent(dt_teamshots_plot(), {
+    updateSelectInput(session,
+                      inputId = 'teamplot_xvar',
+                      label = 'X-axis variable',
+                      choices = setdiff(names(dt_teamshots_plot()), c("Team", "Season", "Games", "Conf")),
+                      selected = teamshooting_plotvalues$teamplot_xvar)
+    
+    updateSelectInput(session,
+                      inputId = 'teamplot_yvar',
+                      label = 'Y-axis variable',
+                      choices = setdiff(names(dt_teamshots_plot()), c("Team", "Season", "Games", "Conf")),
+                      selected = teamshooting_plotvalues$teamplot_yvar)
+  })
+  
+  output$teamplot <- renderPlotly({
+    req(input$teamplot_xvar, input$teamplot_yvar)
+    dt <- dt_teamshots_plot()
+    
+    xlim <- min(dt[[input$teamplot_xvar]]) - 0.05*(max(dt[[input$teamplot_xvar]]) - min(dt[[input$teamplot_xvar]]))
+    ylim <- min(dt[[input$teamplot_yvar]]) - 0.05*(max(dt[[input$teamplot_yvar]]) - min(dt[[input$teamplot_yvar]]))
+    
+    dt[["extreme1"]] <- rank(dt[[input$teamplot_xvar]], ties.method = "random")
+    dt[["extreme2"]] <- rank(dt[[input$teamplot_yvar]], ties.method = "random")
+    
     if(length(unique(dt$Season)) > 1){
       dt[['plotnames']] <- paste(unlist(lapply(strsplit(dt$Team, " "), function(x) { return(x[length(x)]) })), dt$Season)
     }else{
@@ -889,29 +1184,51 @@ shinyServer(function(input, output, session) {
     
     p <- dt  %>%
       ggplot(
-        aes_string(x = paste0('`', team_inputs$teamplot_xvar, '`'), 
-                   y = paste0('`', team_inputs$teamplot_yvar, '`'))) +
-      geom_point(color = '#0000cc') +
-      geom_text(aes(label = plotnames, 
-                    hjust = 'inward'),
-                size = 5,
-                check_overlap = T,
-                color = '#ff3300') +
-      theme(legend.position = "none",
-            axis.text = element_text(size = 14),
-            axis.title = element_text(size = 14))
-    p + geom_smooth(method = 'lm', se = F) +
-      geom_text(x = min(dt[[team_inputs$teamplot_xvar]]), 
-                y = min(dt[[team_inputs$teamplot_yvar]]),
-                hjust = 0,
-                label = lm_eqn(dt, team_inputs$teamplot_xvar, team_inputs$teamplot_yvar), 
-                parse = TRUE, 
-                color = 'black',
-                size = 7)
+        aes_string(x = paste0('`', input$teamplot_xvar, '`'),
+                   y = paste0('`', input$teamplot_yvar, '`'))) +
+      geom_point(aes(text = plotnames), color = '#0000cc') +
+      expand_limits(x = xlim,
+                    y = ylim) +
+      geom_smooth(method = 'lm', se = F) +
+      ggtheme
     
+    m <- dt %>% 
+      ungroup() %>%
+      filter(extreme1 >= sort(extreme1, decreasing = T)[2] |
+               extreme1 <= sort(extreme1, decreasing = F)[2] |
+               extreme2 >= sort(extreme2, decreasing = T)[2] |
+               extreme2 <= sort(extreme2, decreasing = F)[2])
     
+    a <- list(
+      x = m[[input$teamplot_xvar]],
+      y = m[[input$teamplot_yvar]],
+      text = m$plotnames,
+      xref = "x",
+      yref = "y",
+      showarrow = F,
+      xanchor = "center",
+      yanchor = "top",
+      font = list(color = '#ff3300',
+                  size = 10)
+    )
     
-  }, height = 500, width = 700)
+    ggplotly(p,
+             tooltip = c("x", "y", "text"),
+             width = 700,
+             height = 500) %>%
+      add_markers() %>%
+      layout(annotations = a)
+    
+  })
+  
+  output$teamshootingplot_text <- renderText({
+    req(input$teamplot_xvar, input$teamplot_yvar)
+    paste0('<font size = "4">',
+           lm_eqn2(dt_teamshots_plot(),
+                   paste0('`', input$teamplot_xvar, '`'),
+                   paste0('`', input$teamplot_yvar, '`')),
+           "</font>")
+  })
   
   # Team passing tables ####
   dt_team_passing <- reactive({
@@ -975,6 +1292,109 @@ shinyServer(function(input, output, session) {
       formatRound(columns = columns.dec2, digits = 2)
   })
   
+  # Team passing plots ####
+  dt_teampassing_plot <- reactive({
+    dt_team_passing_pergame()
+    # If you ever want to join totals and pergame (currently just plotting per game)    
+    # dt_team_passing() %>%
+    #   left_join(dt_team_passing_pergame() %>% 
+    #               select(one_of(c("Team", "Season", 
+    #                               setdiff(names(dt_team_passing_pergame()), names(dt_team_passing()))))),
+    #             by = c("Team", "Season")[c(T, input$teampassing_byseasons)]) %>%
+    #   select(-one_of(c("Conf")))
+    
+  })
+  
+  teampassing_plotvalues <- reactiveValues(teampassingplot_xvar = "xPctF", teampassingplot_yvar = "PctF")
+  
+  observeEvent({
+    input$teampassingplot_xvar 
+    input$teampassingplot_yvar
+  }, 
+  {
+    teampassing_plotvalues$teampassingplot_xvar <- input$teampassingplot_xvar
+    teampassing_plotvalues$teampassingplot_yvar <- input$teampassingplot_yvar
+  })
+  
+  observeEvent(dt_teampassing_plot(), {
+    updateSelectInput(session,
+                      inputId = 'teampassingplot_xvar',
+                      label = 'X-axis variable',
+                      choices = setdiff(names(dt_teampassing_plot()), c("Team", "Season", "Games", "Conf")),
+                      selected = teampassing_plotvalues$teampassingplot_xvar)
+    
+    updateSelectInput(session,
+                      inputId = 'teampassingplot_yvar',
+                      label = 'Y-axis variable',
+                      choices = setdiff(names(dt_teampassing_plot()), c("Team", "Season", "Games", "Conf")),
+                      selected = teampassing_plotvalues$teampassingplot_yvar)
+  })
+  
+  output$teampassingplot <- renderPlotly({
+    req(input$teampassingplot_xvar, input$teampassingplot_yvar)
+    dt <- dt_teampassing_plot()
+
+        xlim <- min(dt[[input$teampassingplot_xvar]]) - 0.05*(max(dt[[input$teampassingplot_xvar]]) - min(dt[[input$teampassingplot_xvar]]))
+    ylim <- min(dt[[input$teampassingplot_yvar]]) - 0.05*(max(dt[[input$teampassingplot_yvar]]) - min(dt[[input$teampassingplot_yvar]]))
+    
+    dt[["extreme1"]] <- rank(dt[[input$teampassingplot_xvar]], ties.method = "random")
+    dt[["extreme2"]] <- rank(dt[[input$teampassingplot_yvar]], ties.method = "random")
+    
+    if(length(unique(dt$Season)) > 1){
+      dt[['plotnames']] <- paste(unlist(lapply(strsplit(as.character(dt$Team), " "), function(x) { return(x[length(x)]) })), dt$Season)
+    }else{
+      dt[['plotnames']] <- unlist(lapply(strsplit(as.character(dt$Team), " "), function(x) { return(x[length(x)]) }))
+    }
+    
+    p <- dt  %>%
+      ggplot(aes_string(x = paste0('`', input$teampassingplot_xvar, '`'),
+                        y = paste0('`', input$teampassingplot_yvar, '`'))) +
+      geom_point(aes(text = plotnames), color = '#0000cc') +
+      expand_limits(x = xlim,
+                    y = ylim) +
+      geom_smooth(method = 'lm', se = F) +
+      ggtheme
+    
+    m <- dt %>% 
+      ungroup() %>%
+      filter(extreme1 >= sort(extreme1, decreasing = T)[2] |
+               extreme1 <= sort(extreme1, decreasing = F)[2] |
+               extreme2 >= sort(extreme2, decreasing = T)[2] |
+               extreme2 <= sort(extreme2, decreasing = F)[2])
+    
+    a <- list(
+      x = m[[input$teampassingplot_xvar]],
+      y = m[[input$teampassingplot_yvar]],
+      text = m$plotnames,
+      xref = "x",
+      yref = "y",
+      showarrow = F,
+      xanchor = "center",
+      yanchor = "top",
+      font = list(color = '#ff3300',
+                  size = 10)
+    )
+    
+    ggplotly(p,
+             tooltip = c("x", "y", "text"),
+             width = 700,
+             height = 500) %>%
+      add_markers() %>%
+      layout(annotations = a)
+    
+  })
+  
+  output$teampassingplot_text <- renderText({
+    req(input$teampassingplot_xvar, input$teampassingplot_yvar)
+    
+    paste0('<font size = "4">',
+           lm_eqn2(dt_teampassing_plot(),
+                   paste0('`', input$teampassingplot_xvar, '`'),
+                   paste0('`', input$teampassingplot_yvar, '`')),
+           "</font>")
+  })
+  
+  # Team passing downloads ####
   output$teampassing_download <- downloadHandler(
     filename = 'ASAteampassingtable_total.csv',
     
@@ -1038,4 +1458,4 @@ shinyServer(function(input, output, session) {
                                lengthMenu = c(10, 20, 30, 40, 50))))
   })
   
-    })
+})

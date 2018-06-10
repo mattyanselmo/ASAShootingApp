@@ -47,29 +47,3 @@ minutesPlayed_gameID <- minutesPlayed %>%
 
 saveRDS(minutesPlayed_gameID, 'IgnoreList/MinutesByGameID.rds')
 
-# minutesPlayed_gameID <- minutesPlayed %>%
-#   select(-X) %>%
-#   mutate(player = str_replace_all(player, 
-#                                   c('Kazaishvili' = 'Qazaishvili', 
-#                                     'Jorge Villafaña' = 'Jorge Villafana',
-#                                     "Antonio Mlinar Dalamea" = "Antonio Mlinar Delamea")),
-#          player = ifelse(row_number() %in% grep("Boniek", player), "Oscar Boniek Garcia", player)) %>%
-#   left_join(merged.passes %>%
-#               select(gameID, date) %>% unique(),
-#             by = "gameID") %>%
-#   left_join(merged.passes %>% 
-#               select(gameID, passer, team) %>% unique(), 
-#             by = c("gameID", "player" = "passer")) %>%
-#   mutate(Season = as.numeric(format(date, "%Y"))) %>%
-#   group_by(player, Season) %>%
-#   arrange(date) %>%
-#   mutate(team = as.character(na.locf(team, na.rm = F)),
-#          team = ifelse(is.na(team), "Missing", team)) %>%
-#   ungroup()
-
-# By Season
-# minutesPlayed_season <- minutesPlayed_gameID %>%
-#   group_by(player, Season, team) %>%
-#   summarize(minutes = sum(minutes))
-# 
-# saveRDS(minutesPlayed_season, 'IgnoreList/MinutesBySeason.rds')

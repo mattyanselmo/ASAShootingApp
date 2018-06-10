@@ -1,7 +1,7 @@
 # library(dplyr)
 # keeperxgoals <- readRDS('IgnoreList/xGoalsByKeeper.rds') %>%
 #   mutate(date = as.Date(date, format = '%m/%d/%Y'))
-# minutes_df <- readRDS("IgnoreList/MinutesByGameID.rds")
+# minutes_df <- readRDS("IgnoreList/MinutesByGameID_forapp.rds")
 # date1 = as.Date('2000-01-01')
 # date2 = as.Date('9999-12-31')
 # season = 2015:2017
@@ -119,21 +119,25 @@ keeperxgoals_per96.func <- function(keeperxgoals = keeperxgoals,
            filter(!is.na(goalie)) %>%
            rename(Keeper = goalie) %>%
            arrange(`G-xG`)) %>%
-    select(one_of(c("Keeper", "Team", "Season", "Min", "Shots", "Goals", "Saves", "Header%", "Dist", "xG", "G-xG")))
+    select(one_of(c("Keeper", "Team", "Season", "Min", 
+                    "Shots", "Goals", "Saves", "Header%", 
+                    "Dist", "xG", "G-xG"))) %>%
+    ungroup()
   
 }
 
+# # Function example
 # library(dplyr)
 # keeperxgoals_per96.func(keeperxgoals = readRDS('IgnoreList/xGoalsByKeeper.rds') %>%
 #                           mutate(date = as.Date(date, format = '%m/%d/%Y')),
-#                         minutes_df = readRDS("IgnoreList/MinutesByGameID.rds"),
+#                         minutes_df = readRDS("IgnoreList/MinutesByGameID_forapp.rds"),
 #                         date1 = as.Date('2015-01-01'),
 #                         date2 = as.Date('9999-12-31'),
-#                         season = 2011:2018,
-#                         shotfilter = 10,
+#                         season = 2018,
+#                         shotfilter = 0,
 #                         minfilter = 0,
 #                         byteams = F,
-#                         byseasons = F,
+#                         byseasons = T,
 #                         OtherShots = T,
 #                         FK = T,
 #                         PK = T)

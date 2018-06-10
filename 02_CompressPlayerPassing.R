@@ -39,8 +39,6 @@ minutesPlayed_gameID <- readRDS("IgnoreList/MinutesByGameID.rds") %>%
                             Season = as.numeric(format(date, "%Y"))),
             by = "gameID")
 
-saveRDS(minutesPlayed_gameID, "IgnoreList/MinutesByGameID.rds")
-
 touches <- minutesPlayed_gameID %>%
   left_join(touches %>%
               select(player, gameID, touches), by = c("gameID", "player")) %>%

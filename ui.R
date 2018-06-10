@@ -13,7 +13,7 @@ shinyUI(
              theme = 'bootstrap_edited.css',
              id = "headnavbar",
              navbarMenu(strong('xGoals'),
-                        # Players tab panel ####
+                      # Players tab panel ####
                         tabPanel('Players',
                                  value = "playerxgoals",
                                  sidebarLayout(
@@ -124,56 +124,28 @@ shinyUI(
                                                           #tags$head(tags$script(src = "www/tablesorter.js")),
                                                           DT::dataTableOutput('shootertable')
                                                  ),
-                                                 tabPanel('Scatter plots: totals',
-                                                          value = "plotstotals",
-                                                          p(HTML("<i>Per-minutes data and position information only goes back to 2015.</i>")),
-                                                          fluidPage(fluidRow(
-                                                            column(3,
-                                                                   selectInput('shooterplot_xvar',
-                                                                               label = 'X-axis variable',
-                                                                               choices = sort(c('xG', 'xA', 'xG/Shot' = 'xGperShot', 
-                                                                                                'xA/Pass' = 'xAperPass', 'Shots on target' = 'OnTarget',
-                                                                                                'Shots', 'Key passes' = 'KeyP', 'Goals', 'G-xG/Shot' = 'GmxGperShot',
-                                                                                                'Assists' = 'Assts', 'G-xG', 'A-xA', 'xPlacement' = 'xPlace')),
-                                                                               selected ='xG')),
-                                                            column(3,
-                                                                   selectInput('shooterplot_yvar',
-                                                                               label = 'Y-axis variable',
-                                                                               choices = sort(c('xG', 'xA', 'xG/Shot' = 'xGperShot', 
-                                                                                                'xA/Pass' = 'xAperPass', 'Shots on target' = 'OnTarget',
-                                                                                                'Shots', 'Key passes' = 'KeyP', 'Goals', 'G-xG/Shot' = 'GmxGperShot',
-                                                                                                'Assists' = 'Assts', 'G-xG', 'A-xA', 'xPlacement' = 'xPlace')),
-                                                                               selected ='G-xG')),
-                                                            plotOutput('shooterplot')))),
                                                  tabPanel('Tables: per 96',
                                                           value = "tablesper96",
                                                           p(HTML("<i>Per-minutes data and position information only goes back to 2015.</i>")),
                                                           DT::dataTableOutput('shootertable_per96')
                                                  ),
-                                                 tabPanel('Scatter plots: per 96',
-                                                          value = "plotsper96",
-                                                          p(HTML("<i>Per-minutes data and position information only goes back to 2015.</i>")),
+                                                 tabPanel('Scatter plots',
+                                                          value = "plots",
+                                                          p(HTML("<i>Per-minutes data and position information only goes back to 2015. Please allow a few seconds for the plot to load.</i>")),
                                                           fluidPage(fluidRow(
                                                             column(3,
-                                                                   selectInput('shooterplot_per96_xvar',
+                                                                   selectInput('shooterplot_xvar',
                                                                                label = 'X-axis variable',
-                                                                               choices = sort(c('xG', 'xA', 'Minutes' = 'Min',
-                                                                                                'Shots on target' = 'SoT',
-                                                                                                'Shots', 'Key passes' = 'KeyP', 'Goals', 
-                                                                                                'Assists' = 'Assts', 'G-xG', 'A-xA', 
-                                                                                                'xG+xA', 'xPlacement' = 'xPlace')),
-                                                                               selected ='xG')),
+                                                                               choices = "xG",
+                                                                               selected = "xG")),
                                                             column(3,
-                                                                   selectInput('shooterplot_per96_yvar',
+                                                                   selectInput('shooterplot_yvar',
                                                                                label = 'Y-axis variable',
-                                                                               choices = sort(c('xG', 'xA', 'xG/Shot' = 'xGperShot', 
-                                                                                                'xA/Pass' = 'xAperPass', 'Shots on target' = 'OnTarget',
-                                                                                                'Shots', 'Key passes' = 'KeyP', 'Goals', 
-                                                                                                'Assists' = 'Assts', 'G-xG', 'A-xA', 'xPlacement' = 'xPlace')),
-                                                                               selected ='G-xG')),
-                                                            
-                                                            plotOutput('shooterplot_per96'))))
-                                     )))),
+                                                                               choices = "Goals",
+                                                                               selected = "Goals")))),
+                                                            htmlOutput("shooterplot_text"),
+                                                            plotlyOutput('shooterplot')                                                            )))
+                                     )),
                         
                         # Team xG tab panel ####
                         tabPanel('Teams',
@@ -196,14 +168,18 @@ shinyUI(
                                        ) 
                                      )),
                                      width = 2,
+                                     # actionButton('team_action', 
+                                     #              label = "Refresh filters"),
                                      radioButtons('team_advanced',
                                                   'Stats option:',
                                                   choices = c('Basic' = "Basic stats", 'Advanced' = "Advanced stats"),
                                                   inline = T),
+
                                      conditionalPanel("(input.team_seasonordate == 'Season' && 
                                                       input.team_seasonfilter.length == 1) ||
                                                       (input.team_seasonordate == 'Date' && 
                                                       parseInt(input.team_date1.substring(0,4)) == parseInt(input.team_date2.substring(0,4)))",
+
                                                       checkboxInput('team_conferenceview',
                                                                     'View by conference',
                                                                     value = T)),
@@ -254,11 +230,13 @@ shinyUI(
                                                           downloadButton('team_download', 'Download CSV'),
                                                           br(),
                                                           br(),
-                                                          div(id = 'west', conditionalPanel(condition = "input.team_conferenceview == 1 && input.team_seasonfilter.length == 1",
+                                                          div(id = 'west', conditionalPanel(condition = "input.team_conferenceview == 1 && ((input.team_seasonordate == 'Season' && input.team_seasonfilter.length == 1) ||
+                                                                                              (input.team_seasonordate == 'Date' && input.team_date1.substring(0,4) == input.team_date2.substring(0,4)))",
                                                                                             h2('Western conference')),
                                                               DT::dataTableOutput('teamtotalxgoalswest')),
                                                           br(),
-                                                          div(id = 'east', conditionalPanel(condition = "input.team_conferenceview == 1 && input.team_seasonfilter.length == 1",
+                                                          div(id = 'east', conditionalPanel(condition = "input.team_conferenceview == 1 && ((input.team_seasonordate == 'Season' && input.team_seasonfilter.length == 1) ||
+                                                                                              (input.team_seasonordate == 'Date' && input.team_date1.substring(0,4) == input.team_date2.substring(0,4)))",
                                                                                             h2('Eastern conference'),
                                                                                             DT::dataTableOutput('teamtotalxgoalseast')))
                                                  ),
@@ -266,44 +244,35 @@ shinyUI(
                                                           downloadButton('team_download_pergame', 'Download CSV'),
                                                           br(),
                                                           br(),
-                                                          conditionalPanel(condition = "input.team_conferenceview == 1 && input.team_seasonfilter.length == 1",
+                                                          conditionalPanel(condition = "input.team_conferenceview == 1 && ((input.team_seasonordate == 'Season' && input.team_seasonfilter.length == 1) ||
+                                                                                              (input.team_seasonordate == 'Date' && input.team_date1.substring(0,4) == input.team_date2.substring(0,4)))",
                                                                            h2('Western conference')),
                                                           div(DT::dataTableOutput('teampergamexgoalswest')),
                                                           br(),
-                                                          conditionalPanel(condition = "input.team_conferenceview == 1 && input.team_seasonfilter.length == 1",
+                                                          conditionalPanel(condition = "input.team_conferenceview == 1 && ((input.team_seasonordate == 'Season' && input.team_seasonfilter.length == 1) ||
+                                                                                              (input.team_seasonordate == 'Date' && input.team_date1.substring(0,4) == input.team_date2.substring(0,4)))",
                                                                            h2('Eastern conference'),
                                                                            div(DT::dataTableOutput('teampergamexgoalseast')))
                                                  ),
                                                  tabPanel('Scatter plots',
-                                                          p(div(HTML("<i> All statistics on a per game basis. Not all teams labeled. </i>"))),
-                                                          actionButton('team_action', 
-                                                                       label = "Refresh filters"),
+                                                          value = "teamxgoalplots",
+                                                          p(HTML("<i>Please allow a few seconds for the plot to load.</i>")),
                                                           fluidPage(fluidRow(
-                                                            column(4,
+                                                            column(3,
                                                                    selectInput('teamplot_xvar',
                                                                                label = 'X-axis variable',
-                                                                               choices = c('Shots for' = 'ShtF', 'Shots against' = 'ShtA',
-                                                                                           # 'Unassisted % for' = 'Solo%F',
-                                                                                           # 'Unassisted % against' = 'Solo%A',
-                                                                                           'Cross % for' = 'CrossPctF', 'Cross % against' = 'CrossPctA',
-                                                                                           'Shots on target for' = 'OnTargetF', 'Shots on target against' = 'OnTargetA',
-                                                                                           'GF', 'GA', 'GD', 'xGF', 'xGA', 'xGD', 'TSR', 'PDO', 'Points' = 'Pts'),
+                                                                               choices = "xGF",
                                                                                selected = 'xGF')),
-                                                            column(4,
+                                                            column(3,
                                                                    selectInput('teamplot_yvar',
                                                                                label = 'Y-axis variable',
-                                                                               choices = c('Shots for' = 'ShtF', 'Shots against' = 'ShtA',
-                                                                                           # 'Unassisted % for' = 'Solo%F',
-                                                                                           # 'Unassisted % against' = 'Solo%A',
-                                                                                           'Cross % for' = 'CrossPctF', 'Cross % against' = 'CrossPctA',
-                                                                                           'Shots on target for' = 'OnTargetF', 'Shots on target against' = 'OnTargetA',
-                                                                                           'GF', 'GA', 'GD', 'xGF', 'xGA', 'xGD', 'TSR', 'PDO', 'Points' = 'Pts'),
-                                                                               selected = 'xGA')),
-                                                            plotOutput('teamplot')))
+                                                                               choices = "GF",
+                                                                               selected = 'GF')))),
+                                                          htmlOutput("teamshootingplot_text"),
+                                                          plotlyOutput("teamplot"))
                                                  )
                                      )
                                    )
-                                 )
                         ),
                         tabPanel('Game-by-game xG',
                                  value = "gamebygamexg",
@@ -364,10 +333,15 @@ shinyUI(
                                      width = 2,
                                      actionButton('keeper_action',
                                                   label = "Refresh filters"),
-                                     numericInput("keeper_minfilter",
-                                                  label = "Minimum minutes:",
-                                                  value = 0,
-                                                  min = 0, max = 10000, step = 500),
+                                     conditionalPanel(
+                                       condition = "(input.keeper_seasonordate == 'Season' && 
+                                                      Math.min(parseInt(input.keeper_seasonfilter)) >= 2015) ||
+                                        (input.keeper_seasonordate == 'Date' && 
+                                        parseInt(input.keeper_date1.substring(0,4)) >= 2015)",  
+                                       numericInput("keeper_minfilter",
+                                                    label = "Minimum minutes:",
+                                                    value = 0,
+                                                    min = 0, max = 10000, step = 500)),
                                      numericInput('keeper_minshots',
                                                   "Minimum shots faced:",
                                                   value = 0,
@@ -421,10 +395,17 @@ shinyUI(
                                      tabsetPanel(id = 'keeper_subtab',
                                                  tabPanel('Tables: totals',
                                                           value = "tablestotals",
+                                                          p(HTML("<i>Per-minutes data only goes back to 2015.</i>")),
                                                           DT::dataTableOutput('keepertable')),
-                                                 tabPanel('Scatter plots: totals',
+                                                 tabPanel("Tables: per 96",
+                                                          value = "tablesper96",
+                                                          p(HTML("<i>Per-minutes data only goes back to 2015.</i>")),
+                                                          DT::dataTableOutput("keepertable_per96")
+                                                 ),
+                                                 tabPanel('Scatter plots',
                                                           value = "plotstotals",
                                                           fluidPage(fluidRow(
+                                                            p(HTML("<i>Per-minutes data only goes back to 2015. Please allow a few seconds for the plot to load.</i>")),
                                                             column(4,
                                                                    selectInput('keeperplot_xvar',
                                                                                label = 'X-axis variable',
@@ -442,24 +423,16 @@ shinyUI(
                                                                                            'G-xG/shot' = 'GmxGperShot',
                                                                                            '%Shots headed' = 'Header%', 'Avg. distance' = 'Dist',
                                                                                            'xG faced' = 'xG', 'GA above average' = 'G-xG'),
-                                                                               selected = 'G-xG')),
-                                                            plotOutput('keeperplot')))
-                                                 ),
-                                                 tabPanel("Tables: per 96",
-                                                          value = "tablesper96",
-                                                          p(HTML("<i>Per-minutes data only goes back to 2015.</i>")),
-                                                          DT::dataTableOutput("keepertable_per96")
-                                                 ),
-                                                 tabPanel("Scatter plots: per 96",
-                                                          value = "plotsper96",
-                                                          p(HTML("<i>This tab is still being developed!</i>"))
+                                                                               selected = 'G-xG')))),
+                                                          htmlOutput("keeperplot_text"),
+                                                          plotlyOutput('keeperplot')
                                                  )
                                      ))
                                  )
                         )),
              # Passing navbar ####
              navbarMenu(strong('xPasses'),
-                        # Passing: Players totals tab panel ####
+                        # Passing: Players tab panel ####
                         tabPanel('Players',
                                  value = "playerpassing",
                                  sidebarLayout(
@@ -524,27 +497,27 @@ shinyUI(
                                              br(),
                                              tabsetPanel(id = 'passing_subtab',
                                                          tabPanel('Tables: totals',
+                                                                  value = "passingtablestotals",
                                                                   DT::dataTableOutput('passingtable_player')),
-                                                         tabPanel("Scatter plots: totals",
-                                                                  p("This tab is still being developed!")),
                                                          tabPanel("Tables: per 96",
-                                                                  p("This tab is still being developed!")),
-                                                         tabPanel("Scatter plots: per 96",
-                                                                  p("This tab is still being developed!"))
-                                                         
-                                                         # tabPanel('Scatter plots',
-                                                         #          fluidPage(fluidRow(
-                                                         #            column(3,
-                                                         #                   selectInput('passerplot_xvar',
-                                                         #                               label = 'X-axis variable',
-                                                         #                               choices = sort(c()),
-                                                         #                               selected = '')),
-                                                         #            column(3,
-                                                         #                   selectInput('passerplot_yvar',
-                                                         #                               label = 'Y-axis variable',
-                                                         #                               choices = sort(c()),
-                                                         #                               selected ='')),
-                                                         #            plotOutput('passerplot'))))
+                                                                  value = "passingtablesper96",
+                                                                  DT::dataTableOutput("passingtable_player_per96")),
+                                                         tabPanel("Scatter plots",
+                                                                  value = "passingplots",
+                                                                  p(HTML("<i>Please allow a few seconds for the plot to load.</i>")),
+                                                                  fluidPage(fluidRow(
+                                                                    column(3,
+                                                                           selectInput('passerplot_xvar',
+                                                                                       label = 'X-axis variable',
+                                                                                       choices = "xPassPct",
+                                                                                       selected = "xPassPct")),
+                                                                    column(3,
+                                                                           selectInput('passerplot_yvar',
+                                                                                       label = 'Y-axis variable',
+                                                                                       choices = "PassPct",
+                                                                                       selected = "PassPct")))),
+                                                                    htmlOutput("passerplot_text"),
+                                                                    plotlyOutput('passerplot'))
                                              )))),
                         # Passing: Teams ####
                         tabPanel('Teams',
@@ -619,32 +592,21 @@ shinyUI(
                                                           br(),
                                                           DT::dataTableOutput("teampassing_pergame")),
                                                  tabPanel('Scatter plots',
-                                                          p("This tab is still being developed!")
-                                                          # p(div(HTML("<i> All statistics on a per game basis. Not all teams labeled. </i>"))),
-                                                          # actionButton('team_action',
-                                                          #              label = "Refresh filters"),
-                                                          # fluidPage(fluidRow(
-                                                          #   column(4,
-                                                          #          selectInput('teamplot_xvar',
-                                                          #                      label = 'X-axis variable',
-                                                          #                      choices = c('Shots for' = 'ShtF', 'Shots against' = 'ShtA',
-                                                          #                                  'Unassisted % for' = 'Solo%F',
-                                                          #                                  'Unassisted % against' = 'Solo%A',
-                                                          #                                  'Cross % for' = 'CrossPctF', 'Cross % against' = 'CrossPctA',
-                                                          #                                  'Shots on target for' = 'OnTargetF', 'Shots on target against' = 'OnTargetA',
-                                                          #                                  'GF', 'GA', 'GD', 'xGF', 'xGA', 'xGD', 'TSR', 'PDO', 'Points' = 'Pts'),
-                                                          #                      selected = 'xGF')),
-                                                          #   column(4,
-                                                          #          selectInput('teamplot_yvar',
-                                                          #                      label = 'Y-axis variable',
-                                                          #                      choices = c('Shots for' = 'ShtF', 'Shots against' = 'ShtA',
-                                                          #                                  'Unassisted % for' = 'Solo%F',
-                                                          #                                  'Unassisted % against' = 'Solo%A',
-                                                          #                                  'Cross % for' = 'CrossPctF', 'Cross % against' = 'CrossPctA',
-                                                          #                                  'Shots on target for' = 'OnTargetF', 'Shots on target against' = 'OnTargetA',
-                                                          #                                  'GF', 'GA', 'GD', 'xGF', 'xGA', 'xGD', 'TSR', 'PDO', 'Points' = 'Pts'),
-                                                          #                      selected = 'xGA')),
-                                                          #   plotOutput('teamplot')))
+                                                          value = "teampassingplots",
+                                                          p(HTML("<i>Please allow a few seconds for the plot to load.</i>")),
+                                                          fluidPage(fluidRow(
+                                                            column(3,
+                                                                   selectInput('teampassingplot_xvar',
+                                                                               label = 'X-axis variable',
+                                                                               choices = "xPctF",
+                                                                               selected = 'xPctF')),
+                                                            column(3,
+                                                                   selectInput('teampassingplot_yvar',
+                                                                               label = 'Y-axis variable',
+                                                                               choices = c("PctF"),
+                                                                               selected = "PctF")))),
+                                                          htmlOutput("teampassingplot_text"),
+                                                          plotlyOutput('teampassingplot')
                                                  )
                                      )
                                    )

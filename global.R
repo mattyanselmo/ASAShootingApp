@@ -3,8 +3,11 @@ library(shiny)
 library(DT)
 library(shinyjs)
 library(ggplot2)
+library(plotly)
+library(ggrepel)
 
 playerxgoals <- readRDS('IgnoreList/xGoalsByPlayer.rds') 
+# Create made-up players
 # %>% 
 #   bind_rows(data.frame(date = as.Date("2018-04-01"),
 #                        team = "LAG",
@@ -31,7 +34,7 @@ playerxgoals <- readRDS('IgnoreList/xGoalsByPlayer.rds')
 #                        gameID = 666,
 #                        check.names = F))
 
-minutesPlayed <- readRDS('IgnoreList/MinutesByGameID.rds')
+minutesPlayed <- readRDS('IgnoreList/MinutesByGameID_forapp.rds')
 # minutesPlayedPassing <- readRDS("IgnoreList/MinutesBySeason.rds")
 teamxgoals <- readRDS('IgnoreList/xGoalsByTeam.rds')
 xgbygame <- readRDS('IgnoreList/xGoalsByTeam_byGame.rds')
@@ -62,13 +65,25 @@ gamesplayed <- readRDS("IgnoreList/GamesPlayed_forTeamPassing.rds")
 #pred.data <- readRDS('IgnoreList/TeamPredictionsData_week35.rds')
 #load('IgnoreList/UnivariatePoissonModels.Rdata')
 
+ggtheme <- theme(legend.position = "none",
+                 axis.text=element_text(size = 12),
+                 axis.title=element_text(size = 16, face = "bold"))
+
 lm_eqn <- function(df, x, y){
-  m <- lm(formula(paste0(y, ' ~ ', x)), df);
+  m <- lm(formula(paste0(y, " ~ ", x)), df);
   eq <- substitute(italic(y) == a + b %.% italic(x)*","~~italic(r)^2~"="~r2, 
                    list(a = format(coef(m)[1], digits = 2), 
                         b = format(coef(m)[2], digits = 2), 
                         r2 = format(summary(m)$r.squared, digits = 3)))
   as.character(as.expression(eq));                 
+}
+
+lm_eqn2 <- function(df, x, y){
+  m <- lm(formula(paste0(y, " ~ ", x)), df);
+  a <- format(coef(m)[1], digits = 3) 
+  b <- format(coef(m)[2], digits = 3) 
+  r2 <- format(summary(m)$r.squared, digits = 3)
+  paste0("y = ", b, "x + ", a, " ; R-squared = ", r2)                 
 }
 
 Mode <- function(x) {
@@ -82,4 +97,5 @@ source('TeamxGoalsFunction.R')
 source('KeeperxGoalsFunction.R')
 source('KeeperxGoalsFunction_perminute.R')
 source("PasserxPassesFunction.R")
+source("PasserxPassesFunction_perminute.R")
 source("TeamxPassesFunction.R")
