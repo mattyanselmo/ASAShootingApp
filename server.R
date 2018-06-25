@@ -1242,6 +1242,110 @@ shinyServer(function(input, output, session) {
            "</font>")
   })
   
+  # Team split plots ####
+  dt_teamshotssplits_plot <- reactive({
+    dt <- teamshootingsplits.func(teamxgoals = teamxgoals,
+                            game_split = input$teamsplitsplot_split,
+                            season = input$team_seasonfilter,
+                            even = input$team_evenstate,
+                            pattern = input$team_pattern)
+    
+    dt
+  
+  })
+  
+  teamshootingsplits_plotvalues <- reactiveValues(teamsplitsplot_xvar = "xGD (before split)", teamsplitsplot_yvar = "GD (after split)")
+  
+  observeEvent({
+    input$teamsplitsplot_xvar 
+    input$teamsplitsplot_yvar
+  }, 
+  {
+    teamshootingsplits_plotvalues$teamsplitsplot_xvar <- input$teamsplitsplot_xvar
+    teamshootingsplits_plotvalues$teamsplitsplot_yvar <- input$teamsplitsplot_yvar
+  })
+  
+  observeEvent(dt_teamshotssplits_plot(), {
+    updateSelectInput(session,
+                      inputId = 'teamsplitsplot_xvar',
+                      label = 'X-axis variable',
+                      choices = grep("before", names(dt_teamshotssplits_plot()), value = T),
+                      selected = teamshootingsplits_plotvalues$teamsplitsplot_xvar)
+    
+    updateSelectInput(session,
+                      inputId = 'teamsplitsplot_yvar',
+                      label = 'Y-axis variable',
+                      choices = grep("after", names(dt_teamshotssplits_plot()), value = T),
+                      selected = teamshootingsplits_plotvalues$teamsplitsplot_yvar)
+  })
+  
+  output$teamsplitsplot <- renderPlotly({
+    req(input$teamsplitsplot_xvar, input$teamsplitsplot_yvar)
+    dt <- dt_teamshotssplits_plot()
+    
+    xlim <- min(dt[[input$teamsplitsplot_xvar]]) - 0.05*(max(dt[[input$teamsplitsplot_xvar]]) - min(dt[[input$teamsplitsplot_xvar]]))
+    ylim <- min(dt[[input$teamsplitsplot_yvar]]) - 0.05*(max(dt[[input$teamsplitsplot_yvar]]) - min(dt[[input$teamsplitsplot_yvar]]))
+    
+    dt[["extreme1"]] <- rank(dt[[input$teamsplitsplot_xvar]], ties.method = "random")
+    dt[["extreme2"]] <- rank(dt[[input$teamsplitsplot_yvar]], ties.method = "random")
+    
+    dt[[input$teamsplitsplot_xvar]] <- round(dt[[input$teamsplitsplot_xvar]], 3)
+    dt[[input$teamsplitsplot_yvar]] <- round(dt[[input$teamsplitsplot_yvar]], 3)
+    
+    if(length(unique(dt$Season)) > 1){
+      dt[['plotnames']] <- paste(unlist(lapply(strsplit(dt$Team, " "), function(x) { return(x[length(x)]) })), dt$Season)
+    }else{
+      dt[['plotnames']] <- unlist(lapply(strsplit(dt$Team, " "), function(x) { return(x[length(x)]) }))
+    }
+    
+    p <- dt  %>%
+      ggplot(
+        aes_string(x = paste0('`', input$teamsplitsplot_xvar, '`'),
+                   y = paste0('`', input$teamsplitsplot_yvar, '`'))) +
+      geom_point(aes(text = plotnames), color = '#0000cc') +
+      expand_limits(x = xlim,
+                    y = ylim) +
+      geom_smooth(method = 'lm', se = F) +
+      ggtheme
+    
+    m <- dt %>% 
+      ungroup() %>%
+      filter(extreme1 >= sort(extreme1, decreasing = T)[2] |
+               extreme1 <= sort(extreme1, decreasing = F)[2] |
+               extreme2 >= sort(extreme2, decreasing = T)[2] |
+               extreme2 <= sort(extreme2, decreasing = F)[2])
+    
+    a <- list(
+      x = m[[input$teamsplitsplot_xvar]],
+      y = m[[input$teamsplitsplot_yvar]],
+      text = m$plotnames,
+      xref = "x",
+      yref = "y",
+      showarrow = F,
+      xanchor = "center",
+      yanchor = "top",
+      font = list(color = '#ff3300',
+                  size = 10)
+    )
+    
+    ggplotly(p,
+             tooltip = c("x", "y", "text"),
+             width = 700,
+             height = 500) %>%
+      add_markers() %>%
+      layout(annotations = a)
+    
+  })
+  
+  output$teamshootingsplitsplot_text <- renderText({
+    req(input$teamsplitsplot_xvar, input$teamsplitsplot_yvar)
+    paste0('<font size = "4">',
+           lm_eqn2(dt_teamshotssplits_plot(),
+                   paste0('`', input$teamsplitsplot_xvar, '`'),
+                   paste0('`', input$teamsplitsplot_yvar, '`')),
+           "</font>")
+  })
+  
   # Team passing tables ####
   dt_team_passing <- reactive({
     dt <- teampassing.func(offense = teampassing.offense,

@@ -94,6 +94,7 @@ Mode <- function(x) {
 source('ShooterxGoalsFunction.R')
 source('ShooterxGoalsFunction_perminute.R')
 source('TeamxGoalsFunction.R')
+source("TeamxGoalsFunction_splits.R")
 source('KeeperxGoalsFunction.R')
 source('KeeperxGoalsFunction_perminute.R')
 source("PasserxPassesFunction.R")
