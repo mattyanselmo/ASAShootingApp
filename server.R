@@ -317,20 +317,12 @@ shinyServer(function(input, output, session) {
   
   # Shooter downloads ####
   output$player_download <- downloadHandler(
-    filename = paste0("ASAplayertable_", 
-                      ifelse(input$player_subtab %in% c("tablestotals", "plots"), "totals", "per96"),
-                      ".csv"),
+    filename = paste0("ASAshootertable.csv"),
     
     content = function(file){
-      if(input$player_subtab %in% c("tablestotals", "plots")){
-        namesFL <- as.data.frame(do.call("rbind", strsplit(sub(" ", ";", dt_total()$Player), ";")))
+        namesFL <- as.data.frame(do.call("rbind", strsplit(sub(" ", ";", dt_playershootingplot()$Player), ";")))
         names(namesFL) <- c("First", "Last")
-        write.csv(data.frame(namesFL, dt_total()), file, row.names = F)
-      } else{
-        namesFL <- as.data.frame(do.call("rbind", strsplit(sub(" ", ";", dt_per96()$Player), ";")))
-        names(namesFL) <- c("First", "Last")
-        write.csv(data.frame(namesFL, dt_per96()), file, row.names = F)        
-      }
+        write.csv(data.frame(namesFL, dt_playershootingplot(), check.names = FALSE), file, row.names = FALSE)
     }
   )
   
@@ -437,7 +429,7 @@ shinyServer(function(input, output, session) {
   # Passer plots ####
   dt_passer_plot <- reactive({
     dt <- dt_passer() %>%
-      left_join(dt_passer_per96(),
+      left_join(dt_passer_per96() %>% select(-one_of(c("Pos", "Min", "Team"))),
                 by = c("Player", "Season")[c(T, passer_inputs$passing_byseasons)],
                 suffix = c("", "/96"))
     
@@ -558,19 +550,11 @@ shinyServer(function(input, output, session) {
   
   # Passer downloads ####
   output$passing_download <- downloadHandler(
-    filename = paste0("ASApassingtable_", 
-                      ifelse(input$passing_subtab %in% c("passingtablestotals", "passingplots"), "totals", "per96"),
-                      ".csv"),
+    filename = paste0("ASApassingtable.csv"),
     content = function(file){
-      if(input$passing_subtab %in% c("passingtablestotals", "passingplots")){
-        namesFL <- as.data.frame(do.call("rbind", strsplit(sub(" ", ";", dt_passer()$Player), ";")))
+        namesFL <- as.data.frame(do.call("rbind", strsplit(sub(" ", ";", dt_passer_plot()$Player), ";")))
         names(namesFL) <- c("First", "Last")
-        write.csv(data.frame(namesFL, dt_passer()), file, row.names = F)
-      } else{
-        namesFL <- as.data.frame(do.call("rbind", strsplit(sub(" ", ";", dt_passer()$Player), ";")))
-        names(namesFL) <- c("First", "Last")
-        write.csv(data.frame(namesFL, dt_passer_per96()), file, row.names = F)
-      }
+        write.csv(data.frame(namesFL, dt_passer_plot(), check.names = FALSE), file, row.names = FALSE)
     }
   )
   
@@ -709,28 +693,10 @@ shinyServer(function(input, output, session) {
                        digits = 1)
   })
   
-  # Keeper downloads ####
-  output$keeper_download <- downloadHandler(
-    filename = paste0("ASAkeepertable_",
-                      ifelse(input$keeper_subtab %in% c("tablestotals", "plotstotals"), "totals", "per96"), 
-                      ".csv"),
-    
-    content = function(file){
-      if(input$keeper_subtab %in% c("tablestotals", "plotstotals")){
-        namesFL <- as.data.frame(do.call("rbind", strsplit(sub(" ", ";", dt_keeper()$Keeper), ";")))
-        names(namesFL) <- c("First", "Last")
-        write.csv(data.frame(namesFL, dt_keeper() %>% select(-c(extreme, plotnames))), file, row.names = F)
-      } else{
-        namesFL <- as.data.frame(do.call("rbind", strsplit(sub(" ", ";", dt_keeper_per96()$Keeper), ";")))
-        names(namesFL) <- c("First", "Last")
-        write.csv(data.frame(namesFL, dt_keeper_per96() %>% select(-c(extreme, plotnames))), file, row.names = F)
-      }
-    })
-  
   # Keeper plots ####
   dt_keeperplot <- reactive({
     dt <- dt_keeper() %>%
-      left_join(dt_keeper_per96(),
+      left_join(dt_keeper_per96() %>% select(-one_of(c("Team", "Season")[!c(keeper_inputs$keeper_byteams, keeper_inputs$keeper_byseasons)])),
                 by = c("Keeper", "Team", "Season")[c(TRUE, keeper_inputs$keeper_byteams, keeper_inputs$keeper_byseasons)],
                 suffix = c("", "/96"))
     
@@ -747,6 +713,7 @@ shinyServer(function(input, output, session) {
       dt[['plotnames']] <- unlist(lapply(strsplit(dt$Keeper, " "), function(x) { return(x[length(x)]) }))
     }
     dt
+    print(dt)
   })
   
   keeper_plotvalues <- reactiveValues(keeperplot_xvar = "xG", keeperplot_yvar = "Goals")
@@ -864,6 +831,16 @@ shinyServer(function(input, output, session) {
                    paste0('`', keeper_inputs$keeperplot_yvar, '`')),
            "</font>")
   })
+  
+  # Keeper downloads ####
+  output$keeper_download <- downloadHandler(
+    filename = "ASAkeepertable.csv",
+    
+    content = function(file){
+        namesFL <- as.data.frame(do.call("rbind", strsplit(sub(" ", ";", dt_keeperplot()$Keeper), ";")))
+        names(namesFL) <- c("First", "Last")
+        write.csv(data.frame(namesFL, dt_keeperplot(), check.names = FALSE), file, row.names = FALSE)
+    })
   
   # Team shots tables ####
   dt_team <- reactive({
