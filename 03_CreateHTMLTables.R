@@ -5,7 +5,7 @@ library(formattable)
 path <- ifelse(file.exists("C:/Users/Matthias"), "C:/Users/Matthias", "C:/Users/Matthias.Kullowatz")
 
 playerxgoals <- readRDS('IgnoreList/xGoalsByPlayer.rds')
-minutesPlayed <- readRDS('IgnoreList/MinutesByGameID.rds')
+minutesPlayed <- readRDS('IgnoreList/MinutesByGameID_forapp.rds')
 teamxgoals <- readRDS('IgnoreList/xGoalsByTeam.rds')
 xgbygame <- readRDS('IgnoreList/xGoalsByTeam_byGame.rds')
 keeperxgoals <- readRDS('IgnoreList/xGoalsByKeeper.rds')
