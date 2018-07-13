@@ -21,6 +21,7 @@ source("02_CompressPlayerTouches.R")
 
 if(length(grep("_master", getwd())) > 0){
   source("03_CreateHTMLTables.R")
+  #source("03_CreateMLSStandings_HTML.R")
 }
 gc()
 
