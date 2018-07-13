@@ -66,7 +66,8 @@ pass.summ <- merged.passes %>%
   ungroup()
 
 player.stats <- pass.summ %>% 
-  left_join(touches, by = c("passer" = "player", "year" = "Season", "team"))
+  left_join(touches, by = c("passer" = "player", "year" = "Season", "team")) %>%
+  filter(!is.na(touches))
 
 saveRDS(player.stats, "IgnoreList/xPassingByPlayer.rds")
 write.csv(player.stats, "IgnoreList/xPassingByPlayer.csv", row.names = F)
