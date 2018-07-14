@@ -25,6 +25,11 @@ source("PasserxPassesFunction.R")
 source("TeamxPassesFunction.R")
 source("xGoalByGameFunction.R")
 
+Mode <- function(x) {
+  ux <- unique(x)
+  ux[which.max(tabulate(match(x, ux)))]
+}
+
 # Player xGoals ####
 dt_xgoals <- lapply(2011:max(playerxgoals$Season),
                     FUN = function(x){
@@ -85,16 +90,17 @@ dt_xgoals <- lapply(2011:max(playerxgoals$Season),
                         write.table(gsub("\n", "",
                                          gsub(" <", "<", 
                                               gsub("> ", ">", 
-                                                   gsub("<table border=1>", '<script>
+                                                   gsub(' align="center"', "",
+                                                        gsub("<table border=1>", '<script>
   $(document).ready(function() {
                                                              $("#myTable").tablesorter();
                       });
                                                              </script><TABLE border=1 id="myTable" class="tablesorter" style="white-space:nowrap;"><thead>',
-                                                        gsub(" xPlacep96 </th>  </tr>", " xPlacep96 </th>  </tr> </thead> <tbody>",
-                                                             print.xtable(output, 
-                                                                          type = "html",
-                                                                          include.rownames = F,
-                                                                          print.results = F)))))), 
+                                                             gsub(" xPlacep96 </th>  </tr>", " xPlacep96 </th>  </tr> </thead> <tbody>",
+                                                                  print.xtable(output, 
+                                                                               type = "html",
+                                                                               include.rownames = F,
+                                                                               print.results = F))))))), 
                                     file = paste0(path, "/Dropbox/ASA Blog Data/HTMLOutputs/Player_xGoals_", x, ".txt"),
                                     row.names = F,
                                     quote = F)
