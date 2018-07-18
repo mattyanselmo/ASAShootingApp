@@ -71,7 +71,9 @@ standings.east <- standings.east %>%
          AvShtF = ShtF/GP, 
          AvShtA = ShtA/GP,
          PPG = as.numeric(as.character(PPG))) %>%
-  select(`#`, Club, GP, W, L, `T`, GF, GA, GD, ShtF, AvShtF, ShtA, AvShtA, TSR, PDO, Poss, Pts, PPG)
+  select(`#`, Club, GP, W, L, `T`, GF, GA, GD, ShtF, AvShtF, ShtA, AvShtA, TSR, PDO, Poss, Pts, PPG) %>%
+  arrange(desc(PPG)) %>%
+  mutate(`#` = 1:n())
 
 standings.west <- standings.west %>%
   left_join(shots, by = c("Club" = "team"), suffix = c("", "_xG")) %>%
@@ -80,7 +82,9 @@ standings.west <- standings.west %>%
          AvShtF = ShtF/GP, 
          AvShtA = ShtA/GP,
          PPG = as.numeric(as.character(PPG))) %>%
-  select(`#`, Club, GP, W, L, `T`, GF, GA, GD, ShtF, AvShtF, ShtA, AvShtA, TSR, PDO, Poss, Pts, PPG)
+  select(`#`, Club, GP, W, L, `T`, GF, GA, GD, ShtF, AvShtF, ShtA, AvShtA, TSR, PDO, Poss, Pts, PPG) %>%
+  arrange(desc(PPG)) %>%
+  mutate(`#` = 1:n())
 
 # Write conference tables to HTML ####
 library(xtable)
@@ -95,9 +99,9 @@ write.table(gsub("\n", "",
                       gsub("> ", ">", 
                            gsub("<table border=1>", '<script>
                                 $(document).ready(function() {
-                                $("#myTable").tablesorter();
+                                $("#EasternConferenceTable").tablesorter();
                                 });
-                                </script><TABLE border=1 id="myTable" class="tablesorter" style="white-space:nowrap;"><thead>',
+                                </script> <b>Eastern Conference</b> <TABLE border=1 id="EasternConferenceTable" class="tablesorter" style="white-space:nowrap;"><thead>',
                                 gsub(" PPG </th>  </tr>", " PPG </th>  </tr> </thead> <tbody>",
                                      print.xtable(output.east, 
                                                   type = "html",
@@ -116,9 +120,9 @@ write.table(gsub("\n", "",
                       gsub("> ", ">", 
                            gsub("<table border=1>", '<script>
                                 $(document).ready(function() {
-                                $("#myTable").tablesorter();
+                                $("#WesternConferenceTable").tablesorter();
                                 });
-                                </script><TABLE border=1 id="myTable" class="tablesorter" style="white-space:nowrap;"><thead>',
+                                </script> <b>Western Conference</b> <TABLE border=1 id="WesternConferenceTable" class="tablesorter" style="white-space:nowrap;"><thead>',
                                 gsub(" PPG </th>  </tr>", " PPG </th>  </tr> </thead> <tbody>",
                                      print.xtable(output.west, 
                                                   type = "html",
