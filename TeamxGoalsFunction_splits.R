@@ -6,10 +6,10 @@
 # pattern = "All"
 
 teamshootingsplits.func <- function(teamxgoals = teamxgoals, 
-                            game_split = 17,
-                            season = 2011:2017,
-                            even = F,
-                            pattern = "All"){
+                                    game_split = 17,
+                                    season = 2011:2017,
+                                    even = F,
+                                    pattern = "All"){
   
   tempdat <- teamxgoals %>%
     filter(Season %in% season) %>%
@@ -32,7 +32,7 @@ teamshootingsplits.func <- function(teamxgoals = teamxgoals,
     tempdat <- tempdat %>% 
       filter(patternOfPlay.model == pattern)
   }
-
+  
   aggdata <- tempdat %>%
     group_by(Team, Season, split = ifelse(gamesplayed <= game_split, 1, 2)) %>%
     summarize(Games = ifelse(split[1] == 1, game_split, max(gamesplayed) - game_split),
@@ -75,8 +75,38 @@ teamshootingsplits.func <- function(teamxgoals = teamxgoals,
 }
 
 # # Function example
-# teamshootingsplits.func(teamxgoals = teamxgoals,
+# teamshootingsplits.func(teamxgoals = readRDS('IgnoreList/xGoalsByTeam.rds'),
 #                         game_split = 17,
 #                         season = 2011:2017,
 #                         even = F,
 #                         pattern = "All")
+
+# # Make plots
+# library(dplyr)
+# library(ggplot2)
+# 
+# splits <- teamshootingsplits.func(teamxgoals = readRDS('IgnoreList/xGoalsByTeam.rds'),
+#                                   game_split = 17,
+#                                   season = 2011:2017,
+#                                   even = F,
+#                                   pattern = "All")
+# stats <- grep("before", names(splits), value = T)
+# plot.dat <- data.frame(Stat = c(), Game = c(), Correlation = c())
+# 
+# for(game in 1:33){
+#   splits <- teamshootingsplits.func(teamxgoals = readRDS('IgnoreList/xGoalsByTeam.rds'),
+#                                     game_split = game,
+#                                     season = 2011:2017,
+#                                     even = F,
+#                                     pattern = "All")
+#   for(stat in stats){
+#     plot.dat <- rbind(plot.dat,
+#                       data.frame(Stat = stat, Game = game, Correlation = cor(splits[[stat]], splits[[gsub("before", "after", stat)]])))
+#   }
+# }
+# 
+# plot.dat %>%
+#   mutate(Stat = gsub(" .*", "", Stat)) %>%
+#   filter(Stat %in% c("xGD", "GD", "PDO", "GD-xGD")) %>%
+#   ggplot(aes(x = Game, y = Correlation)) +
+#   geom_line(aes(color = Stat), size = 2)
