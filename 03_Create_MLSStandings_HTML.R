@@ -4,9 +4,8 @@ library(dplyr)
 
 # year <- 2018
 # merged.passes <- readRDS("IgnoreList/AllPassingData.rds")
-# shooting <- readRDS("IgnoreList/AllShotsData2011-2017.rds")
 
-
+shooting <- readRDS("IgnoreList/AllShotsData2011-2017.rds")
 team.map <- read.csv("TeamNameLinks_MLSStandings.csv")
 
 standings <- readHTMLTable(htmlParse(read_html("https://www.mlssoccer.com/standings")))
