@@ -1,4 +1,6 @@
 # # Function testing
+# library(dplyr)
+# library(ggplot2)
 # teamxgoals <- readRDS('IgnoreList/xGoalsByTeam.rds')
 # season = 2011:2017
 # game_split = 17
@@ -63,10 +65,10 @@ teamshootingsplits.func <- function(teamxgoals = teamxgoals,
   
   aggdata <- aggdata %>%
     filter(split == 1) %>%
-    select(-split) %>%
+    select(-split, -Games) %>%
     left_join(aggdata %>%
                 filter(split == 2) %>%
-                select(-split),
+                select(-split, - Games),
               by = c("Team", "Season"),
               suffix = c(" (before split)", " (after split)"))
   
