@@ -1246,7 +1246,7 @@ shinyServer(function(input, output, session) {
   dt_teamshotssplits_plot <- reactive({
     dt <- teamshootingsplits.func(teamxgoals = teamxgoals,
                             game_split = input$teamsplitsplot_split,
-                            season = input$team_seasonfilter,
+                            season = input$team_seasonfilter2,
                             even = input$team_evenstate,
                             pattern = input$team_pattern)
     
