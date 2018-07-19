@@ -1346,6 +1346,15 @@ shinyServer(function(input, output, session) {
            "</font>")
   })
   
+  # Team shooting splits downloads ####
+  output$team_download_splits <- downloadHandler(
+    filename = 'ASAteamtable_splits.csv',
+    
+    content = function(file){
+      write.csv(dt_teamshotssplits_plot(), file, row.names = F)
+    }
+  )
+  
   # Team passing tables ####
   dt_team_passing <- reactive({
     dt <- teampassing.func(offense = teampassing.offense,
