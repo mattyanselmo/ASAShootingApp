@@ -197,7 +197,7 @@ shinyUI(
                                                                          selected = max(teamxgoals$Season),
                                                                          inline = T)),
                                      conditionalPanel(condition = "input.team_seasonordate == 'Season' && input.team_subtab == 'teamxgoalsplitsplots'",
-                                                      checkboxGroupInput('team_seasonfilter',
+                                                      checkboxGroupInput('team_seasonfilter2',
                                                                          'Select seasons:',
                                                                          choices = min(teamxgoals$Season):(max(teamxgoals$Season) - 1),
                                                                          selected = min(teamxgoals$Season):(max(teamxgoals$Season) - 1),
@@ -276,6 +276,7 @@ shinyUI(
                                                                                selected = 'GF')))),
                                                           htmlOutput("teamshootingplot_text"),
                                                           plotlyOutput("teamplot")),
+                                                 
                                                  tabPanel('Scatter plots (split seasons)',
                                                           value = "teamxgoalsplitsplots",
                                                           p(HTML("<i>Please allow a few seconds for the plot to load.</i>")),
