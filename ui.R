@@ -190,11 +190,17 @@ shinyUI(
                                                   'Filter by:',
                                                   choices = c('Season', 'Date'),
                                                   inline = T),
-                                     conditionalPanel(condition = "input.team_seasonordate == 'Season'",
+                                     conditionalPanel(condition = "input.team_seasonordate == 'Season' && input.team_subtab != 'teamxgoalsplitsplots'",
                                                       checkboxGroupInput('team_seasonfilter',
                                                                          'Select seasons:',
                                                                          choices = min(teamxgoals$Season):max(teamxgoals$Season),
                                                                          selected = max(teamxgoals$Season),
+                                                                         inline = T)),
+                                     conditionalPanel(condition = "input.team_seasonordate == 'Season' && input.team_subtab == 'teamxgoalsplitsplots'",
+                                                      checkboxGroupInput('team_seasonfilter2',
+                                                                         'Select seasons:',
+                                                                         choices = min(teamxgoals$Season):(max(teamxgoals$Season) - 1),
+                                                                         selected = min(teamxgoals$Season):(max(teamxgoals$Season) - 1),
                                                                          inline = T)),
                                      conditionalPanel(condition = "input.team_seasonordate == 'Date'",
                                                       dateInput('team_date1',
@@ -256,7 +262,8 @@ shinyUI(
                                                  ),
                                                  tabPanel('Scatter plots',
                                                           value = "teamxgoalplots",
-                                                          p(HTML("<i>Please allow a few seconds for the plot to load.</i>")),
+                                                          p(HTML("These plots show the linear correlation between pairs of metrics calculated concurrently.
+                                                                 <br> <i>Please allow a few seconds for the plot to load.</i>")),
                                                           fluidPage(fluidRow(
                                                             column(3,
                                                                    selectInput('teamplot_xvar',
@@ -269,7 +276,32 @@ shinyUI(
                                                                                choices = "GF",
                                                                                selected = 'GF')))),
                                                           htmlOutput("teamshootingplot_text"),
-                                                          plotlyOutput("teamplot"))
+                                                          plotlyOutput("teamplot")),
+                                                 
+                                                 tabPanel('Scatter plots (split seasons)',
+                                                          value = "teamxgoalsplitsplots",
+                                                          downloadButton('team_download_splits', 'Download CSV'),
+                                                          br(),
+                                                          p(HTML("These plots show the linear correlation between pairs of metrics, one calculated before a season split and one after.
+                                                                 <br> <i>Please allow a few seconds for the plot to load.</i>")),
+                                                          fluidPage(fluidRow(
+                                                            column(3,
+                                                                   sliderInput("teamsplitsplot_split",
+                                                                               label = "Split after game #",
+                                                                               value = 17,
+                                                                               min = 1, max = 33, step = 1)),
+                                                            column(3,
+                                                                   selectInput('teamsplitsplot_xvar',
+                                                                               label = 'X-axis variable',
+                                                                               choices = "xGD (before split)",
+                                                                               selected = 'xGD (before split)')),
+                                                            column(3,
+                                                                   selectInput('teamsplitsplot_yvar',
+                                                                               label = 'Y-axis variable',
+                                                                               choices = "GD (after split)",
+                                                                               selected = "GD (after split")))),
+                                                          htmlOutput("teamshootingsplitsplot_text"),
+                                                          plotlyOutput("teamsplitsplot"))
                                                  )
                                      )
                                    )
