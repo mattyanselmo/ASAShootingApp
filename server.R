@@ -1221,13 +1221,13 @@ shinyServer(function(input, output, session) {
   # Team split plots ####
   dt_teamshotssplits_plot <- reactive({
     dt <- teamshootingsplits.func(teamxgoals = teamxgoals,
-                            game_split = input$teamsplitsplot_split,
-                            season = input$team_seasonfilter2,
-                            even = input$team_evenstate,
-                            pattern = input$team_pattern)
+                                  game_split = input$teamsplitsplot_split,
+                                  season = input$team_seasonfilter2,
+                                  even = input$team_evenstate,
+                                  pattern = input$team_pattern)
     
     dt
-  
+    
   })
   
   teamshootingsplits_plotvalues <- reactiveValues(teamsplitsplot_xvar = "xGD (before split)", teamsplitsplot_yvar = "GD (after split)")
