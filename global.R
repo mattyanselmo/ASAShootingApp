@@ -82,8 +82,8 @@ lm_eqn2 <- function(df, x, y){
   m <- lm(formula(paste0(y, " ~ ", x)), df);
   a <- format(coef(m)[1], digits = 3) 
   b <- format(coef(m)[2], digits = 3) 
-  r2 <- format(summary(m)$r.squared, digits = 3)
-  paste0("y = ", b, "x + ", a, " ; R-squared = ", r2)                 
+  r <- format(summary(m)$r.squared^0.5, digits = 3)
+  paste0("y = ", b, "x + ", a, " ; r = ", r)                 
 }
 
 Mode <- function(x) {
