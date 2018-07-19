@@ -262,7 +262,8 @@ shinyUI(
                                                  ),
                                                  tabPanel('Scatter plots',
                                                           value = "teamxgoalplots",
-                                                          p(HTML("<i>Please allow a few seconds for the plot to load.</i>")),
+                                                          p(HTML("These plots show the linear correlation between pairs of metrics calculated concurrently.
+                                                                 <br> <i>Please allow a few seconds for the plot to load.</i>")),
                                                           fluidPage(fluidRow(
                                                             column(3,
                                                                    selectInput('teamplot_xvar',
@@ -279,7 +280,10 @@ shinyUI(
                                                  
                                                  tabPanel('Scatter plots (split seasons)',
                                                           value = "teamxgoalsplitsplots",
-                                                          p(HTML("<i>Please allow a few seconds for the plot to load.</i>")),
+                                                          downloadButton('team_download_splits', 'Download CSV'),
+                                                          br(),
+                                                          p(HTML("These plots show the linear correlation between pairs of metrics, one calculated before a season split and one after.
+                                                                 <br> <i>Please allow a few seconds for the plot to load.</i>")),
                                                           fluidPage(fluidRow(
                                                             column(3,
                                                                    sliderInput("teamsplitsplot_split",
