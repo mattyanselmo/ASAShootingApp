@@ -12,31 +12,31 @@
 
 teampassing.func <- function(offense,
                              defense,
-                             season,
+                             date1 = as.Date('2000-01-01'), 
+                             date2 = as.Date('9999-12-31'),
+                             season = 2011:2018,
                              byseasons,
                              third.filter,
-                             pergame = F,
-                             games_df = gamesplayed){
+                             pergame = F){
   
-  if(!byseasons){
-    games_df <- games_df %>%
-      filter(year %in% season) %>%
-      group_by(team) %>%
-      summarize(Games = sum(Games)) %>%
-      ungroup()
-  }
+  # if(!byseasons){
+  #   games_df <- games_df %>%
+  #     filter(year %in% season) %>%
+  #     group_by(team) %>%
+  #     summarize(Games = sum(Games)) %>%
+  #     ungroup()
+  # }
   
   temp <- offense %>%
-    left_join(defense, 
-              by = c("year", "team" = "team.1", "third"), 
+    left_join(defense %>% select(-year), 
+              by = c("date", "team" = "team.1", "third"), 
               suffix = c("f", "a")) %>%
-    left_join(games_df,
-              by = c("year", "team")[c(byseasons, T)]) %>%
     ungroup() %>%
-    filter(year %in% season,
+    filter(date >= date1 & date <= date2,
+           year %in% season,
            third %in% third.filter) %>%
     group_by_(.dots = c("team", "year")[c(T, byseasons)]) %>%
-    summarize(Games = Games[1],
+    summarize(Games = length(unique(date)),
               PassF = sum(Nf),
               PctF = sum(successesf)/PassF,
               xPctF = sum(expf)/PassF,
@@ -84,8 +84,9 @@ teampassing.func <- function(offense,
 # library(dplyr)
 # teampassing.func(offense = readRDS("IgnoreList/xPassingByTeamOffense.rds"),
 #                  defense = readRDS("IgnoreList/xPassingByTeamDefense.rds"),
+#                  date1 = as.Date('2000-01-01'),
+#                  date2 = as.Date('9999-12-31'),
 #                  season = 2017:2018,
 #                  byseasons = T,
 #                  third.filter = "Att",
-#                  pergame = T,
-#                  games_df = gamesplayed)
+#                  pergame = T)
