@@ -1333,12 +1333,23 @@ shinyServer(function(input, output, session) {
   
   # Team passing tables ####
   dt_team_passing <- reactive({
+    if(input$teampassing_seasonordate == "Season"){
     dt <- teampassing.func(offense = teampassing.offense,
                            defense = teampassing.defense,
+                           date1 = as.Date('2000-01-01'), 
+                           date2 = as.Date('9999-12-31'),
                            season = input$teampassing_seasonfilter,
                            byseasons = input$teampassing_byseasons,
-                           third.filter = input$teampassing_thirdfilter,
-                           games_df = gamesplayed) 
+                           third.filter = input$teampassing_thirdfilter) 
+    } else{
+      dt <- teampassing.func(offense = teampassing.offense,
+                             defense = teampassing.defense,
+                             date1 = input$teampassing_date1, 
+                             date2 = input$teampassing_date2,
+                             season = as.numeric(format(input$teampassing_date1, "%Y")):as.numeric(format(input$teampassing_date2, "%Y")),
+                             byseasons = input$teampassing_byseasons,
+                             third.filter = input$teampassing_thirdfilter) 
+    }
     
     is.num <- sapply(dt, is.numeric)
     dt[is.num] <- lapply(dt[is.num], round, 3)
@@ -1347,13 +1358,25 @@ shinyServer(function(input, output, session) {
   })
   
   dt_team_passing_pergame <- reactive({
-    dt <- teampassing.func(offense = teampassing.offense,
-                           defense = teampassing.defense,
-                           season = input$teampassing_seasonfilter,
-                           byseasons = input$teampassing_byseasons,
-                           third.filter = input$teampassing_thirdfilter,
-                           pergame = T,
-                           games_df = gamesplayed) 
+    if(input$teampassing_seasonordate == "Season"){
+      dt <- teampassing.func(offense = teampassing.offense,
+                             defense = teampassing.defense,
+                             date1 = as.Date('2000-01-01'), 
+                             date2 = as.Date('9999-12-31'),
+                             season = input$teampassing_seasonfilter,
+                             byseasons = input$teampassing_byseasons,
+                             third.filter = input$teampassing_thirdfilter,
+                             pergame = T) 
+    } else{
+      dt <- teampassing.func(offense = teampassing.offense,
+                             defense = teampassing.defense,
+                             date1 = input$teampassing_date1, 
+                             date2 = input$teampassing_date2,
+                             season = as.numeric(format(input$teampassing_date1, "%Y")):as.numeric(format(input$teampassing_date2, "%Y")),
+                             byseasons = input$teampassing_byseasons,
+                             third.filter = input$teampassing_thirdfilter,
+                             pergame = T) 
+    } 
     
     is.num <- sapply(dt, is.numeric)
     dt[is.num] <- lapply(dt[is.num], round, 3)
