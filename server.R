@@ -331,7 +331,10 @@ shinyServer(function(input, output, session) {
   # Initial values
   passer_inputs <- reactiveValues(passing_position = c("G", "D", "B", "M", "A", "F", "S", "Heaven"),
                                   passing_third = "All",
-                                  passing_seasonfilter = max(playerxgoals$Season),
+                                  passing_seasonordate = "Season",
+                                  passing_date1 = as.Date("2000-01-01"),
+                                  passing_date2 = as.Date("9999-12-31"),
+                                  passing_seasonfilter = max(playerpassing$Season),
                                   passing_minpasses = 0,
                                   passing_minfilter = 0,
                                   passing_byteams = F,
@@ -352,7 +355,10 @@ shinyServer(function(input, output, session) {
                {
                  passer_inputs$passing_position <- input$passing_position
                  passer_inputs$passing_third <- input$passing_third
+                 passer_inputs$passing_seasonordate <- input$passing_seasonordate
                  passer_inputs$passing_seasonfilter <- input$passing_seasonfilter
+                 passer_inputs$passing_date1 <- input$passing_date1
+                 passer_inputs$passing_date2 <- input$passing_date2
                  passer_inputs$passing_minpasses <- input$passing_minpasses
                  passer_inputs$passing_minfilter <- input$passing_minfilter
                  passer_inputs$passing_byteams <- input$passing_byteams
@@ -374,30 +380,60 @@ shinyServer(function(input, output, session) {
   
   # Passer tables ####
   dt_passer <- reactive({
+    if(passer_inputs$passing_seasonordate == "Season"){
     dt <- passer.xpasses(playerpassing,
                          minpasses = passer_inputs$passing_minpasses,
                          minfilter = passer_inputs$passing_minfilter,
                          seasonfilter = passer_inputs$passing_seasonfilter,
+                         date1 = as.Date('2000-01-01'),
+                         date2 = as.Date('9999-12-31'), 
                          byteams = passer_inputs$passing_byteams,
                          byseasons = passer_inputs$passing_byseasons,
                          third.filter = passer_inputs$passing_third,
                          pos.filter = passer_inputs$passing_position)
+    } else{
+      dt <- passer.xpasses(playerpassing,
+                           minpasses = passer_inputs$passing_minpasses,
+                           minfilter = passer_inputs$passing_minfilter,
+                           seasonfilter = min(playerpassing$Season):max(playerpassing$Season),
+                           date1 = passer_inputs$passing_date1,
+                           date2 = passer_inputs$passing_date2, 
+                           byteams = passer_inputs$passing_byteams,
+                           byseasons = passer_inputs$passing_byseasons,
+                           third.filter = passer_inputs$passing_third,
+                           pos.filter = passer_inputs$passing_position)
+    }
     
     dt
     # Append passer names and extreme obs for plotting?
   })
   
   dt_passer_per96 <- reactive({
-    dt <- passer.xpasses.p96(playerpassing,
-                             minpasses = passer_inputs$passing_minpasses,
-                             minfilter = passer_inputs$passing_minfilter,
-                             seasonfilter = passer_inputs$passing_seasonfilter,
-                             byteams = passer_inputs$passing_byteams,
-                             byseasons = passer_inputs$passing_byseasons,
-                             third.filter = passer_inputs$passing_third,
-                             pos.filter = passer_inputs$passing_position)
-    
-    dt  
+    if(passer_inputs$passing_seasonordate == "Season"){
+      dt <- passer.xpasses.p96(playerpassing,
+                               minpasses = passer_inputs$passing_minpasses,
+                               minfilter = passer_inputs$passing_minfilter,
+                               seasonfilter = passer_inputs$passing_seasonfilter,
+                               date1 = as.Date('2000-01-01'),
+                               date2 = as.Date('9999-12-31'), 
+                               byteams = passer_inputs$passing_byteams,
+                               byseasons = passer_inputs$passing_byseasons,
+                               third.filter = passer_inputs$passing_third,
+                               pos.filter = passer_inputs$passing_position)
+      
+    } else{
+      dt <- passer.xpasses.p96(playerpassing,
+                               minpasses = passer_inputs$passing_minpasses,
+                               minfilter = passer_inputs$passing_minfilter,
+                               seasonfilter = min(playerpassing$Season):max(playerpassing$Season),
+                               date1 = passer_inputs$passing_date1,
+                               date2 = passer_inputs$passing_date2,                               
+                               byteams = passer_inputs$passing_byteams,
+                               byseasons = passer_inputs$passing_byseasons,
+                               third.filter = passer_inputs$passing_third,
+                               pos.filter = passer_inputs$passing_position)
+    }
+    dt
   })
   
   output$passingtable_player <- DT::renderDataTable({
