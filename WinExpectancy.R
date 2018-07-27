@@ -49,10 +49,19 @@ write.csv(tab %>% select(-hscore, -ascore) %>% mutate(xPts = 3*Win + Tie),
 
 library(ggplot2)
 library(reshape2)
+
 tab %>% 
   filter(Minute == 90, PlayerAdvantage == "Neutral") %>%
   melt(measure.vars = c("Win", "Tie", "Lose")) %>%
   ggplot(aes(x = HomeLead)) + 
+  geom_line(aes(y = value, color = variable), size = 1.5) +
+  xlab("Home lead") + ylab("Outcome probability") + ggtitle("Home outcome probability (at minute 45)") +
+  scale_color_discrete("Outcome")
+
+tab %>% 
+  filter(HomeLead == 0, PlayerAdvantage == "Neutral") %>%
+  melt(measure.vars = c("Win", "Tie", "Lose")) %>%
+  ggplot(aes(x = Minute)) + 
   geom_line(aes(y = value, color = variable), size = 1.5) +
   xlab("Home lead") + ylab("Outcome probability") + ggtitle("Home outcome probability (at minute 45)") +
   scale_color_discrete("Outcome")
