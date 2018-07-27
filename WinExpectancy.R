@@ -9,7 +9,7 @@ winexp <- passing %>%
          minute = minute.temp + second.temp/60) %>%
   group_by(gameID, half) %>%
   arrange(minute) %>% 
-  filter(row_number() %in% sapply(seq(0, 45, 2.5) + 45*(half[1] - 1), function(x) which.min(abs(minute - x)))) %>%
+  filter(row_number() %in% sapply(seq(0, 50, 2.5) + 45*(half[1] - 1), function(x) which.min(abs(minute - x)))) %>%
   ungroup() %>%
   select(gameID, half, minute, hscore, ascore, hfinal, afinal, playerdiff) %>%
   mutate(Hpts = 3*(hfinal > afinal) + (hfinal == afinal),
@@ -32,9 +32,7 @@ logitT <- glm(Hpts == 1 ~ I(hscore - ascore)*ns(minute, 5) + playerdiff,
               data = winexp %>% filter(Hpts < 3), 
               family = binomial)
 
-
-
-tab <- expand.grid(Minute = seq(0, 90, 10), HomeLead = -3:3, PlayerAdvantage = c("Home", "Neutral", "Away")) %>%
+tab <- expand.grid(Minute = seq(0, 95, 5), HomeLead = -3:3, PlayerAdvantage = c("Home", "Neutral", "Away")) %>%
   mutate(hscore = 3,
          ascore = hscore - HomeLead,
          playerdiff = ifelse(PlayerAdvantage == "Home", 1,
@@ -50,8 +48,11 @@ write.csv(tab %>% select(-hscore, -ascore) %>% mutate(xPts = 3*Win + Tie),
           row.names = F)
 
 library(ggplot2)
+library(reshape2)
 tab %>% 
-  filter(N > 10, playerdiff == 0) %>%
-  ggplot(aes(x = hscore - ascore, y = ActWin - Win)) +
-  geom_point(aes(color = Minute > 45)) +
-  geom_line(aes(y = 0))
+  filter(Minute == 90, PlayerAdvantage == "Neutral") %>%
+  melt(measure.vars = c("Win", "Tie", "Lose")) %>%
+  ggplot(aes(x = HomeLead)) + 
+  geom_line(aes(y = value, color = variable), size = 1.5) +
+  xlab("Home lead") + ylab("Outcome probability") + ggtitle("Home outcome probability (at minute 45)") +
+  scale_color_discrete("Outcome")
