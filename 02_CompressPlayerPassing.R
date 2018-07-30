@@ -45,18 +45,14 @@ touches <- minutesPlayed_gameID %>%
   mutate(touches = ifelse(is.na(touches), 0, touches)) %>%
   group_by(gameID, team) %>%
   mutate(TeamTouches = sum(touches)) %>%
-  ungroup() %>%
-  group_by(player, Season, team) %>%
-  summarize(touchpct = sum(touches)/sum((minutes*TeamTouches)/96),
-            minutes = sum(minutes),
-            touches = sum(touches)) %>%
-  filter(team != "Missing")
+  group_by(player, gameID) %>%
+  mutate(touchpct = sum(touches)/sum((minutes*TeamTouches)/96))
 
 ## balance predictions to actual by zone
 pass.summ <- merged.passes %>%
   mutate(third = ifelse(x < 115/3, "Def",
                         ifelse(x < 115*2/3, "Mid", "Att"))) %>%
-  group_by(passer, year, team, third) %>%
+  group_by(passer, date, team, third) %>%
   summarize(N = n(),
             successes = sum(success),
             exp = sum(success.pred),
@@ -66,7 +62,8 @@ pass.summ <- merged.passes %>%
   ungroup()
 
 player.stats <- pass.summ %>% 
-  left_join(touches, by = c("passer" = "player", "year" = "Season", "team")) %>%
+  left_join(touches %>% select(-team), by = c("passer" = "player", "date")) %>%
+  mutate(Season = as.numeric(format(date, "%Y"))) %>%
   filter(!is.na(touches))
 
 saveRDS(player.stats, "IgnoreList/xPassingByPlayer.rds")
