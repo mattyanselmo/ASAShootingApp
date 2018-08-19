@@ -224,7 +224,7 @@ dt_xG_team <- lapply(2011:max(teamxgoals$Season),
 
 # Player xPassing ####
 
-lapply(2015:max(playerpassing$year),
+lapply(2015:max(playerpassing$Season),
        FUN = function(x){
          options(scipen = 100)
          all <- passer.xpasses(playerpassing,
