@@ -5,7 +5,7 @@ xGByGame <- xG.by.game(shooting) %>%
   mutate(Season = format(date, '%Y'),
          Date = date) %>%
   ungroup() %>%
-  select(Date, Season, Home = hteam, HG:HxGp, Away = ateam, AG:xGDp)
+  select(Date, Season, Home = hteam, HG:HxGp, Away = ateam, AG:xGDp, Final)
 
 shooting <- shooting %>%
   mutate(playerdiff = ifelse(team == hteam, hplayers - aplayers, aplayers - hplayers),
