@@ -7,7 +7,8 @@ xG.by.game <- function(shooting){
               AG = sum((result == "Goal")[ateam == team]),
               AxGt = sum(xGTeam[ateam == team]),
               AxGp = sum(xGShooter[ateam == team]),
-              GD = final[1],
+              GD = HG - AG,
               xGDt = HxGt - AxGt,
-              xGDp = HxGp - AxGp)
+              xGDp = HxGp - AxGp,
+              Final = final[1])
 }
