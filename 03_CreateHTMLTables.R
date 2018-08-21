@@ -390,7 +390,7 @@ lapply(2011:max(xgbygame$Season),
            select(-FullName_home, -FullName_away)
          write.csv(dt, paste0(path, "/Dropbox/ASA Blog Data/HTMLOutputs/xGoalsByGame_", x, ".csv"))
          output <- xtable(dt, 
-                          digits = c(0, 0, 0, 0, 2, 2, 0, 0, 2, 2, 0, 2, 2),
+                          digits = c(0, 0, 0, 0, 2, 2, 0, 0, 2, 2, 0, 2, 2, 0),
                           align = rep("c", ncol(dt) + 1))
          write.table(gsub("\n", "",
                           gsub(" <", "<", 
