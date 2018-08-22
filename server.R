@@ -320,9 +320,9 @@ shinyServer(function(input, output, session) {
     filename = paste0("ASAshootertable.csv"),
     
     content = function(file){
-        namesFL <- as.data.frame(do.call("rbind", strsplit(sub(" ", ";", dt_playershootingplot()$Player), ";")))
-        names(namesFL) <- c("First", "Last")
-        write.csv(data.frame(namesFL, dt_playershootingplot(), check.names = FALSE), file, row.names = FALSE)
+      namesFL <- as.data.frame(do.call("rbind", strsplit(sub(" ", ";", dt_playershootingplot()$Player), ";")))
+      names(namesFL) <- c("First", "Last")
+      write.csv(data.frame(namesFL, dt_playershootingplot(), check.names = FALSE), file, row.names = FALSE)
     }
   )
   
@@ -381,16 +381,16 @@ shinyServer(function(input, output, session) {
   # Passer tables ####
   dt_passer <- reactive({
     if(passer_inputs$passing_seasonordate == "Season"){
-    dt <- passer.xpasses(playerpassing,
-                         minpasses = passer_inputs$passing_minpasses,
-                         minfilter = passer_inputs$passing_minfilter,
-                         seasonfilter = passer_inputs$passing_seasonfilter,
-                         date1 = as.Date('2000-01-01'),
-                         date2 = as.Date('9999-12-31'), 
-                         byteams = passer_inputs$passing_byteams,
-                         byseasons = passer_inputs$passing_byseasons,
-                         third.filter = passer_inputs$passing_third,
-                         pos.filter = passer_inputs$passing_position)
+      dt <- passer.xpasses(playerpassing,
+                           minpasses = passer_inputs$passing_minpasses,
+                           minfilter = passer_inputs$passing_minfilter,
+                           seasonfilter = passer_inputs$passing_seasonfilter,
+                           date1 = as.Date('2000-01-01'),
+                           date2 = as.Date('9999-12-31'), 
+                           byteams = passer_inputs$passing_byteams,
+                           byseasons = passer_inputs$passing_byseasons,
+                           third.filter = passer_inputs$passing_third,
+                           pos.filter = passer_inputs$passing_position)
     } else{
       dt <- passer.xpasses(playerpassing,
                            minpasses = passer_inputs$passing_minpasses,
@@ -588,11 +588,73 @@ shinyServer(function(input, output, session) {
   output$passing_download <- downloadHandler(
     filename = paste0("ASApassingtable.csv"),
     content = function(file){
-        namesFL <- as.data.frame(do.call("rbind", strsplit(sub(" ", ";", dt_passer_plot()$Player), ";")))
-        names(namesFL) <- c("First", "Last")
-        write.csv(data.frame(namesFL, dt_passer_plot(), check.names = FALSE), file, row.names = FALSE)
+      namesFL <- as.data.frame(do.call("rbind", strsplit(sub(" ", ";", dt_passer_plot()$Player), ";")))
+      names(namesFL) <- c("First", "Last")
+      write.csv(data.frame(namesFL, dt_passer_plot(), check.names = FALSE), file, row.names = FALSE)
     }
   )
+  
+  # Player xGChain reactive values ####
+  # Initial values
+  playerxgchain_inputs <- reactiveValues(playerxgchain_position = c("G", "D", "B", "M", "A", "F", "S"),
+                                         playerxgchain_seasonordate = "Season",
+                                         playerxgchain_date1 = as.Date("2000-01-01"),
+                                         playerxgchain_date2 = as.Date("9999-12-31"),
+                                         playerxgchain_seasonfilter = max(playerpassing$Season),
+                                         playerxgchain_minfilter = 0,
+                                         playerxgchain_byteams = F,
+                                         playerxgchain_byseasons = T,
+                                         playerxgchain_plot_xvar = 'SOMETHINGNEW',
+                                         playerxgchain_plot_yvar = 'SOMETHINGNEW')
+  
+  # Updated values
+  observeEvent(input$playerxgchain_action,
+               {
+                 playerxgchain_inputs$playerxgchain_position <- input$playerxgchain_position
+                 playerxgchain_inputs$playerxgchain_seasonordate <- input$playerxgchain_seasonordate
+                 playerxgchain_inputs$playerxgchain_seasonfilter <- input$playerxgchain_seasonfilter
+                 playerxgchain_inputs$playerxgchain_date1 <- input$playerxgchain_date1
+                 playerxgchain_inputs$playerxgchain_date2 <- input$playerxgchain_date2
+                 playerxgchain_inputs$playerxgchain_minfilter <- input$playerxgchain_minfilter
+                 playerxgchain_inputs$playerxgchain_byteams <- input$playerxgchain_byteams
+                 playerxgchain_inputs$playerxgchain_byseasons <- input$playerxgchain_byseasons
+                 #playerxgchain_inputs$playerxgchain_inputs$playerxgchain_xvar <- input$playerxgchain_plot_xvar
+                 #playerxgchain_inputs$playerxgchain_inputs$playerxgchain_yvar <- input$playerxgchain_plot_yvar
+               })
+  
+  # Player xGChain tables ####
+  dt_playerxgchain_per96 <- reactive({
+    if(playerxgchain_inputs$playerxgchain_seasonordate == "Season"){
+      dt <- xgchain.function(playerchaindata,
+                             min.filter = playerxgchain_inputs$playerxgchain_minfilter,
+                             season.filter = playerxgchain_inputs$playerxgchain_seasonfilter,
+                             date1 = as.Date('2000-01-01'),
+                             date2 = as.Date('9999-12-31'), 
+                             byteams = playerxgchain_inputs$playerxgchain_byteams,
+                             byseasons = playerxgchain_inputs$playerxgchain_byseasons)
+    } else{
+      dt <- xgchain.function(playerchaindata,
+                             min.filter = playerxgchain_inputs$playerxgchain_minfilter,
+                             season.filter = min(playerchaindata$Season):max(playerchaindata$Season),
+                             date1 = playerxgchain_inputs$playerxgchain_date1,
+                             date2 = playerxgchain_inputs$playerxgchain_date2, 
+                             byteams = playerxgchain_inputs$playerxgchain_byteams,
+                             byseasons = playerxgchain_inputs$playerxgchain_byseasons)
+    }
+    
+    dt %>%
+      filter(Pos %in% playerxgchain_inputs$playerxgchain_position)
+  })
+  
+  output$playerxgchain_per96 <- DT::renderDataTable({
+    DT::datatable(dt_playerxgchain_per96()) %>%
+      formatRound(columns = c("NumChains/96"), 
+                  digits = 1) %>%
+      formatRound(columns = c("xGB/96", "xGChain/96"), 
+                  digits = 2) %>%
+      formatPercentage(columns = c("TeamChain%", "ChainShot%", "xGB%"), 
+                       digits = 1)
+  })
   
   # Keeper reactive values ####
   # Initial values
@@ -837,7 +899,7 @@ shinyServer(function(input, output, session) {
                extreme1 <= sort(extreme1, decreasing = F)[1] |
                extreme2 >= sort(extreme2, decreasing = T)[1] |
                extreme2 <= sort(extreme2, decreasing = F)[1])
-
+    
     a <- list(
       x = m[[keeper_inputs$keeperplot_xvar]],
       y = m[[keeper_inputs$keeperplot_yvar]],
@@ -873,9 +935,9 @@ shinyServer(function(input, output, session) {
     filename = "ASAkeepertable.csv",
     
     content = function(file){
-        namesFL <- as.data.frame(do.call("rbind", strsplit(sub(" ", ";", dt_keeperplot()$Keeper), ";")))
-        names(namesFL) <- c("First", "Last")
-        write.csv(data.frame(namesFL, dt_keeperplot(), check.names = FALSE), file, row.names = FALSE)
+      namesFL <- as.data.frame(do.call("rbind", strsplit(sub(" ", ";", dt_keeperplot()$Keeper), ";")))
+      names(namesFL) <- c("First", "Last")
+      write.csv(data.frame(namesFL, dt_keeperplot(), check.names = FALSE), file, row.names = FALSE)
     })
   
   # Team shots tables ####
@@ -1370,13 +1432,13 @@ shinyServer(function(input, output, session) {
   # Team passing tables ####
   dt_team_passing <- reactive({
     if(input$teampassing_seasonordate == "Season"){
-    dt <- teampassing.func(offense = teampassing.offense,
-                           defense = teampassing.defense,
-                           date1 = as.Date('2000-01-01'), 
-                           date2 = as.Date('9999-12-31'),
-                           season = input$teampassing_seasonfilter,
-                           byseasons = input$teampassing_byseasons,
-                           third.filter = input$teampassing_thirdfilter) 
+      dt <- teampassing.func(offense = teampassing.offense,
+                             defense = teampassing.defense,
+                             date1 = as.Date('2000-01-01'), 
+                             date2 = as.Date('9999-12-31'),
+                             season = input$teampassing_seasonfilter,
+                             byseasons = input$teampassing_byseasons,
+                             third.filter = input$teampassing_thirdfilter) 
     } else{
       dt <- teampassing.func(offense = teampassing.offense,
                              defense = teampassing.defense,
