@@ -40,14 +40,14 @@ xgchain.function <- function(
               `NumChains/96` = sum(num.chains)*96/Minutes,
               `TeamChain%` = sum(num.chains)*Games*96/(sum(num.team.chains)*Minutes),
               `ChainShot%` = sum(shots.chain)/sum(num.chains),
-              `xGB/96` = sum(xG.buildup.noshots)*96/Minutes,
+              `xB/96` = sum(xG.buildup.noshots)*96/Minutes,
               `xGChain/96` = sum(xG.buildup.shots)*96/Minutes,
-              `xGB%` = `xGB/96`/`xGChain/96`) %>%
+              `xB%` = `xB/96`/`xGChain/96`) %>%
     select(-one_of("team"))
   
   return(aggdata %>% 
            filter(Minutes >= min.filter) %>%
-           arrange(desc(`xGB/96`)))
+           arrange(desc(`xB/96`)))
 }
 
 # # Function example
