@@ -116,33 +116,53 @@ combined <- bind_rows(shots %>% mutate(action = "shot",
 combined <- combined %>%
   group_by(gameID) %>%
   arrange(half, time) %>%
-  mutate(RecentPossTeam = c("First", unlist(sapply(1:n(), function(x) team[pmax(0, max(which(action %in% c("pass", "dribble", "shot") & row_number() < x)))]))),
-         ChainChange = ifelse(action %in% c("pass", "dribble", "shot") & team != RecentPossTeam, 1, 0),
+  mutate(RecentPossTeam = c("First", unlist(sapply(1:n(), function(x) team[pmax(0, max(which(action %in% c("pass", "dribble", "shot", "foulsuffered") & row_number() < x)))]))),
+         ChainChange = ifelse(action %in% c("pass", "dribble", "shot", "foulsuffered") & team != RecentPossTeam, 1, 0),
          ChainChange = ifelse(row_number() == 1 | lag(half) != half, 1, ChainChange),
          ChainID = cumsum(ChainChange)) %>%
   group_by(gameID, ChainID) %>%
-  mutate(xG = 1 - prod(1 - na.omit(c(xGShooter[patternOfPlay.model != "Penalty"], 
+  mutate(pattern = ifelse(sum(patternOfPlay.model == "Penalty", na.rm = T) > 0, "Penalty",
+                          ifelse(sum(patternOfPlay.model %in% c("Corner", "Set piece", "Free kick"), na.rm = T) > 0, "Set Piece",
+                                 ifelse(mean(is.na(patternOfPlay.model)) == 1, "None", "Regular"))),
+         xG = 1 - prod(1 - na.omit(c(xGShooter[patternOfPlay.model != "Penalty"], 
                     0.2*(patternOfPlay.model == "Penalty")))),
+         xGs = sum(xGShooter, na.rm = T),
          G = sum(result == "Goal", na.rm = T),
-         Vertical = 120*(max(x[action %in% c("pass", "dribble", "shot")]) - x[action %in% c("pass", "dribble", "shot")][1])/100,
-         TotalTime = max(time[action %in% c("pass", "dribble", "shot")]) - min(time[action %in% c("pass", "dribble", "shot")])) %>% 
+         Vertical = 120*(max(x[action %in% c("pass", "dribble", "shot", "foulsuffered")]) - x[action %in% c("pass", "dribble", "shot", "foulsuffered")][1])/100,
+         Horizontal = 80*(max(y[action %in% c("pass", "dribble", "shot", "foulsuffered")]) - y[action %in% c("pass", "dribble", "shot", "foulsuffered")][1])/100,
+         TotalTime = max(time[action %in% c("pass", "dribble", "shot", "foulsuffered")]) - min(time[action %in% c("pass", "dribble", "shot", "foulsuffered")])) %>% 
   ungroup()
 
 saveRDS(combined %>% 
           arrange(gameID, half, time) %>%
           select(action, date, time, half, gameID, team, 
-                 goalie, team.1, passer, player, result, 
-                 x, y, angle, xPass = success.pred, hscore, ascore, hfinal, 
+                 goalie, team.1, passer, player, recipient, result, 
+                 x, y, endX, endY, angle, xPass = success.pred, hscore, ascore, hfinal, 
                  afinal, outcome, keyPass, assist, ChainChange, 
-                 ChainID, xG, G, xGShooter, Vertical, 
+                 ChainID, xG, xGs, G, xGShooter, Vertical, Horizontal, pattern,
                  TotalTime), "IgnoreList/xGChain_combineddata.rds")
 set.seed(1)
 write.csv(combined %>% 
             filter(gameID %in% sample(unique(gameID), 4, replace = F)) %>%
             arrange(gameID, half, time) %>%
             select(action, date, time, half, gameID, team, 
-                   goalie, team.1, passer, player, result, 
-                   x, y, angle, xPass = success.pred, hscore, ascore, hfinal, 
+                   goalie, team.1, passer, player, recipient, result, 
+                   x, y, endX, endY, angle, xPass = success.pred, hscore, ascore, hfinal, 
                    afinal, outcome, keyPass, assist, ChainChange, 
-                   ChainID, xG, G, xGShooter, Vertical, 
-                   TotalTime), "IgnoreList/xGChain_combineddata.csv", row.names = F)
+                   ChainID, xG, xGs, G, xGShooter, Vertical, Horizontal, pattern,
+                   TotalTime), "IgnoreList/xGChain_combineddata_sample.csv", row.names = F)
+
+for(year in 2015:2018){
+  write.csv(combined %>% 
+              mutate(Season = as.numeric(format(date, "%Y"))) %>%
+              filter(Season == year) %>%
+              arrange(gameID, half, time) %>%
+              select(action, date, time, half, gameID, team, 
+                     goalie, team.1, passer, player, recipient, result, 
+                     x, y, endX, endY, angle, xPass = success.pred, hscore, ascore, hfinal, 
+                     afinal, outcome, keyPass, assist, ChainChange, 
+                     ChainID, xG, xGs, G, xGShooter, Vertical, Horizontal, pattern,
+                     TotalTime), 
+            file = paste0("IgnoreList/xGChain_combineddata", year, ".csv"), 
+            row.names = F)
+}
