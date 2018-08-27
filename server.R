@@ -647,12 +647,16 @@ shinyServer(function(input, output, session) {
   })
   
   output$playerxgchain_per96 <- DT::renderDataTable({
-    DT::datatable(dt_playerxgchain_per96()) %>%
+    DT::datatable(dt_playerxgchain_per96(),
+                  rownames = F,
+                  options(list(autoWidth = T,
+                               pageLength = 25,
+                               lengthMenu = seq(25, 100, 25)))) %>%
       formatRound(columns = c("NumChains/96"), 
                   digits = 1) %>%
-      formatRound(columns = c("xGB/96", "xGChain/96"), 
+      formatRound(columns = c("xB/96", "xGChain/96"), 
                   digits = 2) %>%
-      formatPercentage(columns = c("TeamChain%", "ChainShot%", "xGB%"), 
+      formatPercentage(columns = c("TeamChain%", "ChainShot%", "xB%"), 
                        digits = 1)
   })
   
@@ -763,7 +767,7 @@ shinyServer(function(input, output, session) {
   
   output$keepertable <- DT::renderDataTable({
     
-    datatable(dt_keeper() %>% select(-c(`Goals/Shot`:`G-xG/Shot`)),
+    DT::datatable(dt_keeper() %>% select(-c(`Goals/Shot`:`G-xG/Shot`)),
               rownames = F,
               options(list(autoWidth = T,
                            pageLength = 25,
