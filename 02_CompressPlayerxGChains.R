@@ -12,18 +12,26 @@ playerpos <- readRDS("IgnoreList/playerpositions_byseason.rds")
 # summarize relevant chain data by player and date
 playerchaindata <- combined %>%
   group_by(team, gameID) %>%
-  mutate(num.team.chains = length(na.omit(unique(ChainID[outcome == 1 & action %in% c("pass", "dribble", "shot")])))) %>%
+  mutate(num.team.chains = length(na.omit(unique(ChainID[outcome == 1 & action %in% c("pass", "dribble", "shot", "foulsuffered")]))),
+         xG.team.buildup.shots = sum(tapply(xG[action %in% c("pass", "dribble", "shot", "foulsuffered") & outcome == 1], 
+                                            ChainID[action %in% c("pass", "dribble", "shot", "foulsuffered") & outcome == 1], 
+                                            function(x) max(c(0, x))))) %>%
   group_by(player, team, gameID) %>%
   summarize(date = date[1],
             num.team.chains = num.team.chains[1],
-            num.chains = length(na.omit(unique(ChainID[outcome == 1 & action %in% c("pass", "dribble", "shot")]))),
-            shots.chain = length(na.omit(unique(ChainID[xG > 0]))),
+            xG.team.buildup.shots = xG.team.buildup.shots[1],
+            num.chains = length(na.omit(unique(ChainID[outcome == 1 & action %in% c("pass", "dribble", "shot", "foulsuffered")]))),
+            shots.chain = length(na.omit(unique(ChainID[outcome == 1 & action %in% c("pass", "dribble", "shot", "foulsuffered") & xG > 0]))),
             shots = length(na.omit(unique(ChainID[action == "shot"]))),
             keypasses = length(na.omit(unique(ChainID[keyPass == 1]))),
             xG.shooter = sum(xGShooter[action == "shot"], na.rm = T),
-            xG.assister = sum(xGShooter[action == "pass" & assist == 1], na.rm = T),
-            xG.buildup.noshots = sum(tapply(xG[action %in% c("pass", "dribble") & outcome == 1 & keyPass != 1], ChainID[action %in% c("pass", "dribble") & outcome == 1 & keyPass != 1], function(x) max(c(0, x)))),
-            xG.buildup.shots = sum(tapply(xG[action %in% c("pass", "dribble", "shot") & outcome == 1], ChainID[action %in% c("pass", "dribble", "shot") & outcome == 1], function(x) max(c(0, x))))) %>%
+            #xG.assister = sum(xGShooter[action == "pass" & keyPass == 1], na.rm = T),
+            xG.buildup.noshots = sum(tapply(xG[action %in% c("pass", "dribble", "foulsuffered") & outcome == 1 & keyPass != 1], 
+                                            ChainID[action %in% c("pass", "dribble", "foulsuffered") & outcome == 1 & keyPass != 1], 
+                                            function(x) max(c(0, x)))),
+            xG.buildup.shots = sum(tapply(xG[action %in% c("pass", "dribble", "shot", "foulsuffered") & outcome == 1], 
+                                          ChainID[action %in% c("pass", "dribble", "shot", "foulsuffered") & outcome == 1], 
+                                          function(x) max(c(0, x))))) %>%
   ungroup()
   
 
