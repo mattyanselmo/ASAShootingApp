@@ -660,6 +660,16 @@ shinyServer(function(input, output, session) {
                        digits = 1)
   })
   
+  # Player xGChain downloads ####
+  output$playerxgchain_per96_download <- downloadHandler(
+    filename = "ASA_PlayerxGChain_per96table.csv",
+    
+    content = function(file){
+      namesFL <- as.data.frame(do.call("rbind", strsplit(sub(" ", ";", dt_playerxgchain_per96()$Player), ";")))
+      names(namesFL) <- c("First", "Last")
+      write.csv(data.frame(namesFL, dt_playerxgchain_per96(), check.names = FALSE), file, row.names = FALSE)
+    })
+  
   # Keeper reactive values ####
   # Initial values
   keeper_inputs <- reactiveValues(keeper_minshots = 0,
