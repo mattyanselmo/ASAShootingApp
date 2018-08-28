@@ -775,7 +775,7 @@ shinyUI(
                                      p(HTML("<i>Possession chains represent uninterrupted sequences of passes, dribbles, and/or shots from the same team.</i>")),
                                      tabsetPanel(id = 'playerxgchain_subtab',
                                                  tabPanel('Per 96',
-                                                          downloadButton('playerxgoalchain_download', 'Download CSV'),
+                                                          downloadButton('playerxgchain_per96_download', 'Download CSV'),
                                                           br(),
                                                           br(),
                                                           DT::dataTableOutput("playerxgchain_per96")
