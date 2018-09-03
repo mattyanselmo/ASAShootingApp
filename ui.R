@@ -767,13 +767,22 @@ shinyUI(
                                                    value = F),
                                      checkboxInput('playerxgchain_byseasons',
                                                    label = 'Split players by seasons',
-                                                   value = T)
+                                                   value = T),
+                                     checkboxInput("playerxgchain_gamestate0ind",
+                                                   label = "Even gamestate only",
+                                                   value = F)
                                      ),
                                    mainPanel(
                                      h1('Player xGChains'),
                                      p(paste0('Updated through games on ', max(as.Date(playerchaindata$date)))),
                                      p(HTML("<i>Possession chains represent uninterrupted sequences of passes, dribbles, and/or shots from the same team.</i>")),
                                      tabsetPanel(id = 'playerxgchain_subtab',
+                                                 tabPanel('Totals',
+                                                          downloadButton('playerxgchain_totals_download', 'Download CSV'),
+                                                          br(),
+                                                          br(),
+                                                          DT::dataTableOutput("playerxgchain_totals")
+                                                 ), 
                                                  tabPanel('Per 96',
                                                           downloadButton('playerxgchain_per96_download', 'Download CSV'),
                                                           br(),
