@@ -138,7 +138,7 @@ saveRDS(combined %>%
           select(action, date, time, half, gameID, team, 
                  goalie, team.1, passer, player, recipient, result, 
                  x, y, endX, endY, angle, xPass = success.pred, hscore, ascore, hfinal, 
-                 afinal, outcome, keyPass, assist, ChainChange, 
+                 afinal, outcome, keyPass, assist, ChainChange, hteam, ateam,
                  ChainID, xG, xGs, G, xGShooter, Vertical, Horizontal, pattern,
                  TotalTime), "IgnoreList/xGChain_combineddata.rds")
 set.seed(1)
@@ -148,7 +148,7 @@ write.csv(combined %>%
             select(action, date, time, half, gameID, team, 
                    goalie, team.1, passer, player, recipient, result, 
                    x, y, endX, endY, angle, xPass = success.pred, hscore, ascore, hfinal, 
-                   afinal, outcome, keyPass, assist, ChainChange, 
+                   afinal, outcome, keyPass, assist, ChainChange, hteam, ateam,
                    ChainID, xG, xGs, G, xGShooter, Vertical, Horizontal, pattern,
                    TotalTime), "IgnoreList/xGChain_combineddata_sample.csv", row.names = F)
 
