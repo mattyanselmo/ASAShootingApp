@@ -11,6 +11,12 @@ playerpos <- readRDS("IgnoreList/playerpositions_byseason.rds")
 
 # summarize relevant chain data by player and date
 playerchaindata <- combined %>%
+  group_by(ChainID) %>%
+  mutate(
+    #Chain.team = team[action %in% c("pass", "dribble", "shot", "foulsuffered")][1],
+    Gamestate0ind = ifelse(round(mean((hscore - ascore)[action %in% c("pass", "dribble", "shot", "foulsuffered")])) == 0, 1, 0)
+  ) %>%
+  ungroup() %>%
   group_by(team, gameID) %>%
   mutate(num.team.chains = length(na.omit(unique(ChainID[outcome == 1 & action %in% c("pass", "dribble", "shot", "foulsuffered")]))),
          xG.team.buildup.shots = sum(tapply(xG[action %in% c("pass", "dribble", "shot", "foulsuffered") & outcome == 1], 
@@ -18,6 +24,7 @@ playerchaindata <- combined %>%
                                             function(x) max(c(0, x))))) %>%
   group_by(player, team, gameID) %>%
   summarize(date = date[1],
+            Gamestate0ind = Gamestate0ind[1],
             num.team.chains = num.team.chains[1],
             xG.team.buildup.shots = xG.team.buildup.shots[1],
             num.chains = length(na.omit(unique(ChainID[outcome == 1 & action %in% c("pass", "dribble", "shot", "foulsuffered")]))),
@@ -33,7 +40,7 @@ playerchaindata <- combined %>%
                                           ChainID[action %in% c("pass", "dribble", "shot", "foulsuffered") & outcome == 1], 
                                           function(x) max(c(0, x))))) %>%
   ungroup()
-  
+
 
 # join on minutes and positions
 playerchaindata <- playerchaindata %>%
