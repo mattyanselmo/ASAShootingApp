@@ -60,6 +60,7 @@ playerpassing <- readRDS("IgnoreList/xPassingByPlayer.rds")
 
 teampassing.offense <- readRDS("IgnoreList/xPassingByTeamOffense.rds")
 teampassing.defense <- readRDS("IgnoreList/xPassingByTeamDefense.rds")
+playerchaindata <- readRDS("IgnoreList/PlayerxGChainData.rds")
 
 #pred.data <- readRDS('IgnoreList/TeamPredictionsData_week35.rds')
 #load('IgnoreList/UnivariatePoissonModels.Rdata')
@@ -99,3 +100,4 @@ source('KeeperxGoalsFunction_perminute.R')
 source("PasserxPassesFunction.R")
 source("PasserxPassesFunction_perminute.R")
 source("TeamxPassesFunction.R")
+source("xGChainPlayerFunction.R")

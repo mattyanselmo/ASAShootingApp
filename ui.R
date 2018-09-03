@@ -697,6 +697,102 @@ shinyUI(
                                  )
                         )
              ),
+             # Possession chains navbar ####
+             navbarMenu(strong('Possession chains'),
+                        # Chains: Players xGChain tab panel ####
+                        tabPanel('Players',
+                                 value = "playerxgchain",
+                                 sidebarLayout(
+                                   sidebarPanel(tagList(
+                                     tags$head(
+                                       tags$style(
+                                         HTML(
+                                           ".checkbox-inline { 
+                                           margin-left: 20px;
+                                           margin-right: 0px;
+                                           }
+                                           .checkbox-inline+.checkbox-inline {
+                                           margin-left: 20px;
+                                           margin-right: 0px;
+                                           }
+                                           "
+                                         )
+                                         ) 
+                                         )),
+                                     width = 2,
+                                     actionButton('playerxgchain_action',
+                                                  label = "Refresh filters"),
+                                     numericInput("playerxgchain_minfilter",
+                                                  label = "Minimum minutes:",
+                                                  value = 0,
+                                                  min = 0, max = 10000, 500),
+                                     checkboxGroupInput("playerxgchain_position",
+                                                        label = "Position:",
+                                                        inline = T,
+                                                        choices = c("Keeper (G)" = "G",
+                                                                    "Central Def (D)" = "D",
+                                                                    "Back (B)" = "B",
+                                                                    "Midfielder (M)" = "M",
+                                                                    "Attacking Mid (A)" = "A",
+                                                                    "Forward (F)" = "F",
+                                                                    "Sub (S)" = "S"),
+                                                        selected = c("G", "D", "B", "M", "A", "F", "S")),
+                                     radioButtons('playerxgchain_seasonordate',
+                                                  'Filter by:',
+                                                  choices = c('Season', 'Date'),
+                                                  inline = T),
+                                     conditionalPanel(condition = "input.playerxgchain_seasonordate == 'Season'",
+                                                      checkboxGroupInput('playerxgchain_seasonfilter',
+                                                                         'Select seasons:',
+                                                                         choices = min(playerchaindata$Season):max(playerchaindata$Season),
+                                                                         selected = max(playerchaindata$Season),
+                                                                         inline = T)),
+                                     conditionalPanel(condition = "input.playerxgchain_seasonordate == 'Date'",
+                                                      dateInput('playerxgchain_date1',
+                                                                'From:',
+                                                                value = min(playerchaindata$date[playerchaindata$Season == max(playerchaindata$Season)]),
+                                                                min = min(playerchaindata$date),
+                                                                max = max(playerchaindata$date),
+                                                                format = 'mm/dd/yyyy'),
+                                                      dateInput('playerxgchain_date2',
+                                                                'To:',
+                                                                value = max(playerchaindata$date),
+                                                                min = min(playerchaindata$date),
+                                                                max = max(playerchaindata$date),
+                                                                format = 'mm/dd/yyyy')
+                                     ),  
+                                     h5(HTML('<b>Other filters:</b>')),
+                                     checkboxInput('playerxgchain_byteams',
+                                                   label = 'Split players by teams',
+                                                   value = F),
+                                     checkboxInput('playerxgchain_byseasons',
+                                                   label = 'Split players by seasons',
+                                                   value = T),
+                                     checkboxInput("playerxgchain_gamestate0ind",
+                                                   label = "Even gamestate only",
+                                                   value = F)
+                                     ),
+                                   mainPanel(
+                                     h1('Player xGChains'),
+                                     p(paste0('Updated through games on ', max(as.Date(playerchaindata$date)))),
+                                     p(HTML("<i>Possession chains represent uninterrupted sequences of passes, dribbles, and/or shots from the same team.</i>")),
+                                     tabsetPanel(id = 'playerxgchain_subtab',
+                                                 tabPanel('Totals',
+                                                          downloadButton('playerxgchain_totals_download', 'Download CSV'),
+                                                          br(),
+                                                          br(),
+                                                          DT::dataTableOutput("playerxgchain_totals")
+                                                 ), 
+                                                 tabPanel('Per 96',
+                                                          downloadButton('playerxgchain_per96_download', 'Download CSV'),
+                                                          br(),
+                                                          br(),
+                                                          DT::dataTableOutput("playerxgchain_per96")
+                                                 ))
+                                   )
+                                 )
+                        )
+             ),
              # Glossary ####
              tabPanel(strong('Glossary'),
                       value = "glossary",
