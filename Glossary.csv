@@ -64,3 +64,13 @@ xPasses: Team,Per100,Additional passes completed over expected per 100 passes: S
 xPasses: Team,Vert,"Average distance of all completed passes in the ""forward"" direction (yds)",,,,,
 xPasses: Team,ScoreDiff,Difference between ScoreF and ScoreA,,,,,
 xPasses: Team,VertDiff,Difference between VertF and VertA,,,,,
+Possession chains: Player, NumChains, Number of team's possessions in which the player was involved with a successful pass attempt or dribble, a shot, and/or a foul earned ("particpation"),,,,,
+Possession chains: Player, TeamChain%, Percentage of team's total possessions in which the player was involved with a successful pass attempt or dribble, a shot, and/or a foul earned ("participation"),,,,,
+Possession chains: Player, ChainShot%, Percentage of chains in which the player participates where the team earns a shot,,,,,
+Possession chains: Player, PlayerShot%, Percentage of chains in which the player participates where he takes a shot,,,,,
+Possession chains: Player, PlayerKP%, Percentage of chains in which the player participates where he makes the final pass before the shot,,,,,
+Possession chains: Player, xB (xBuildup), Total team-adjusted xGoals earned by the team on possessions in which the player participated but did not make the final pass or shot,,,,,
+Possession chains: Player, xGChain, Total team-adjusted xGoals earned by the team on possessions in which the player participated,,,,,
+Possession chains: Player, xB% (xBuildup%), Ratio of xB/xGChain,,,,,
+
+
