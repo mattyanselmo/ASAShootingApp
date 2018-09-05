@@ -10,6 +10,7 @@
 # team.filter = unique(playerchaindata$team)
 # byseasons = T
 # byteams = T
+# perminute = F
 # Mode <- function(x) {
 #   ux <- unique(x)
 #   ux[which.max(tabulate(match(x, ux)))]
@@ -25,14 +26,16 @@ xgchain.function <- function(
  team.filter = unique(playerchaindata$team),
  byseasons,
  byteams,
- gamestateind,
+ #gamestateind,
  perminute = F
 ){
   temp <- playerchaindata %>%
     filter(date >= date1 & date <= date2,
            Season %in% season.filter,
-           team %in% team.filter,
-           Gamestate0ind %in% gamestateind)
+           team %in% team.filter
+           #,
+           #Gamestate0ind %in% gamestateind
+           )
  
   if(perminute){ 
   aggdata <- temp %>%
@@ -48,7 +51,8 @@ xgchain.function <- function(
               `PlayerKP%` = sum(keypasses)/sum(num.chains),
               `xB/96` = sum(xG.buildup.noshots)*96/Minutes,
               `xGChain/96` = sum(xG.buildup.shots)*96/Minutes,
-              `xB%` = `xB/96`/`xGChain/96`) %>%
+              `xB%` = `xB/96`/`xGChain/96`,
+              `xB% (0)` = sum(xG.buildup.noshots[Gamestate0ind == 1])/sum(xG.buildup.shots[Gamestate0ind == 1])) %>%
     select(-one_of("team")) %>%
     arrange(desc(`xB/96`))
   } else{
@@ -65,9 +69,10 @@ xgchain.function <- function(
                 `PlayerKP%` = sum(keypasses)/sum(num.chains),
                 `xB` = sum(xG.buildup.noshots),
                 `xGChain` = sum(xG.buildup.shots),
-                `xB%` = `xB`/`xGChain`) %>%
+                `xB%` = `xB`/`xGChain`,
+                `xB% (0)` = sum(xG.buildup.noshots[Gamestate0ind == 1])/sum(xG.buildup.shots[Gamestate0ind == 1])) %>%
       select(-one_of("team")) %>%
-      arrange(desc(xB))
+      arrange(desc(`xB`))
   }
   
   return(aggdata %>% 
@@ -75,6 +80,11 @@ xgchain.function <- function(
 }
 
 # # Function example
+# library(dplyr)
+# Mode <- function(x) {
+#   ux <- unique(x)
+#   ux[which.max(tabulate(match(x, ux)))]
+# }
 # xgchain.function(playerchaindata = playerchaindata,
 #                  date1 = "2000-01-01",
 #                  date2 = "9999-12-31",

@@ -767,10 +767,11 @@ shinyUI(
                                                    value = F),
                                      checkboxInput('playerxgchain_byseasons',
                                                    label = 'Split players by seasons',
-                                                   value = T),
-                                     checkboxInput("playerxgchain_gamestate0ind",
-                                                   label = "Even gamestate only",
-                                                   value = F)
+                                                   value = T)
+                                     #,
+                                     #checkboxInput("playerxgchain_gamestate0ind",
+                                      #             label = "Even gamestate only",
+                                       #            value = F)
                                      ),
                                    mainPanel(
                                      h1('Player xGChains'),

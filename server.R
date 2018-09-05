@@ -604,7 +604,7 @@ shinyServer(function(input, output, session) {
                                          playerxgchain_minfilter = 0,
                                          playerxgchain_byteams = F,
                                          playerxgchain_byseasons = T,
-                                         playerxgchain_gamestate0ind = c(0, 1),
+                                         #playerxgchain_gamestate0ind = c(0, 1),
                                          playerxgchain_plot_xvar = 'SOMETHINGNEW',
                                          playerxgchain_plot_yvar = 'SOMETHINGNEW')
   
@@ -619,7 +619,7 @@ shinyServer(function(input, output, session) {
                  playerxgchain_inputs$playerxgchain_minfilter <- input$playerxgchain_minfilter
                  playerxgchain_inputs$playerxgchain_byteams <- input$playerxgchain_byteams
                  playerxgchain_inputs$playerxgchain_byseasons <- input$playerxgchain_byseasons
-                 playerxgchain_inputs$playerxgchain_gamestate0ind <- ifelse(rep(input$playerxgchain_gamestate0ind, 2), c(1, 1), c(0, 1))
+                 #playerxgchain_inputs$playerxgchain_gamestate0ind <- ifelse(rep(input$playerxgchain_gamestate0ind, 2), c(1, 1), c(0, 1))
                  #playerxgchain_inputs$playerxgchain_inputs$playerxgchain_xvar <- input$playerxgchain_plot_xvar
                  #playerxgchain_inputs$playerxgchain_inputs$playerxgchain_yvar <- input$playerxgchain_plot_yvar
                })
@@ -634,7 +634,7 @@ shinyServer(function(input, output, session) {
                              date2 = as.Date('9999-12-31'), 
                              byteams = playerxgchain_inputs$playerxgchain_byteams,
                              byseasons = playerxgchain_inputs$playerxgchain_byseasons,
-                             gamestateind = playerxgchain_inputs$playerxgchain_gamestate0ind,
+                             #gamestateind = playerxgchain_inputs$playerxgchain_gamestate0ind,
                              perminute = F)
     } else{
       dt <- xgchain.function(playerchaindata,
@@ -644,7 +644,7 @@ shinyServer(function(input, output, session) {
                              date2 = playerxgchain_inputs$playerxgchain_date2, 
                              byteams = playerxgchain_inputs$playerxgchain_byteams,
                              byseasons = playerxgchain_inputs$playerxgchain_byseasons,
-                             gamestateind = playerxgchain_inputs$playerxgchain_gamestate0ind,
+                             #gamestateind = playerxgchain_inputs$playerxgchain_gamestate0ind,
                              perminute = F)
     }
     
@@ -661,7 +661,7 @@ shinyServer(function(input, output, session) {
                              date2 = as.Date('9999-12-31'), 
                              byteams = playerxgchain_inputs$playerxgchain_byteams,
                              byseasons = playerxgchain_inputs$playerxgchain_byseasons,
-                             gamestateind = playerxgchain_inputs$playerxgchain_gamestate0ind,
+                             #gamestateind = playerxgchain_inputs$playerxgchain_gamestate0ind,
                              perminute = T)
     } else{
       dt <- xgchain.function(playerchaindata,
@@ -671,7 +671,7 @@ shinyServer(function(input, output, session) {
                              date2 = playerxgchain_inputs$playerxgchain_date2, 
                              byteams = playerxgchain_inputs$playerxgchain_byteams,
                              byseasons = playerxgchain_inputs$playerxgchain_byseasons,
-                             gamestateind = playerxgchain_inputs$playerxgchain_gamestate0ind,
+                             #gamestateind = playerxgchain_inputs$playerxgchain_gamestate0ind,
                              perminute = T)
     }
     
@@ -689,7 +689,7 @@ shinyServer(function(input, output, session) {
       #             digits = 1) %>%
       formatRound(columns = c("xB", "xGChain"), 
                   digits = 2) %>%
-      formatPercentage(columns = c("TeamChain%", "ChainShot%", "PlayerShot%", "PlayerKP%", "xB%"), 
+      formatPercentage(columns = c("TeamChain%", "ChainShot%", "PlayerShot%", "PlayerKP%", "xB%", "xB% (0)"), 
                        digits = 1)
   })
   
@@ -703,7 +703,7 @@ shinyServer(function(input, output, session) {
                   digits = 1) %>%
       formatRound(columns = c("xB/96", "xGChain/96"), 
                   digits = 2) %>%
-      formatPercentage(columns = c("TeamChain%", "ChainShot%", "PlayerShot%", "PlayerKP%", "xB%"), 
+      formatPercentage(columns = c("TeamChain%", "ChainShot%", "PlayerShot%", "PlayerKP%", "xB%", "xB% (0)"), 
                        digits = 1)
   })
   
