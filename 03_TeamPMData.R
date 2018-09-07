@@ -1,9 +1,9 @@
 dat <- readRDS('IgnoreList/AllShotsData2011-2017.rds')
-library(MASS)
 library(dplyr)
 library(tidyr)
 library(gbm)
 library(nnet)
+library(MASS)
 
 dat.for <- dat %>%
   mutate(Season = format(date, '%Y'),
@@ -65,12 +65,12 @@ dat.pred <- dat.pred %>%
   mutate(gamesplayedH = sapply(1:n(), function(x) sum((hteam == hteam[x] | ateam == hteam[x]) & date < date[x])),
          gamesplayedA = sapply(1:n(), function(x) sum((hteam == ateam[x] | ateam == ateam[x]) & date < date[x]))) %>%
   ungroup() %>%
-  select(hteam, ateam, date, gamesplayedH, gamesplayedA) %>%
+  dplyr::select(hteam, ateam, date, gamesplayedH, gamesplayedA) %>%
   left_join(dat.pred %>% 
-              select(Season, team, date, xGF_team:GA_last10), 
+              dplyr::select(Season, team, date, xGF_team:GA_last10), 
             by = c('hteam' = 'team', 'date')) %>%
   left_join(dat.pred %>%
-              select(team, date, xGF_team:GA_last10),
+              dplyr::select(team, date, xGF_team:GA_last10),
             by = c('ateam' = 'team', 'date'),
             suffix = c('_home', '_away')) %>%
   filter(!is.na(hteam)) %>%
@@ -88,16 +88,17 @@ dat.pred <- dat.pred %>%
             .funs = funs(./gamesplayedA)) %>%
   group_by(Season, hteam) %>%
   arrange(date) %>%
-  fill_(grep('home', grep('season', names(test), value = T), value = T), .direction = 'up') %>%
+  fill_(grep('home', grep('season', names(dat.pred), value = T), value = T), .direction = 'up') %>%
   ungroup() %>%
   group_by(Season, ateam) %>%
   arrange(date) %>%
-  fill_(grep('away', grep('season', names(test), value = T), value = T), .direction = 'up') %>%
+  fill_(grep('away', grep('season', names(dat.pred), value = T), value = T), .direction = 'up') %>%
   ungroup() %>%
   mutate(final = final_home,
          outcome = ifelse(final < 0, 0, ifelse(final == 0, 1, 3))) %>%
-  select(-c(final_home, final_away)) %>%
-  mutate(Season = as.numeric(Season))
+  dplyr::select(-c(final_home, final_away)) %>%
+  mutate(Season = as.numeric(Season),
+         date = as.Date(date, origin = "1970-01-01"))
 
 saveRDS(dat.pred, 'IgnoreList/TeamPMData.rds')
-
+detach("package:MASS", unload = T)
