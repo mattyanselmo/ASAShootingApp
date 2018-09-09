@@ -717,8 +717,8 @@ shinyUI(
                                            }
                                            "
                                          )
-                                         ) 
-                                         )),
+                                       ) 
+                                     )),
                                      width = 2,
                                      actionButton('playerxgchain_action',
                                                   label = "Refresh filters"),
@@ -770,9 +770,9 @@ shinyUI(
                                                    value = T)
                                      #,
                                      #checkboxInput("playerxgchain_gamestate0ind",
-                                      #             label = "Even gamestate only",
-                                       #            value = F)
-                                     ),
+                                     #             label = "Even gamestate only",
+                                     #            value = F)
+                                   ),
                                    mainPanel(
                                      h1('Player xGChains'),
                                      p(paste0('Updated through games on ', max(as.Date(playerchaindata$date)))),
@@ -794,6 +794,25 @@ shinyUI(
                                  )
                         )
              ),
+             navbarMenu(strong('Predictions'),
+                        # Predictions tab ####
+                        tabPanel('Playoffs seeding',
+                                 value = "playoffsseeding",
+                                 tagList(
+                                   tags$head(
+                                     tags$style(".datatables .display {margin-left: 0;}"))),
+                                 h1('Playoffs seeding probabilities'),
+                                 p(HTML(paste0('Updated through games on ', max(as.Date(playerxgoals$date)), ".<br> 
+                                          Based on 1,000 simulated runs of the remaining schedule. <br>
+                                          Percentages shown to tenths only to reinforce mathematical certainties. <br>
+                                          Margin of error is greater than 0.5% for probabilities between 1.0% and 99.0%. <br>
+                                          Western conference shown first because everyone around here is tired of hearing about Atlanta."))),                                 
+                                 h2("Western Conference"),
+                                 DT::dataTableOutput("playoffsseeding_west"),
+                                 br(),
+                                 h2("Eastern Conference"),
+                                 DT::dataTableOutput("playoffsseeding_east")
+                        )),
              # Glossary ####
              tabPanel(strong('Glossary'),
                       value = "glossary",
