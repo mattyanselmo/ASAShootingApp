@@ -17,12 +17,10 @@ source('02_CompressTeamPassing.R')
 source('02_CompressKeeperxGoals.R')
 source("02_CompressPlayerTouches.R")
 
-# Construct predictive model dataset
-# source('03_TeamPMData.R')
-# source("03_TunePMModels.R")
-# source('03_TeamPredictiveModelFunction.R')
-# source("03_TeamPMDataThruCurrentWeek.R")
-# source("03_SimulateSeasonResults.R")
+source('03_TeamPMData.R')
+source("03_TunePMModels.R")
+source("03_TeamPMDataThruCurrentWeek.R")
+source("03_SimulateSeasonResults.R")
 
 if(length(grep("_master", getwd())) > 0){
   source("03_CreateHTMLTables.R")
