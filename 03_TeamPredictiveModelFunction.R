@@ -28,7 +28,7 @@ pm.function <- function(pred.data, model.home, model.away, team.home, team.away,
   dist.home <- sapply(0:10, function(x) dpois(x, lambda = lambda.home))
   dist.away <- sapply(0:10, function(x) dpois(x, lambda = lambda.away))
   
-  rho <- -0.06
+  rho <- -0.05
   temp <-  dist.home %o% dist.away
   temp[1, 1] <- temp[1, 1] * (1 - lambda.home*lambda.away*rho)
   temp[1, 2] <- temp[1, 2] * (1 + lambda.home*rho)
