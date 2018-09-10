@@ -4,7 +4,7 @@ sched <- readRDS("IgnoreList/RemainingSchedule.rds")
 standings <- readRDS("IgnoreList/CurrentStandings.rds")
 pred.data <- readRDS("IgnoreList/TeamPredictionsData.rds")
 load('IgnoreList/UnivariatePoissonModels.Rdata')
-# source("03_TeamPredictiveModelFunction.R")
+source("03_TeamPredictiveModelFunction.R")
 
 # About 60 seconds per 100 runs
 N <- 1000
@@ -45,8 +45,12 @@ gc()
 
 results <- standings.cum %>%
   group_by(Run, Conf) %>%
-  arrange(desc(Pts), desc(Wins), desc(GF - GA)) %>%
-  mutate(Rank = pmin(7, 1:n()))
+  arrange(desc(Pts), desc(Wins), desc(GF - GA), desc(GF)) %>%
+  mutate(Rank = pmin(7, 1:n())) %>%
+  group_by(Run) %>%
+  arrange(desc(Pts), desc(Wins), desc(GF - GA), desc(GF)) %>%
+  mutate(LeagueRank = 1:n()) %>%
+  ungroup()
 
 final.pos <- results %>% 
   group_by(Team, Conf) %>%
@@ -56,8 +60,22 @@ final.pos <- results %>%
             `4` = mean(Rank == 4),
             `5` = mean(Rank == 5),
             `6` = mean(Rank == 6),
-            `7+` = mean(Rank >= 7)) %>%
-  arrange(desc(`1`), desc(`2`), desc(`3`), desc(`4`), desc(`5`), desc(`6`))
+            Playoffs = mean(Rank <= 6),
+            Shield = mean(LeagueRank == 1),
+            Bye = `1` + `2`) %>%
+  arrange(desc(`1`), desc(Playoffs)) %>%
+  ungroup()
 
 final.pos
-saveRDS(final.pos, "IgnoreList/CurrentSimulationResults_playoffseeding.rds")
+saveRDS(final.pos %>% filter(Conf == "west") %>% select(-Conf), "IgnoreList/CurrentSimulationResults_playoffseeding_west.rds")
+saveRDS(final.pos %>% 
+          filter(Conf == "west") %>% 
+          select(-Conf), 
+        paste0("IgnoreList/CurrentSimulationResults_playoffseeding_west_week", max.week, "_year", year, ".rds"))
+
+saveRDS(final.pos %>% filter(Conf == "east") %>% select(-Conf), "IgnoreList/CurrentSimulationResults_playoffseeding_east.rds")
+saveRDS(final.pos %>% 
+          filter(Conf == "east") %>% 
+          select(-Conf), 
+        paste0("IgnoreList/CurrentSimulationResults_playoffseeding_east_week", max.week, "_year", year, ".rds"))
+

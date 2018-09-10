@@ -44,7 +44,7 @@ saveRDS(sched %>%
 
 
 max.week <- max(training.dat$week[training.dat$Season == max(training.dat$Season)])
-weeks <- c(max(max.week - 15, 10), max.week)
+weeks <- c(max(max.week - 15, 10), floor(1.125*max.week))
 
 # Build bivariate Poisson model ####
 form.home <- formula(GF_home ~ xGF_season_team_home + 
@@ -58,14 +58,14 @@ form.away <- formula(GF_away ~ xGF_season_team_away +
                        I(GA_season_home - xGA_season_team_home))
 
 model.home <- glm(form.home,
-                  data = dat.pred %>% filter(week >= weeks[1], week <= weeks[2]),
+                  data = training.dat %>% filter(week >= weeks[1], week <= weeks[2]),
                   family = poisson,
-                  weights = week^2)
+                  weights = pmin(week, max.week))
 
 model.away <- glm(form.away,
-                  data = dat.pred %>% filter(week >= weeks[1], week <= weeks[2]),
+                  data = training.dat %>% filter(week >= weeks[1], week <= weeks[2]),
                   family = poisson,
-                  weights = week^2)
+                  weights = pmin(week, max.week))
 
 # Save files ####
 save(model.home, model.away, file = 'IgnoreList/UnivariatePoissonModels.Rdata')

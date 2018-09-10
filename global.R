@@ -61,6 +61,8 @@ playerpassing <- readRDS("IgnoreList/xPassingByPlayer.rds")
 teampassing.offense <- readRDS("IgnoreList/xPassingByTeamOffense.rds")
 teampassing.defense <- readRDS("IgnoreList/xPassingByTeamDefense.rds")
 playerchaindata <- readRDS("IgnoreList/PlayerxGChainData.rds")
+playoffsseeding_west <- readRDS("IgnoreList/CurrentSimulationResults_playoffseeding_west.rds")
+playoffsseeding_east <- readRDS("IgnoreList/CurrentSimulationResults_playoffseeding_east.rds")
 
 #pred.data <- readRDS('IgnoreList/TeamPredictionsData_week35.rds')
 #load('IgnoreList/UnivariatePoissonModels.Rdata')
