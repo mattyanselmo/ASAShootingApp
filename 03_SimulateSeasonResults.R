@@ -45,10 +45,10 @@ gc()
 
 results <- standings.cum %>%
   group_by(Run, Conf) %>%
-  arrange(desc(Pts), desc(Wins), desc(GF - GA)) %>%
+  arrange(desc(Pts), desc(Wins), desc(GF - GA), desc(GF)) %>%
   mutate(Rank = pmin(7, 1:n())) %>%
   group_by(Run) %>%
-  arrange(desc(Pts), desc(Wins), desc(GF - GA)) %>%
+  arrange(desc(Pts), desc(Wins), desc(GF - GA), desc(GF)) %>%
   mutate(LeagueRank = 1:n()) %>%
   ungroup()
 
@@ -71,11 +71,11 @@ saveRDS(final.pos %>% filter(Conf == "west") %>% select(-Conf), "IgnoreList/Curr
 saveRDS(final.pos %>% 
           filter(Conf == "west") %>% 
           select(-Conf), 
-        paste0("IgnoreList/CurrentSimulationResults_playoffseeding_west_week", week.max, "_year", year, ".rds"))
+        paste0("IgnoreList/CurrentSimulationResults_playoffseeding_west_week", max.week, "_year", year, ".rds"))
 
 saveRDS(final.pos %>% filter(Conf == "east") %>% select(-Conf), "IgnoreList/CurrentSimulationResults_playoffseeding_east.rds")
 saveRDS(final.pos %>% 
           filter(Conf == "east") %>% 
           select(-Conf), 
-        paste0("IgnoreList/CurrentSimulationResults_playoffseeding_east_week", week.max, "_year", year, ".rds"))
+        paste0("IgnoreList/CurrentSimulationResults_playoffseeding_east_week", max.week, "_year", year, ".rds"))
 
