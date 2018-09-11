@@ -1,20 +1,20 @@
 # Filter player chain data for app
 
-# # Test inputs
-# library(dplyr)
-# playerchaindata <- readRDS("IgnoreList/PlayerxGChainData.rds")
-# date1 = as.Date('2000-01-01')
-# date2 = as.Date('9999-12-31')
-# season.filter = 2015:2017
-# min.filter = 0
-# team.filter = unique(playerchaindata$team)
-# byseasons = T
-# byteams = T
-# perminute = F
-# Mode <- function(x) {
-#   ux <- unique(x)
-#   ux[which.max(tabulate(match(x, ux)))]
-# }
+# Test inputs
+library(dplyr)
+playerchaindata <- readRDS("IgnoreList/PlayerxGChainData.rds")
+date1 = as.Date('2000-01-01')
+date2 = as.Date('9999-12-31')
+season.filter = 2015:2017
+min.filter = 0
+team.filter = unique(playerchaindata$team)
+byseasons = T
+byteams = T
+perminute = F
+Mode <- function(x) {
+  ux <- unique(x)
+  ux[which.max(tabulate(match(x, ux)))]
+}
 
 
 xgchain.function <- function(
@@ -42,7 +42,7 @@ xgchain.function <- function(
     group_by_(.dots = c("Player" = "player", "Season", "team")[c(T, byseasons, byteams)]) %>%
     summarize(Team = paste0(unique(team), collapse = ","),
               Games = length(unique(gameID)),
-              Minutes = sum(minutes),
+              Minutes = sum(minutes[!duplicated(gameID)]),
               Pos = Mode(season.pos),
               `NumChains/96` = sum(num.chains)*96/Minutes,
               `TeamChain%` = sum(num.chains)*Games*96/(sum(num.team.chains)*Minutes),
@@ -60,7 +60,7 @@ xgchain.function <- function(
       group_by_(.dots = c("Player" = "player", "Season", "team")[c(T, byseasons, byteams)]) %>%
       summarize(Team = paste0(unique(team), collapse = ","),
                 Games = length(unique(gameID)),
-                Minutes = sum(minutes),
+                Minutes = sum(minutes[!duplicated(gameID)]),
                 Pos = Mode(season.pos),
                 `NumChains` = sum(num.chains),
                 `TeamChain%` = sum(num.chains)*Games*96/(sum(num.team.chains)*Minutes),
