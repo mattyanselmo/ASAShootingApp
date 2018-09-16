@@ -16,6 +16,7 @@ glossary <- read.csv('Glossary.csv')
 playerpassing <- readRDS("IgnoreList/xPassingByPlayer.rds")
 teampassing.offense <- readRDS("IgnoreList/xPassingByTeamOffense.rds")
 teampassing.defense <- readRDS("IgnoreList/xPassingByTeamDefense.rds")
+playerchaindata <- readRDS("IgnoreList/PlayerxGChainData.rds")
 
 source('ShooterxGoalsFunction.R')
 source('ShooterxGoalsFunction_perminute.R')
@@ -24,7 +25,7 @@ source('KeeperxGoalsFunction.R')
 source("PasserxPassesFunction.R")
 source("TeamxPassesFunction.R")
 source("xGoalByGameFunction.R")
-
+source("xGChainPlayerFunction.R")
 Mode <- function(x) {
   ux <- unique(x)
   ux[which.max(tabulate(match(x, ux)))]
@@ -410,3 +411,43 @@ lapply(2011:max(xgbygame$Season),
                      quote = F)
          
        })
+
+# Player xGChains ####
+lapply(2015:max(playerchaindata$Season),
+       FUN = function(x){
+         dt <- xgchain.function(playerchaindata = playerchaindata,
+                                date1 = "2000-01-01",
+                                date2 = "9999-12-31",
+                                season.filter = x,
+                                min.filter = 0,
+                                team.filter = unique(playerchaindata$team),
+                                byseasons = F,
+                                byteams = F)
+         
+         namesFL <- as.data.frame(do.call("rbind", strsplit(sub(" ", ";", dt$Player), ";")))
+         names(namesFL) <- c("First", "Last")
+         dt <- data.frame(namesFL, dt %>% select(-Player), check.names = F)
+         
+         write.csv(dt, paste0(path, "/Dropbox/ASA Blog Data/HTMLOutputs/xGChain_byplayer_", x, ".csv"))
+         output <- xtable(dt, 
+                          digits = c(0, 0, 0, 0, 0, 0, 0, 0, 3, 3, 3, 3, 1, 1, 3, 3),
+                          align = rep("c", ncol(dt) + 1))
+         write.table(gsub("\n", "",
+                          gsub(" <", "<", 
+                               gsub("> ", ">", 
+                                    gsub("<table border=1>", '<script>
+                                         $(document).ready(function() {
+                                         $("#myTable").tablesorter();
+                                         });
+                                         </script><TABLE border=1 id="myTable" class="tablesorter" style="white-space:nowrap;"><thead>',
+                                         gsub(" xB% (0) </th>  </tr>", " xB% (0) </th>  </tr> </thead> <tbody>",
+                                              print.xtable(output, 
+                                                           type = "html",
+                                                           include.rownames = F,
+                                                           print.results = F)))))),
+                     file = paste0(path, "/Dropbox/ASA Blog Data/HTMLOutputs/xGChain_byplayer_", x, ".txt"),
+                     row.names = F,
+                     quote = F)
+         
+       })
+
