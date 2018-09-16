@@ -4,19 +4,33 @@ library(dplyr)
 
 # year <- 2018
 # merged.passes <- readRDS("IgnoreList/AllPassingData.rds")
+# playoffsseeding_west <- readRDS("IgnoreList/CurrentSimulationResults_playoffseeding_west.rds")
+# playoffsseeding_east <- readRDS("IgnoreList/CurrentSimulationResults_playoffseeding_east.rds")
+# final.pos <- bind_rows(playoffsseeding_west, playoffsseeding_east)
 
 shooting <- readRDS("IgnoreList/AllShotsData2011-2017.rds")
 team.map <- read.csv("TeamNameLinks_MLSStandings.csv")
+team.map2 <- read.csv("TeamNameLinks_MLSStandings2.csv")
 
 standings <- readHTMLTable(htmlParse(read_html("https://www.mlssoccer.com/standings")))
 standings <- lapply(standings, function(x){names(x) <- as.character(as.matrix(x[1,])); x <- x[-1,]; x})
-standings.east <- standings[[1]][,1:12] %>% select(`#`, Club, GP, W:`T`, GF:GD, Pts = PTS, PPG) %>%
+standings.east <- standings[[1]][,1:12] %>% 
+  select(`#`, Club, GP, W:`T`, GF:GD, Pts = PTS, PPG) %>%
+  mutate(Club = gsub("x - ", "", gsub("e - ", "", Club))) %>%
   left_join(team.map, c("Club" = "Original")) %>%
   mutate(Club = Convert) %>%
+  select(-Convert) %>%
+  left_join(team.map2, c("Club" = "Original")) %>%
+  left_join(final.pos %>% select(Team, Playoffs, Shield), c("Convert" = "Team")) %>%
   select(-Convert)
-standings.west <- standings[[2]][,1:12] %>% select(`#`, Club, GP, W:`T`, GF:GD, Pts = PTS, PPG) %>%
+standings.west <- standings[[2]][,1:12] %>% 
+  select(`#`, Club, GP, W:`T`, GF:GD, Pts = PTS, PPG) %>%
+  mutate(Club = gsub("x - ", "", gsub("e - ", "", Club))) %>%
   left_join(team.map, c("Club" = "Original")) %>%
   mutate(Club = Convert) %>%
+  select(-Convert) %>%
+  left_join(team.map2, c("Club" = "Original")) %>%
+  left_join(final.pos %>% select(Team, Playoffs, Shield), c("Convert" = "Team")) %>%
   select(-Convert)
 
 possession <- merged.passes %>% 
@@ -70,7 +84,7 @@ standings.east <- standings.east %>%
          AvShtF = ShtF/GP, 
          AvShtA = ShtA/GP,
          PPG = as.numeric(as.character(PPG))) %>%
-  select(`#`, Club, GP, W, L, `T`, GF, GA, GD, ShtF, AvShtF, ShtA, AvShtA, TSR, PDO, Poss, Pts, PPG) %>%
+  select(`#`, Club, GP, W, L, `T`, GF, GA, GD, ShtF, AvShtF, ShtA, AvShtA, TSR, PDO, Poss, Pts, PPG, Playoffs, Shield) %>%
   arrange(desc(PPG)) %>%
   mutate(`#` = 1:n())
 
@@ -81,7 +95,7 @@ standings.west <- standings.west %>%
          AvShtF = ShtF/GP, 
          AvShtA = ShtA/GP,
          PPG = as.numeric(as.character(PPG))) %>%
-  select(`#`, Club, GP, W, L, `T`, GF, GA, GD, ShtF, AvShtF, ShtA, AvShtA, TSR, PDO, Poss, Pts, PPG) %>%
+  select(`#`, Club, GP, W, L, `T`, GF, GA, GD, ShtF, AvShtF, ShtA, AvShtA, TSR, PDO, Poss, Pts, PPG, Playoffs, Shield) %>%
   arrange(desc(PPG)) %>%
   mutate(`#` = 1:n())
 
@@ -91,7 +105,7 @@ path <- ifelse(file.exists("C:/Users/Matthias"), "C:/Users/Matthias", "C:/Users/
 
 # Easter conference
 output.east <- xtable(standings.east, 
-                 digits = c(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 1, 3, 0, 3, 0, 2),
+                 digits = c(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 1, 3, 0, 3, 0, 2, 3, 3),
                  align = rep("center", ncol(standings.east) + 1))
 write.table(gsub("\n", "",
                  gsub(" <", "<", 
@@ -112,7 +126,7 @@ write.table(gsub("\n", "",
 
 # Western conference
 output.west <- xtable(standings.west, 
-                      digits = c(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 1, 3, 0, 3, 0, 2),
+                      digits = c(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 1, 3, 0, 3, 0, 2, 3, 3),
                       align = rep("center", ncol(standings.west) + 1))
 write.table(gsub("\n", "",
                  gsub(" <", "<", 
