@@ -6,19 +6,14 @@ library(stringr)
 teamnames <- read.csv('TeamNameLinks.csv', stringsAsFactors = F) %>%
   select(-one_of("X"))
 
-if(file.exists('C:/Users/Matthias')){
-  temp <- read.csv(paste0("C:/Users/Matthias/Dropbox/ASA Blog Data/", year, " Stats/raw passes.csv"))
-  write.csv(temp, paste0("C:/Users/Matthias/Documents/GitHub/ASAShootingApp_development/IgnoreList/raw passes ", year, ".csv"))
-  write.csv(temp, paste0("C:/Users/Matthias/Documents/GitHub/ASAShootingApp_master/IgnoreList/raw passes ", year, ".csv"))
-  rm(temp)
-  gc()
-} else if(file.exists('C:/Users/Matthias.Kullowatz')){
-  temp <- read.csv(paste0("C:/Users/Matthias.Kullowatz/Dropbox/ASA Blog Data/", year, " Stats/raw passes.csv"))
-  write.csv(temp, paste0("C:/Users/Matthias.Kullowatz/Documents/GitHub/ASAShootingApp_development/IgnoreList/raw passes ", year, ".csv"))
-  write.csv(temp, paste0("C:/Users/Matthias.Kullowatz/Documents/GitHub/ASAShootingApp_master/IgnoreList/raw passes ", year, ".csv"))
-  rm(temp)
-  gc()
-}
+path <- ifelse(file.exists("C:/Users/Matthias"), "C:/Users/Matthias", "C:/Users/Matthias.Kullowatz")
+
+temp <- read.csv(paste0(path, "/Dropbox/ASA Blog Data/", year, " Stats/raw passes.csv"))
+write.csv(temp, paste0(path, "/Documents/GitHub/ASAShootingApp_development/IgnoreList/raw passes ", year, ".csv"))
+write.csv(temp, paste0(path, "/Documents/GitHub/ASAShootingApp_master/IgnoreList/raw passes ", year, ".csv"))
+rm(temp)
+gc()
+
 
 #load in the requisite data
 passes <- bind_rows(lapply(paste0("IgnoreList/", grep('raw passes', list.files("IgnoreList/"), value = T)),
@@ -155,3 +150,23 @@ merged.passes <- merged.passes %>%
 
 saveRDS(merged.passes, "IgnoreList/AllPassingData.rds")
 write.csv(merged.passes, "IgnoreList/AllPassingData.csv", row.names = F)
+
+for(tm in unique(merged.passes$team)){
+  write.csv(merged.passes %>%
+              filter(team == tm) %>%
+              select(passer, recipient, date, x, endX, y, endY, success, success.pred),
+            paste0(path, 
+                   "/Google Drive/Soccer Statistics and Research/ASA Blog/Analysis/Data/Shared data/xPassData_",
+                   tm, "_allyears.csv"), 
+            row.names = F)
+}
+
+for(yr in unique(merged.passes$year)){
+  write.csv(merged.passes %>%
+              filter(year == yr) %>%
+              select(passer, recipient, date, x, endX, y, endY, success, success.pred),
+            paste0(path, 
+                   "/Google Drive/Soccer Statistics and Research/ASA Blog/Analysis/Data/Shared data/xPassData_",
+                   yr, "_allteams.csv"), 
+            row.names = F)
+}
