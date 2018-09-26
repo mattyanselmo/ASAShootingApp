@@ -435,16 +435,17 @@ lapply(2015:max(playerchaindata$Season),
          write.table(gsub("\n", "",
                           gsub(" <", "<", 
                                gsub("> ", ">", 
-                                    gsub("<table border=1>", '<script>
+                                    gsub(' align="center"', "",
+                                         gsub("<table border=1>", '<script>
                                          $(document).ready(function() {
                                          $("#myTable").tablesorter();
                                          });
                                          </script><TABLE border=1 id="myTable" class="tablesorter" style="white-space:nowrap;"><thead>',
-                                         gsub(" xB% (0) </th>  </tr>", " xB% (0) </th>  </tr> </thead> <tbody>",
-                                              print.xtable(output, 
-                                                           type = "html",
-                                                           include.rownames = F,
-                                                           print.results = F)))))),
+                                              gsub(" xB% \\(0) </th>  </tr>", " xB% (0) </th>  </tr> </thead> <tbody>",
+                                                   print.xtable(output, 
+                                                                type = "html",
+                                                                include.rownames = F,
+                                                                print.results = F))))))),
                      file = paste0(path, "/Dropbox/ASA Blog Data/HTMLOutputs/xGChain_byplayer_", x, ".txt"),
                      row.names = F,
                      quote = F)

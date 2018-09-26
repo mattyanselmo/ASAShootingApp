@@ -97,13 +97,16 @@ standings.west <- standings.west %>%
          PPG = as.numeric(as.character(PPG))) %>%
   select(`#`, Club, GP, W, L, `T`, GF, GA, GD, ShtF, AvShtF, ShtA, AvShtA, TSR, PDO, Poss, Pts, PPG, Playoffs, Shield) %>%
   arrange(desc(PPG)) %>%
-  mutate(`#` = 1:n())
+  mutate(`#` = 1:n()
+         #,
+         #Club = ifelse(Playoffs == 1, paste0("<strong>", Club, "</strong>"), as.character(Club))
+         )
 
 # Write conference tables to HTML ####
 library(xtable)
 path <- ifelse(file.exists("C:/Users/Matthias"), "C:/Users/Matthias", "C:/Users/Matthias.Kullowatz")
 
-# Easter conference
+# Eastern conference
 output.east <- xtable(standings.east, 
                  digits = c(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 1, 3, 0, 3, 0, 2, 3, 3),
                  align = rep("center", ncol(standings.east) + 1))
@@ -136,7 +139,7 @@ write.table(gsub("\n", "",
                                 $("#WesternConferenceTable").tablesorter();
                                 });
                                 </script> <b>Western Conference</b> <TABLE border=1 id="WesternConferenceTable" class="tablesorter" style="white-space:nowrap;"><thead>',
-                                gsub(" PPG </th>  </tr>", " PPG </th>  </tr> </thead> <tbody>",
+                                gsub(" Shield </th>  </tr>", " Shield </th>  </tr> </thead> <tbody>",
                                      print.xtable(output.west, 
                                                   type = "html",
                                                   include.rownames = F,
