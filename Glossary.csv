@@ -72,5 +72,5 @@ Possession chains: Player, PlayerKP%, Percentage of chains in which the player p
 Possession chains: Player, xB (xBuildup), Total team-adjusted xGoals earned by the team on possessions in which the player participated but did not make the final pass or shot,,,,,
 Possession chains: Player, xGChain, Total team-adjusted xGoals earned by the team on possessions in which the player participated,,,,,
 Possession chains: Player, xB% (xBuildup%), Ratio of xB/xGChain,,,,,
-
+Possession chains: Player, xB% (0), Ratio of xB/xGChain in even gamestates,,,,,
 
