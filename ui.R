@@ -813,6 +813,46 @@ shinyUI(
                                  DT::dataTableOutput("playoffsseeding_east"),
                                  br()
                         )),
+             navbarMenu(strong('Salaries'),
+                        # Salary tabs ####
+                        tabPanel('Players',
+                                 value = "playersalaries",
+                                 sidebarLayout(
+                                   sidebarPanel(
+                                     actionButton("playersalaries_action",
+                                                  label = "Refresh filters"),
+                                     selectInput("playersalaries_teamfilter",
+                                                 label = "Select team:",
+                                                 choices = c("All", sort(unique(salary.data$Team))),
+                                                 selected = "All"),
+                                     checkboxGroupInput("playersalaries_posfilter",
+                                                        "Select position:",
+                                                        choices = c("Keeper (G)" = "G",
+                                                                    "Central Def (D)" = "D",
+                                                                    "Back (B)" = "B",
+                                                                    "Midfielder (M)" = "M",
+                                                                    "Attacking Mid (A)" = "A",
+                                                                    "Forward (F)" = "F",
+                                                                    "Sub (S)" = "S"),
+                                                        selected = c("G", "D", "B", "M", "A", "F", "S")),
+                                     dateRangeInput("playersalaries_daterange",
+                                                    "Select date range:",
+                                                    start = min(salary.data$Date),
+                                                    end = max(salary.data$Date),
+                                                    startview = "year")),
+                                   mainPanel(
+                                     h1("Player salaries"),
+                                     DT::dataTableOutput("playersalaries")
+                                   ))
+                        ),
+                        tabPanel("Teams",
+                                 value = "teamsalaries",
+                                 tagList(
+                                   tags$head(
+                                     tags$style(".datatables .display {margin-left: 0;}"))),
+                                 h1("Team salaries"),
+                                 DT::dataTableOutput("teamsalaries")
+                        )),
              # Glossary ####
              tabPanel(strong('Glossary'),
                       value = "glossary",
