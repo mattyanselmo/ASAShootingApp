@@ -63,6 +63,7 @@ teampassing.defense <- readRDS("IgnoreList/xPassingByTeamDefense.rds")
 playerchaindata <- readRDS("IgnoreList/PlayerxGChainData.rds")
 playoffsseeding_west <- readRDS("IgnoreList/CurrentSimulationResults_playoffseeding_west.rds")
 playoffsseeding_east <- readRDS("IgnoreList/CurrentSimulationResults_playoffseeding_east.rds")
+salary.data <- read.csv("SalaryByPlayer_MLS.csv", stringsAsFactors = F) %>% mutate(Date = "2018-05-01")
 
 #pred.data <- readRDS('IgnoreList/TeamPredictionsData_week35.rds')
 #load('IgnoreList/UnivariatePoissonModels.Rdata')
