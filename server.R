@@ -1766,6 +1766,47 @@ shinyServer(function(input, output, session) {
       formatPercentage(columns = c("1", "2", "3", "4", "5", "6", "Playoffs", "Shield", "Bye"), digits = 1)
   })
   
+  # Salary ####
+  playersalaries_inputs <- reactiveValues(posfilter = c("G", "D", "B", "M", "A", "F", "S"),
+                                          teamfilter = "All",
+                                          extract_date1 = as.Date("2000-01-01"),
+                                          extract_date2 = as.Date("9999-12-31"))
+  
+  observeEvent(input$playersalaries_action,
+               {
+                 playersalaries_inputs$posfilter <- input$playersalaries_posfilter
+                 playersalaries_inputs$teamfilter <- input$playersalaries_teamfilter
+                 playersalaries_inputs$extract_date1 <- input$playersalaries_daterange[1]
+                 playersalaries_inputs$extract_date2 <- input$playersalaries_daterange[2]
+               })
+  
+  dt_playersalaries <- reactive({
+    if(playersalaries_inputs$teamfilter == "All"){
+      teamfilter <- unique(salary.data$Team)
+    } else{
+      teamfilter <- playersalaries_inputs$teamfilter 
+    }
+    
+    dt <- player.salary.func(salary.data = salary.data,
+                             team = teamfilter,
+                             position = playersalaries_inputs$posfilter,
+                             extract.date1 = playersalaries_inputs$extract_date1,
+                             extract.date2 = playersalaries_inputs$extract_date2)
+    dt
+  })
+  
+  output$playersalaries <- DT::renderDataTable({
+    DT::datatable(dt_playersalaries(),
+                 rownames = F,
+                 options(list(autoWidth = T,
+                              pageLength = 25))) %>%
+      formatCurrency(columns = c("Base", "Guaranteed"),
+                     currency = "$",
+                     interval = 3,
+                     mark = ",",
+                     digits = 0)
+  })
+  
   # Glossary ####
   output$glossary <- DT::renderDataTable({
     DT::datatable(glossary %>% select(c(1, 2, 3)),
