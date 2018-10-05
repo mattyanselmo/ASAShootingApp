@@ -1,22 +1,30 @@
 # Summarize team salaries
 
 # library(dplyr)
-# salary.data <- read.csv("SalaryByPlayer_MLS.csv") %>% mutate(Season = 2018)
+# salary.data <- readRDS("AppData/SalaryData.rds")
 # grouping <- c("Team")
 # season <- 2018
 
-salary.func <- function(salary.data = salary.data,
+team.salary.func <- function(salary.data = salary.data,
                         grouping,
-                        season){
+                        seasonfilter){
   
   temp <- salary.data %>%
-    filter(Season %in% season)
+    mutate(Season = as.numeric(format(Date, "%Y"))) %>%
+    filter(Season %in% seasonfilter)
   
   temp %>%
     group_by_(grouping) %>%
-    summarize(AvgGuar = mean(Guaranteed),
-              MedGuar = median(Guaranteed),
-              StdDevGuar = sd(Guaranteed)) %>%
+    summarize(N = sum(Date == max(Date)),
+              TotalGuar = sum(Guaranteed[Date == max(Date)]),
+              AvgGuar = mean(Guaranteed[Date == max(Date)]),
+              MedGuar = median(Guaranteed[Date == max(Date)]),
+              StdDevGuar = sd(Guaranteed[Date == max(Date)])) %>%
     ungroup() %>% 
-    arrange(desc(AvgGuar))
+    arrange(desc(TotalGuar))
 }
+
+# library(dplyr)
+# team.salary.func(salary.data = readRDS("AppData/SalaryData.rds"),
+#                  grouping = "Team",
+#                  season = 2015) %>% data.frame()
