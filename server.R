@@ -1767,10 +1767,11 @@ shinyServer(function(input, output, session) {
   })
   
   # Salary ####
-  playersalaries_inputs <- reactiveValues(posfilter = c("G", "D", "B", "M", "A", "F", "S"),
+  # Player salary inputs ####
+  playersalaries_inputs <- reactiveValues(posfilter = c("GK", "D", "B", "M", "A", "F"),
                                           teamfilter = "All",
-                                          extract_date1 = as.Date("2000-01-01"),
-                                          extract_date2 = as.Date("9999-12-31"))
+                                          extract_date1 = max(salary.data$Date),
+                                          extract_date2 = max(salary.data$Date))
   
   observeEvent(input$playersalaries_action,
                {
@@ -1788,8 +1789,8 @@ shinyServer(function(input, output, session) {
     }
     
     dt <- player.salary.func(salary.data = salary.data,
-                             team = teamfilter,
-                             position = playersalaries_inputs$posfilter,
+                             teamfilter = teamfilter,
+                             posfilter = playersalaries_inputs$posfilter,
                              extract.date1 = playersalaries_inputs$extract_date1,
                              extract.date2 = playersalaries_inputs$extract_date2)
     dt
@@ -1801,6 +1802,37 @@ shinyServer(function(input, output, session) {
                  options(list(autoWidth = T,
                               pageLength = 25))) %>%
       formatCurrency(columns = c("Base", "Guaranteed"),
+                     currency = "$",
+                     interval = 3,
+                     mark = ",",
+                     digits = 0)
+  })
+  
+  # Team salary inputs ####
+  teamsalaries_inputs <- reactiveValues(groupby = "Team",
+                                        seasonfilter = 2018)
+  
+  observeEvent(input$teamsalaries_action,
+               {
+                 teamsalaries_inputs$groupby <- input$teamsalaries_groupby
+                 teamsalaries_inputs$seasonfilter <- input$teamsalaries_seasonfilter
+               })
+  
+  dt_teamsalaries <- reactive({
+    
+    dt <- team.salary.func(salary.data = salary.data,
+                           grouping = teamsalaries_inputs$groupby,
+                           seasonfilter = teamsalaries_inputs$seasonfilter)
+    dt
+  })
+  
+  output$teamsalaries <- DT::renderDataTable({
+    DT::datatable(dt_teamsalaries(),
+                  rownames = F,
+                  options(list(autoWidth = T,
+                               pageLength = 25,
+                               dom = "t"))) %>%
+      formatCurrency(columns = c("TotalGuar", "AvgGuar", "MedGuar", "StdDevGuar"),
                      currency = "$",
                      interval = 3,
                      mark = ",",
