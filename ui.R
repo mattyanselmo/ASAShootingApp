@@ -823,21 +823,20 @@ shinyUI(
                                                   label = "Refresh filters"),
                                      selectInput("playersalaries_teamfilter",
                                                  label = "Select team:",
-                                                 choices = c("All", sort(unique(salary.data$Team))),
+                                                 choices = c("All", sort(unique(salary.data$Club))),
                                                  selected = "All"),
                                      checkboxGroupInput("playersalaries_posfilter",
                                                         "Select position:",
-                                                        choices = c("Keeper (G)" = "G",
-                                                                    "Central Def (D)" = "D",
+                                                        choices = c("Keeper (GK)" = "GK",
+                                                                    "Defender (D)" = "D",
                                                                     "Back (B)" = "B",
                                                                     "Midfielder (M)" = "M",
                                                                     "Attacking Mid (A)" = "A",
-                                                                    "Forward (F)" = "F",
-                                                                    "Sub (S)" = "S"),
-                                                        selected = c("G", "D", "B", "M", "A", "F", "S")),
+                                                                    "Forward (F)" = "F"),
+                                                        selected = c("GK", "D", "B", "M", "A", "F")),
                                      dateRangeInput("playersalaries_daterange",
                                                     "Select date range:",
-                                                    start = min(salary.data$Date),
+                                                    start = max(salary.data$Date),
                                                     end = max(salary.data$Date),
                                                     startview = "year")),
                                    mainPanel(
@@ -847,11 +846,23 @@ shinyUI(
                         ),
                         tabPanel("Teams",
                                  value = "teamsalaries",
-                                 tagList(
-                                   tags$head(
-                                     tags$style(".datatables .display {margin-left: 0;}"))),
-                                 h1("Team salaries"),
-                                 DT::dataTableOutput("teamsalaries")
+                                 sidebarLayout(
+                                 sidebarPanel(
+                                   actionButton("teamsalaries_action",
+                                                label = "Refresh filters"),
+                                   selectInput("teamsalaries_groupby",
+                                               label = "Group by:",
+                                               choices = c("Team", "Position" = "Pos"),
+                                               selected = "Team"),
+                                   selectInput("teamsalaries_seasonfilter",
+                                               label = "Select season:",
+                                               choices = as.numeric(unique(format(salary.data$Date, "%Y"))),
+                                               selected = max(as.numeric(unique(format(salary.data$Date, "%Y")))))),
+                                 mainPanel(
+                                   h1("Salaries by team and position"),
+                                   DT::dataTableOutput("teamsalaries")
+                                 )
+                        )
                         )),
              # Glossary ####
              tabPanel(strong('Glossary'),
