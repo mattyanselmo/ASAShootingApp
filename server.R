@@ -1797,7 +1797,7 @@ shinyServer(function(input, output, session) {
   })
   
   output$playersalaries <- DT::renderDataTable({
-    DT::datatable(dt_playersalaries(),
+    DT::datatable(dt_playersalaries() %>% mutate(Date = format(Date, "%m/%d/%Y")),
                  rownames = F,
                  options(list(autoWidth = T,
                               pageLength = 25))) %>%
