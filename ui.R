@@ -823,7 +823,7 @@ shinyUI(
                                                   label = "Refresh filters"),
                                      selectInput("playersalaries_teamfilter",
                                                  label = "Select team:",
-                                                 choices = c("All", sort(unique(salary.data$Club))),
+                                                 choices = c("All", sort(unique(salary.data$Team))),
                                                  selected = "All"),
                                      checkboxGroupInput("playersalaries_posfilter",
                                                         "Select position:",
@@ -838,7 +838,8 @@ shinyUI(
                                                     "Select date range:",
                                                     start = max(salary.data$Date),
                                                     end = max(salary.data$Date),
-                                                    startview = "year")),
+                                                    startview = "year",
+                                                    format = "mm/dd/yyyy")),
                                    mainPanel(
                                      h1("Player salaries"),
                                      DT::dataTableOutput("playersalaries")
