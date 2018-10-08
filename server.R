@@ -1783,8 +1783,8 @@ shinyServer(function(input, output, session) {
                {
                  playersalaries_inputs$posfilter <- input$playersalaries_posfilter
                  playersalaries_inputs$teamfilter <- input$playersalaries_teamfilter
-                 playersalaries_inputs$extract_date1 <- input$playersalaries_daterange[1]
-                 playersalaries_inputs$extract_date2 <- input$playersalaries_daterange[2]
+                 playersalaries_inputs$extract_date1 <- input$playersalaries_date1
+                 playersalaries_inputs$extract_date2 <- input$playersalaries_date2
                })
   
   dt_playersalaries <- reactive({
