@@ -14,7 +14,8 @@
 # byteams = T
 # FK = T
 # PK = T
-# OtherShots = 
+# OpenPlay = T
+# SetPiece = T
 # Mode <- function(x) {
 #   ux <- unique(x)
 #   ux[which.max(tabulate(match(x, ux)))]
@@ -30,14 +31,15 @@ shooterxgoals_perminute <- function(playerxgoals = playerxgoals,
                                     keyfilter = 0,
                                     byseasons = T,
                                     byteams = T,
-                                    OtherShots = T,
+                                    OpenPlay = T,
                                     FK = T,
-                                    PK = T){
+                                    PK = T,
+                                    SetPiece = T){
   
   tempdat <- playerxgoals %>%
     filter(date >= date1 & date <= date2,
            Season %in% season,
-           type %in% c('Other'[OtherShots], 'FK'[FK], 'PK'[PK]))
+           type %in% c('Open play'[OpenPlay], 'FK'[FK], 'PK'[PK], "Set piece"[SetPiece]))
   
   tempmins <- minutes_df %>%
     filter(date >= date1 & date <= date2,
@@ -177,6 +179,7 @@ shooterxgoals_perminute <- function(playerxgoals = playerxgoals,
 #                    minfilter = 0,
 #                    byseasons = T,
 #                    byteams = T,
-#                    OtherShots = T,
+#                    OpenPlay = T,
 #                    FK = T,
-#                    PK = T)
+#                    PK = T,
+#                    SetPiece = T)

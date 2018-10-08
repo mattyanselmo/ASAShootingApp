@@ -11,7 +11,8 @@ shooting <- shooting %>%
 shooterxgoals <- shooting %>%
   mutate(date = as.Date(date, format = '%m/%d/%Y')) %>%
   group_by(date, team, shooter, type = ifelse(patternOfPlay == 'Penalty', 'PK',
-                                              ifelse(patternOfPlay == 'Free kick', 'FK', 'Other'))) %>%
+                                              ifelse(patternOfPlay == 'Free kick', 'Direct FK',
+                                                     ifelse(patternOfPlay %in% c("Set piece", "Corner", "Throw in"), "Set piece", "Open play")))) %>%
   summarize(gameID = gameID[1],
             shots = n(),
             ontarget = sum(result %in% c('Goal', 'Saved', 'Blocked off line')),
@@ -26,7 +27,8 @@ shooterxgoals <- shooting %>%
 passerxgoals <- shooting %>%
   filter(!is.na(passer)) %>%
   group_by(date, team, passer, type = ifelse(patternOfPlay == 'Penalty', 'PK',
-                                             ifelse(patternOfPlay == 'Free kick', 'FK', 'Other'))) %>%
+                                             ifelse(patternOfPlay == 'Free kick', 'Direct FK',
+                                                    ifelse(patternOfPlay %in% c("Set piece", "Corner", "Throw in"), "Set piece", "Open play")))) %>%
   summarize(gameID = gameID[1],
             keypasses = n(),
             ontarget.pass = sum(result %in% c('Goal', 'Saved', 'Blocked off line')),

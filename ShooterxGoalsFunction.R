@@ -1,3 +1,4 @@
+# library
 # playerxgoals <- readRDS('IgnoreList/xGoalsByPlayer.rds') %>%
 #   mutate(date = as.Date(date, format = '%m/%d/%Y'))
 # minutes_df <- readRDS("IgnoreList/MinutesByGameID.rds")
@@ -12,7 +13,8 @@
 # byseasons = T
 # FK = T
 # PK = T
-# OtherShots = T
+# OpenPlay = T
+# SetPiece = T
 # Mode <- function(x) {
 #   ux <- unique(x)
 #   ux[which.max(tabulate(match(x, ux)))]
@@ -28,9 +30,10 @@ shooterxgoals.func <- function(playerxgoals = playerxgoals,
                                keyfilter = 0,
                                byteams = F,
                                byseasons = T,
-                               OtherShots = T,
-                               FK = F,
-                               PK = F){
+                               OpenPlay = T,
+                               FK = T,
+                               PK = T,
+                               SetPiece = T){
   
   tempmins <- minutes_df %>%
     filter(date >= date1 & date <= date2,
@@ -39,7 +42,7 @@ shooterxgoals.func <- function(playerxgoals = playerxgoals,
   tempdat <- playerxgoals %>%
     filter(date >= date1 & date <= date2,
            Season %in% season,
-           type %in% c('Other'[OtherShots], 'FK'[FK], 'PK'[PK]))
+           type %in% c("Open play"[OpenPlay], 'FK'[FK], 'PK'[PK], "Set piece"[SetPiece]))
   
   if(byteams & byseasons){
     aggdata <- tempdat %>%
@@ -212,8 +215,10 @@ shooterxgoals.func <- function(playerxgoals = playerxgoals,
 #                    keyfilter = 0,
 #                    byteams = F,
 #                    byseasons = T,
+#                    OpenPlay = T
 #                    FK = T,
-#                    PK = T) %>%
+#                    PK = T,
+#                    SetPiece = T) %>%
 #   mutate(`xG/shot` = ifelse(Shots > 0, xG/Shots, 0),
 #          `xA/pass` = ifelse(KeyP > 0, xA/KeyP, 0),
 #          `G-xG/shot` = ifelse(Shots > 0, `G-xG`/Shots, 0),
