@@ -141,6 +141,18 @@ saveRDS(combined %>%
                  afinal, outcome, keyPass, assist, ChainChange, hteam, ateam,
                  ChainID, xG, xGs, G, xGShooter, Vertical, Horizontal, pattern,
                  TotalTime), "IgnoreList/xGChain_combineddata.rds")
+
+saveRDS(combined %>% 
+          arrange(gameID, half, time) %>%
+          select(action, date, time, half, gameID, team, 
+                 goalie, team.1, passer, player, recipient, result, 
+                 x, y, endX, endY, angle, xPass = success.pred, hscore, ascore, hfinal, 
+                 afinal, outcome, keyPass, assist, ChainChange, hteam, ateam,
+                 ChainID, xG, xGs, G, xGShooter, Vertical, Horizontal, pattern,
+                 TotalTime), 
+        file = paste0(path, 
+                      "/Google Drive/Soccer Statistics and Research/ASA Blog/Analysis/Data/Shared data/xGChain_combineddata.rds"))
+
 set.seed(1)
 write.csv(combined %>% 
             filter(gameID %in% sample(unique(gameID), 4, replace = F)) %>%
