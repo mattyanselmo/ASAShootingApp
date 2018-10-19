@@ -1777,7 +1777,8 @@ shinyServer(function(input, output, session) {
   playersalaries_inputs <- reactiveValues(posfilter = c("GK", "D", "B", "M", "A", "F"),
                                           teamfilter = "All",
                                           extract_date1 = max(salary.data$Date),
-                                          extract_date2 = max(salary.data$Date))
+                                          extract_date2 = max(salary.data$Date),
+                                          aggregate = F)
   
   observeEvent(input$playersalaries_action,
                {
@@ -1785,6 +1786,7 @@ shinyServer(function(input, output, session) {
                  playersalaries_inputs$teamfilter <- input$playersalaries_teamfilter
                  playersalaries_inputs$extract_date1 <- input$playersalaries_date1
                  playersalaries_inputs$extract_date2 <- input$playersalaries_date2
+                 playersalaries_inputs$aggregate <- input$playersalaries_aggregate
                })
   
   dt_playersalaries <- reactive({
@@ -1798,20 +1800,33 @@ shinyServer(function(input, output, session) {
                              teamfilter = teamfilter,
                              posfilter = playersalaries_inputs$posfilter,
                              extract.date1 = playersalaries_inputs$extract_date1,
-                             extract.date2 = playersalaries_inputs$extract_date2)
+                             extract.date2 = playersalaries_inputs$extract_date2,
+                             aggregate = playersalaries_inputs$aggregate)
     dt
   })
   
   output$playersalaries <- DT::renderDataTable({
+    if(playersalaries_inputs$aggregate){
+      DT::datatable(dt_playersalaries(),
+                    rownames = F,
+                    options(list(autoWidth = T,
+                                 pageLength = 25))) %>%
+        formatCurrency(columns = c("Base", "Guaranteed", "Guar Total", "Guar Avg")[c(!playersalaries_inputs$aggregate, !playersalaries_inputs$aggregate, playersalaries_inputs$aggregate, playersalaries_inputs$aggregate)],
+                       currency = "$",
+                       interval = 3,
+                       mark = ",",
+                       digits = 0) 
+    } else{
     DT::datatable(dt_playersalaries() %>% mutate(Date = format(Date, "%m/%d/%Y")),
                  rownames = F,
                  options(list(autoWidth = T,
                               pageLength = 25))) %>%
-      formatCurrency(columns = c("Base", "Guaranteed"),
+      formatCurrency(columns = c("Base", "Guaranteed", "Guar Total", "Guar Avg")[c(!playersalaries_inputs$aggregate, !playersalaries_inputs$aggregate, playersalaries_inputs$aggregate, playersalaries_inputs$aggregate)],
                      currency = "$",
                      interval = 3,
                      mark = ",",
                      digits = 0)
+    }
   })
   
   # Team salary inputs ####
