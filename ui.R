@@ -861,10 +861,11 @@ shinyUI(
                                      #                format = "mm/dd/yyyy",
                                      #                width = "95%")
                                      checkboxInput("playersalaries_aggregate",
-                                                  "Aggregate across seasons:",
+                                                  "Combine selected seasons",
                                                   value = F)),
                                    mainPanel(
                                      h1("Player salaries"),
+                                     p(HTML("We have multiple salary extract dates in some seasons. When seasons are aggregated, only the latest extract date is used from each season.")),
                                      DT::dataTableOutput("playersalaries")
                                    ))
                         ),
