@@ -4,7 +4,9 @@ passes <- readRDS("IgnoreList/AllPassingData.rds") %>%
   mutate(time = as.character(time),
          time = sapply(strsplit(time, ':'), function(x) as.numeric(x[1]) + as.numeric(x[2])/60),
          x = x*100/115,
-         y = y*100/80)
+         y = y*100/80, 
+         endX = endX*100/115,
+         endY = endY*100/80)
 
 shots <- readRDS("IgnoreList/AllShotsData2011-2017.rds") %>%
   mutate(x = (115 - abs(distance * cos(angle*pi/180)))*100/115,
@@ -149,21 +151,21 @@ saveRDS(combined %>%
                  x, y, endX, endY, angle, xPass = success.pred, hscore, ascore, hfinal, 
                  afinal, outcome, keyPass, assist, ChainChange, hteam, ateam,
                  ChainID, xG, xGs, G, xGShooter, Vertical, Horizontal, pattern,
-                 TotalTime), 
-        file = paste0(ifelse(file.exists("C:/Users/Matthias"), 
-                             "C:/Users/Matthias.Kullowatz/Google Drive/Soccer Statistics and Research/ASA Blog/Analysis/Data/Shared data/xGChain_combineddata.rds",
-                             "C:/Users/Matthias.Kullowatz/Google Drive/Soccer Statistics and Research/ASA Blog/Analysis/Data/Shared data/xGChain_combineddata.rds")))
-# set.seed(1)
-# write.csv(combined %>% 
-#             filter(gameID %in% sample(unique(gameID), 4, replace = F)) %>%
-#             arrange(gameID, half, time) %>%
-#             select(action, date, time, half, gameID, team, 
-#                    goalie, team.1, passer, player, recipient, result, 
-#                    x, y, endX, endY, angle, xPass = success.pred, hscore, ascore, hfinal, 
-#                    afinal, outcome, keyPass, assist, ChainChange, hteam, ateam,
-#                    ChainID, xG, xGs, G, xGShooter, Vertical, Horizontal, pattern,
-#                    TotalTime), "IgnoreList/xGChain_combineddata_sample.csv", row.names = F)
+                 TotalTime),
+        file = paste0(path, 
+                      "/Google Drive/Soccer Statistics and Research/ASA Blog/Analysis/Data/Shared data/xGChain_combineddata.rds"))
 
+set.seed(1)
+write.csv(combined %>% 
+            filter(gameID %in% sample(unique(gameID), 4, replace = F)) %>%
+            arrange(gameID, half, time) %>%
+            select(action, date, time, half, gameID, team, 
+                   goalie, team.1, passer, player, recipient, result, 
+                   x, y, endX, endY, angle, xPass = success.pred, hscore, ascore, hfinal, 
+                   afinal, outcome, keyPass, assist, ChainChange, hteam, ateam,
+                   ChainID, xG, xGs, G, xGShooter, Vertical, Horizontal, pattern,
+                   TotalTime), "IgnoreList/xGChain_combineddata_sample.csv", row.names = F)
+                                            
 for(year in 2015:2018){
   write.csv(combined %>% 
               mutate(Season = as.numeric(format(date, "%Y"))) %>%

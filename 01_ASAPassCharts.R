@@ -154,7 +154,7 @@ write.csv(merged.passes, "IgnoreList/AllPassingData.csv", row.names = F)
 for(tm in unique(merged.passes$team)){
   write.csv(merged.passes %>%
               filter(team == tm) %>%
-              select(passer, recipient, date, x, endX, y, endY, success, success.pred),
+              select(eventID, team, team.1, passer, recipient, date, x, endX, y, endY, success, success.pred),
             paste0(path, 
                    "/Google Drive/Soccer Statistics and Research/ASA Blog/Analysis/Data/Shared data/xPassData_",
                    tm, "_allyears.csv"), 
@@ -164,7 +164,7 @@ for(tm in unique(merged.passes$team)){
 for(yr in unique(merged.passes$year)){
   write.csv(merged.passes %>%
               filter(year == yr) %>%
-              select(passer, recipient, date, x, endX, y, endY, success, success.pred),
+              select(eventID, team, team.1, passer, recipient, date, x, endX, y, endY, success, success.pred),
             paste0(path, 
                    "/Google Drive/Soccer Statistics and Research/ASA Blog/Analysis/Data/Shared data/xPassData_",
                    yr, "_allteams.csv"), 
