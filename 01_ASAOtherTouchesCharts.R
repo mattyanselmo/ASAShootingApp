@@ -4,7 +4,9 @@ passes <- readRDS("IgnoreList/AllPassingData.rds") %>%
   mutate(time = as.character(time),
          time = sapply(strsplit(time, ':'), function(x) as.numeric(x[1]) + as.numeric(x[2])/60),
          x = x*100/115,
-         y = y*100/80)
+         y = y*100/80, 
+         endX = endX*100/115,
+         endY = endY*100/80)
 
 shots <- readRDS("IgnoreList/AllShotsData2011-2017.rds") %>%
   mutate(x = (115 - abs(distance * cos(angle*pi/180)))*100/115,
