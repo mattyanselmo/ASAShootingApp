@@ -8,6 +8,11 @@ source("03_TeamPredictiveModelFunction.R")
 
 # About 60 seconds per 100 runs
 N <- 1000
+matchups <- matrix(data = 0, 
+                   nrow = length(unique(standings$Team)),
+                  ncol = length(unique(standings$Team)),
+                  dimnames = list(sort(unique(standings$Team)),
+                                  sort(unique(standings$Team))))
 standings.cum <- data.frame()
 for(run in 1:N){
   scores <- matrix(NA, nrow = nrow(sched), ncol = 2)
@@ -78,4 +83,22 @@ saveRDS(final.pos %>%
           filter(Conf == "east") %>% 
           select(-Conf), 
         paste0("IgnoreList/CurrentSimulationResults_playoffseeding_east_week", max.week, "_year", year, ".rds"))
+
+# Matchup analysis ####
+matchup.func <- function(results = results, team1, team2, rank1, rank2){
+  temp <- results %>%
+    group_by(Run) %>%
+    summarize(Matchup = ifelse(Rank[Team == team1] == rank1 & Rank[Team == team2] == rank2, 1, 0)) %>%
+    ungroup()
+  sum(temp$Matchup)
+}
+
+team1 <- "POR"
+team2 <- "SEA"
+matchup.func(results, team1, team2, 3, 6)/N
+matchup.func(results, team1, team2, 4, 5)/N
+matchup.func(results, team1, team2, 5, 4)/N
+matchup.func(results, team1, team2, 6, 3)/N
+
+
 

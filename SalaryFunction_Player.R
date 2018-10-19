@@ -25,11 +25,16 @@ player.salary.func <- function(salary.data = salary.data,
       group_by(Player = paste0(First, " ", Last), Season) %>% 
       filter(row_number() == n()) %>% 
       group_by(Player) %>% 
-      summarize(Records = n(), 
+      summarize(Team = paste0(unique(Team), collapse = ","),
+                Last = Last[1],
+                First = First[1],
+                Records = n(), 
                 Seasons = paste0(min(Season), " - ", max(Season)), 
-                Team = paste0(unique(Team), collapse = ","), 
                 `Guar Total` = sum(Guaranteed, na.rm = T), 
-                `Guar Avg` = mean(Guaranteed, na.rm = T))
+                `Guar Avg` = mean(Guaranteed, na.rm = T)) %>%
+      ungroup() %>%
+      select(-Player) %>%
+      arrange(desc(`Guar Avg`))
   } else{
     temp %>%
       arrange(desc(Guaranteed))
@@ -42,4 +47,5 @@ player.salary.func <- function(salary.data = salary.data,
 #                    teamfilter = "POR",
 #                    posfilter = "F",
 #                    extract.date1 = "2000-01-01",
-#                    extract.date2 = "2020-01-01")
+#                    extract.date2 = "2020-01-01",
+#                    aggregate = T)
