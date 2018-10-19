@@ -151,7 +151,7 @@ saveRDS(combined %>%
                  x, y, endX, endY, angle, xPass = success.pred, hscore, ascore, hfinal, 
                  afinal, outcome, keyPass, assist, ChainChange, hteam, ateam,
                  ChainID, xG, xGs, G, xGShooter, Vertical, Horizontal, pattern,
-                 TotalTime), 
+                 TotalTime),
         file = paste0(path, 
                       "/Google Drive/Soccer Statistics and Research/ASA Blog/Analysis/Data/Shared data/xGChain_combineddata.rds"))
 
@@ -165,7 +165,7 @@ write.csv(combined %>%
                    afinal, outcome, keyPass, assist, ChainChange, hteam, ateam,
                    ChainID, xG, xGs, G, xGShooter, Vertical, Horizontal, pattern,
                    TotalTime), "IgnoreList/xGChain_combineddata_sample.csv", row.names = F)
-
+                                            
 for(year in 2015:2018){
   write.csv(combined %>% 
               mutate(Season = as.numeric(format(date, "%Y"))) %>%
@@ -176,7 +176,9 @@ for(year in 2015:2018){
                      x, y, endX, endY, angle, xPass = success.pred, hscore, ascore, hfinal, 
                      afinal, outcome, keyPass, assist, ChainChange, 
                      ChainID, xG, xGs, G, xGShooter, Vertical, Horizontal, pattern,
-                     TotalTime), 
-            file = paste0("IgnoreList/xGChain_combineddata", year, ".csv"), 
+                     TotalTime),
+            file = ifelse(file.exists("C:/Users/Matthias"), 
+                   paste0("C:/Users/Matthias.Kullowatz/Google Drive/Soccer Statistics and Research/ASA Blog/Analysis/Data/Shared data/xGChain_combineddata", year, ".rds"),
+                   paste0("C:/Users/Matthias.Kullowatz/Google Drive/Soccer Statistics and Research/ASA Blog/Analysis/Data/Shared data/xGChain_combineddata", year, ".rds")),
             row.names = F)
 }

@@ -54,6 +54,7 @@ shinyServer(function(input, output, session) {
                                    shooting_other = T,
                                    shooting_fk = T,
                                    shooting_pk = T,
+                                   setpiece = T,
                                    shooterplot_xvar = "xG",
                                    shooterplot_yvar = "Goals",
                                    shooterplot_per96_xvar = "xG",
@@ -75,6 +76,7 @@ shinyServer(function(input, output, session) {
                  shooter_inputs$shooting_other <- input$shooting_other
                  shooter_inputs$shooting_fk <- input$shooting_fk
                  shooter_inputs$shooting_pk <- input$shooting_pk
+                 shooter_inputs$setpiece <- input$shooting_setpiece
                  shooter_inputs$shooterplot_xvar <- input$shooterplot_xvar
                  shooter_inputs$shooterplot_yvar <- input$shooterplot_yvar
                  # shooter_inputs$shooterplot_per96_xvar <- input$shooterplot_per96_xvar
@@ -93,9 +95,10 @@ shinyServer(function(input, output, session) {
                                      keyfilter = shooter_inputs$shooting_minkeypasses,
                                      byteams = shooter_inputs$shooting_byteams,
                                      byseasons = shooter_inputs$shooting_byseasons,
-                                     OtherShots = shooter_inputs$shooting_other,
+                                     OpenPlay = shooter_inputs$shooting_other,
                                      FK = shooter_inputs$shooting_fk,
-                                     PK = shooter_inputs$shooting_pk) %>%
+                                     PK = shooter_inputs$shooting_pk,
+                                     SetPiece = shooter_inputs$setpiece) %>%
         mutate(`xG/shot` = ifelse(Shots > 0, xG/Shots, 0),
                `xA/pass` = ifelse(KeyP > 0, xA/KeyP, 0),
                `G-xG/shot` = ifelse(Shots > 0, `G-xG`/Shots, 0),
@@ -110,9 +113,10 @@ shinyServer(function(input, output, session) {
                                      keyfilter = shooter_inputs$shooting_minkeypasses,
                                      byteams = shooter_inputs$shooting_byteams,
                                      byseasons = shooter_inputs$shooting_byseasons,
-                                     OtherShots = shooter_inputs$shooting_other,
+                                     OpenPlay = shooter_inputs$shooting_other,
                                      FK = shooter_inputs$shooting_fk,
-                                     PK = shooter_inputs$shooting_pk) %>%
+                                     PK = shooter_inputs$shooting_pk,
+                                     SetPiece = shooter_inputs$setpiece) %>%
         mutate(`xG/shot` = ifelse(Shots > 0, xG/Shots, 0),
                `xA/pass` = ifelse(KeyP > 0, xA/KeyP, 0),
                `G-xG/shot` = ifelse(Shots > 0, `G-xG`/Shots, 0),
@@ -138,9 +142,10 @@ shinyServer(function(input, output, session) {
                                           minfilter = shooter_inputs$shooting_minfilter,
                                           byseasons = shooter_inputs$shooting_byseasons,
                                           byteams = shooter_inputs$shooting_byteams,
-                                          OtherShots = shooter_inputs$shooting_other,
+                                          OpenPlay = shooter_inputs$shooting_other,
                                           FK = shooter_inputs$shooting_fk,
-                                          PK = shooter_inputs$shooting_pk)
+                                          PK = shooter_inputs$shooting_pk,
+                                          SetPiece = shooter_inputs$setpiece)
     } else{
       dt_per96 <- shooterxgoals_perminute(playerxgoals,
                                           minutes_df = minutesPlayed,
@@ -152,9 +157,10 @@ shinyServer(function(input, output, session) {
                                           minfilter = shooter_inputs$shooting_minfilter,
                                           byseasons = shooter_inputs$shooting_byseasons,
                                           byteams = shooter_inputs$shooting_byteams,
-                                          OtherShots = shooter_inputs$shooting_other,
+                                          OpenPlay = shooter_inputs$shooting_other,
                                           FK = shooter_inputs$shooting_fk,
-                                          PK = shooter_inputs$shooting_pk)
+                                          PK = shooter_inputs$shooting_pk,
+                                          SetPiece = shooter_inputs$setpiece)
     }
     
     dt_per96 %>% filter(Pos %in% shooter_inputs$shooting_position)
@@ -1764,6 +1770,94 @@ shinyServer(function(input, output, session) {
                                pageLength = 15,
                                dom = "t"))) %>%
       formatPercentage(columns = c("1", "2", "3", "4", "5", "6", "Playoffs", "Shield", "Bye"), digits = 1)
+  })
+  
+  # Salary ####
+  # Player salary inputs ####
+  playersalaries_inputs <- reactiveValues(posfilter = c("GK", "D", "B", "M", "A", "F"),
+                                          teamfilter = "All",
+                                          extract_date1 = max(salary.data$Date),
+                                          extract_date2 = max(salary.data$Date),
+                                          aggregate = F)
+  
+  observeEvent(input$playersalaries_action,
+               {
+                 playersalaries_inputs$posfilter <- input$playersalaries_posfilter
+                 playersalaries_inputs$teamfilter <- input$playersalaries_teamfilter
+                 playersalaries_inputs$extract_date1 <- input$playersalaries_date1
+                 playersalaries_inputs$extract_date2 <- input$playersalaries_date2
+                 playersalaries_inputs$aggregate <- input$playersalaries_aggregate
+               })
+  
+  dt_playersalaries <- reactive({
+    if(playersalaries_inputs$teamfilter == "All"){
+      teamfilter <- unique(salary.data$Team)
+    } else{
+      teamfilter <- playersalaries_inputs$teamfilter 
+    }
+    
+    dt <- player.salary.func(salary.data = salary.data,
+                             teamfilter = teamfilter,
+                             posfilter = playersalaries_inputs$posfilter,
+                             extract.date1 = playersalaries_inputs$extract_date1,
+                             extract.date2 = playersalaries_inputs$extract_date2,
+                             aggregate = playersalaries_inputs$aggregate)
+    dt
+  })
+  
+  output$playersalaries <- DT::renderDataTable({
+    if(playersalaries_inputs$aggregate){
+      DT::datatable(dt_playersalaries(),
+                    rownames = F,
+                    options(list(autoWidth = T,
+                                 pageLength = 25))) %>%
+        formatCurrency(columns = c("Base", "Guaranteed", "Guar Total", "Guar Avg")[c(!playersalaries_inputs$aggregate, !playersalaries_inputs$aggregate, playersalaries_inputs$aggregate, playersalaries_inputs$aggregate)],
+                       currency = "$",
+                       interval = 3,
+                       mark = ",",
+                       digits = 0) 
+    } else{
+    DT::datatable(dt_playersalaries() %>% mutate(Date = format(Date, "%m/%d/%Y")),
+                 rownames = F,
+                 options(list(autoWidth = T,
+                              pageLength = 25))) %>%
+      formatCurrency(columns = c("Base", "Guaranteed", "Guar Total", "Guar Avg")[c(!playersalaries_inputs$aggregate, !playersalaries_inputs$aggregate, playersalaries_inputs$aggregate, playersalaries_inputs$aggregate)],
+                     currency = "$",
+                     interval = 3,
+                     mark = ",",
+                     digits = 0)
+    }
+  })
+  
+  # Team salary inputs ####
+  teamsalaries_inputs <- reactiveValues(groupby = "Team",
+                                        seasonfilter = 2018)
+  
+  observeEvent(input$teamsalaries_action,
+               {
+                 teamsalaries_inputs$groupby <- input$teamsalaries_groupby
+                 teamsalaries_inputs$seasonfilter <- input$teamsalaries_seasonfilter
+               })
+  
+  dt_teamsalaries <- reactive({
+    
+    dt <- team.salary.func(salary.data = salary.data,
+                           grouping = teamsalaries_inputs$groupby,
+                           seasonfilter = teamsalaries_inputs$seasonfilter)
+    dt
+  })
+  
+  output$teamsalaries <- DT::renderDataTable({
+    DT::datatable(dt_teamsalaries(),
+                  rownames = F,
+                  options(list(autoWidth = T,
+                               pageLength = 25,
+                               dom = "t"))) %>%
+      formatCurrency(columns = c("TotalGuar", "AvgGuar", "MedGuar", "StdDevGuar"),
+                     currency = "$",
+                     interval = 3,
+                     mark = ",",
+                     digits = 0)
   })
   
   # Glossary ####
