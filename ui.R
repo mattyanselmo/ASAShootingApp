@@ -866,6 +866,7 @@ shinyUI(
                                    mainPanel(
                                      h1("Player salaries"),
                                      p(HTML("We have multiple salary extract dates in some seasons. When seasons are aggregated, only the latest extract date is used from each season.")),
+                                     downloadButton('playersalaries_download', 'Download CSV'),
                                      DT::dataTableOutput("playersalaries")
                                    ))
                         ),
@@ -873,6 +874,7 @@ shinyUI(
                                  value = "teamsalaries",
                                  sidebarLayout(
                                  sidebarPanel(
+                                   width = 2,
                                    actionButton("teamsalaries_action",
                                                 label = "Refresh filters"),
                                    selectInput("teamsalaries_groupby",
@@ -885,6 +887,7 @@ shinyUI(
                                                selected = max(as.numeric(unique(format(salary.data$Date, "%Y")))))),
                                  mainPanel(
                                    h1("Salaries by team and position"),
+                                   downloadButton('teamsalaries_download', 'Download CSV'),
                                    DT::dataTableOutput("teamsalaries")
                                  )
                         )
