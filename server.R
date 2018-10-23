@@ -1829,6 +1829,15 @@ shinyServer(function(input, output, session) {
     }
   })
   
+  # Player salary downloads ####
+  output$playersalaries_download <- downloadHandler(
+    filename = paste0("ASA_PlayerSalaries.csv"),
+    
+    content = function(file){
+      write.csv(dt_playersalaries(), file, row.names = FALSE)
+    }
+  )
+  
   # Team salary inputs ####
   teamsalaries_inputs <- reactiveValues(groupby = "Team",
                                         seasonfilter = 2018)
@@ -1859,6 +1868,15 @@ shinyServer(function(input, output, session) {
                      mark = ",",
                      digits = 0)
   })
+  
+  # Team salary downloads ####
+  output$teamsalaries_download <- downloadHandler(
+    filename = paste0("ASA_TeamSalaries.csv"),
+    
+    content = function(file){
+      write.csv(dt_teamsalaries(), file, row.names = FALSE)
+    }
+  )
   
   # Glossary ####
   output$glossary <- DT::renderDataTable({

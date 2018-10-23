@@ -137,7 +137,7 @@ combined <- combined %>%
 
 saveRDS(combined %>% 
           arrange(gameID, half, time) %>%
-          select(action, date, time, half, gameID, team, 
+          select(eventID, action, date, time, half, gameID, team, 
                  goalie, team.1, passer, player, recipient, result, 
                  x, y, endX, endY, angle, xPass = success.pred, hscore, ascore, hfinal, 
                  afinal, outcome, keyPass, assist, ChainChange, hteam, ateam,
@@ -146,7 +146,7 @@ saveRDS(combined %>%
 
 saveRDS(combined %>% 
           arrange(gameID, half, time) %>%
-          select(action, date, time, half, gameID, team, 
+          select(eventID, action, date, time, half, gameID, team, 
                  goalie, team.1, passer, player, recipient, result, 
                  x, y, endX, endY, angle, xPass = success.pred, hscore, ascore, hfinal, 
                  afinal, outcome, keyPass, assist, ChainChange, hteam, ateam,
@@ -159,7 +159,7 @@ set.seed(1)
 write.csv(combined %>% 
             filter(gameID %in% sample(unique(gameID), 4, replace = F)) %>%
             arrange(gameID, half, time) %>%
-            select(action, date, time, half, gameID, team, 
+            select(eventID, action, date, time, half, gameID, team, 
                    goalie, team.1, passer, player, recipient, result, 
                    x, y, endX, endY, angle, xPass = success.pred, hscore, ascore, hfinal, 
                    afinal, outcome, keyPass, assist, ChainChange, hteam, ateam,
@@ -171,14 +171,12 @@ for(year in 2015:2018){
               mutate(Season = as.numeric(format(date, "%Y"))) %>%
               filter(Season == year) %>%
               arrange(gameID, half, time) %>%
-              select(action, date, time, half, gameID, team, 
+              select(eventID, action, date, time, half, gameID, team, 
                      goalie, team.1, passer, player, recipient, result, 
                      x, y, endX, endY, angle, xPass = success.pred, hscore, ascore, hfinal, 
                      afinal, outcome, keyPass, assist, ChainChange, 
                      ChainID, xG, xGs, G, xGShooter, Vertical, Horizontal, pattern,
                      TotalTime),
-            file = ifelse(file.exists("C:/Users/Matthias"), 
-                   paste0("C:/Users/Matthias.Kullowatz/Google Drive/Soccer Statistics and Research/ASA Blog/Analysis/Data/Shared data/xGChain_combineddata", year, ".rds"),
-                   paste0("C:/Users/Matthias.Kullowatz/Google Drive/Soccer Statistics and Research/ASA Blog/Analysis/Data/Shared data/xGChain_combineddata", year, ".rds")),
+            file = paste0(path, "/Google Drive/Soccer Statistics and Research/ASA Blog/Analysis/Data/Shared data/xGChain_combineddata", year, ".rds"),
             row.names = F)
 }
