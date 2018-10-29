@@ -16,7 +16,7 @@ standings <- readHTMLTable(htmlParse(read_html("https://www.mlssoccer.com/standi
 standings <- lapply(standings, function(x){names(x) <- as.character(as.matrix(x[1,])); x <- x[-1,]; x})
 standings.east <- standings[[1]][,1:12] %>% 
   select(`#`, Club, GP, W:`T`, GF:GD, Pts = PTS, PPG) %>%
-  mutate(Club = gsub("x - ", "", gsub("e - ", "", Club))) %>%
+  mutate(Club = gsub("y - ", "", gsub("s - ", "", gsub("x - ", "", gsub("e - ", "", Club))))) %>%
   left_join(team.map, c("Club" = "Original")) %>%
   mutate(Club = Convert) %>%
   select(-Convert) %>%
@@ -25,7 +25,7 @@ standings.east <- standings[[1]][,1:12] %>%
   select(-Convert)
 standings.west <- standings[[2]][,1:12] %>% 
   select(`#`, Club, GP, W:`T`, GF:GD, Pts = PTS, PPG) %>%
-  mutate(Club = gsub("x - ", "", gsub("e - ", "", Club))) %>%
+  mutate(Club = gsub("y - ", "", gsub("s - ", "", gsub("x - ", "", gsub("e - ", "", Club))))) %>%
   left_join(team.map, c("Club" = "Original")) %>%
   mutate(Club = Convert) %>%
   select(-Convert) %>%
