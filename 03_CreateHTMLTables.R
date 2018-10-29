@@ -43,9 +43,10 @@ dt_xgoals <- lapply(2011:max(playerxgoals$Season),
                                                      keyfilter = 0,
                                                      byteams = F,
                                                      byseasons = T,
-                                                     OtherShots = T,
+                                                     OpenPlay = T,
                                                      FK = T,
-                                                     PK = T) %>% 
+                                                     PK = T,
+                                                     SetPiece = T) %>% 
                         select(-c(Dist, Dist.key)) %>%
                         mutate(`G+A` = Goals + Assts) %>%
                         rename(Sht = Shots,G = Goals, KP = KeyP, A = Assts) %>%
@@ -62,9 +63,10 @@ dt_xgoals <- lapply(2011:max(playerxgoals$Season),
                                                           minfilter = 0,
                                                           byseasons = T,
                                                           byteams = F,
-                                                          OtherShots = T,
+                                                          OpenPlay = T,
                                                           FK = T,
-                                                          PK = T) %>%
+                                                          PK = T,
+                                                          SetPiece = T) %>%
                         mutate(`G+A` = Goals + Assts) %>%
                         rename(Sht = Shots,G = Goals, KP = KeyP, A = Assts) %>%
                         select(Player:xG, `G-xG`:`xG+xA`, xPlace) %>%
