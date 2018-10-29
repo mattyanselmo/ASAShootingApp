@@ -8,11 +8,7 @@ source("03_TeamPredictiveModelFunction.R")
 
 # About 60 seconds per 100 runs
 N <- 1000
-matchups <- matrix(data = 0, 
-                   nrow = length(unique(standings$Team)),
-                  ncol = length(unique(standings$Team)),
-                  dimnames = list(sort(unique(standings$Team)),
-                                  sort(unique(standings$Team))))
+
 standings.cum <- data.frame()
 for(run in 1:N){
   scores <- matrix(NA, nrow = nrow(sched), ncol = 2)
@@ -27,6 +23,10 @@ for(run in 1:N){
   
   cell <- which(cumsum(score.mat) > runif(1))[1]
   scores[i,] <- c(cell %% 11 - 1, (cell - 1) %/% 11)
+  
+  sched[["Win"]][i] <- sum(score.mat[lower.tri(score.mat)])
+  sched[["Loss"]][i] <- sum(score.mat[upper.tri(score.mat)])
+  sched[["Draw"]][i] <- sum(diag(score.mat))
   
   standings.temp$Pts[standings.temp$Team == sched$Home[i]] <- standings.temp$Pts[standings.temp$Team == sched$Home[i]] + 3*(scores[i,1] > scores[i,2]) + (scores[i,1] == scores[i,2])
   standings.temp$Pts[standings.temp$Team == sched$Away[i]] <- standings.temp$Pts[standings.temp$Team == sched$Away[i]] + 3*(scores[i,1] < scores[i,2]) + (scores[i,1] == scores[i,2])
@@ -71,7 +71,7 @@ final.pos <- results %>%
   arrange(desc(`1`), desc(Playoffs)) %>%
   ungroup()
 
-final.pos
+final.pos %>% as.data.frame()
 saveRDS(final.pos %>% filter(Conf == "west") %>% select(-Conf), "IgnoreList/CurrentSimulationResults_playoffseeding_west.rds")
 saveRDS(final.pos %>% 
           filter(Conf == "west") %>% 
@@ -93,12 +93,51 @@ matchup.func <- function(results = results, team1, team2, rank1, rank2){
   sum(temp$Matchup)
 }
 
-team1 <- "POR"
-team2 <- "SEA"
+team1 <- "SEA"
+team2 <- "RSL"
 matchup.func(results, team1, team2, 3, 6)/N
 matchup.func(results, team1, team2, 4, 5)/N
 matchup.func(results, team1, team2, 5, 4)/N
 matchup.func(results, team1, team2, 6, 3)/N
 
+matchups <- matrix(data = 0, 
+                   nrow = length(unique(standings$Team)),
+                   ncol = length(unique(standings$Team)),
+                   dimnames = list(sort(unique(standings$Team)),
+                                   sort(unique(standings$Team))))
+for(home in standings$Team[standings$Conf == "west"]){
+  for(away in standings$Team[standings$Conf == "west"]){
+    matchups[rownames(matchups) == home, colnames(matchups) == away] <- matchup.func(results, home, away, 3, 6)/N + matchup.func(results, home, away, 4, 5)/N
+  }
+}
 
+for(home in standings$Team[standings$Conf == "east"]){
+  for(away in standings$Team[standings$Conf == "east"]){
+    matchups[rownames(matchups) == home, colnames(matchups) == away] <- matchup.func(results, home, away, 3, 6)/N + matchup.func(results, home, away, 4, 5)/N
+  }
+}
+
+west <- matchups[rownames(matchups) %in% standings$Team[standings$Conf == "west"], 
+         colnames(matchups) %in% standings$Team[standings$Conf == "west"]] %>%
+  as.data.frame()
+west <- west %>%
+  select(which(sapply(west, function(x) sum(x) > 0) | apply(west, 1, function(x) sum(x) > 0))) %>%
+  filter(sapply(west, function(x) sum(x) > 0) | apply(west, 1, function(x) sum(x) > 0))
+print(west %>%
+  mutate(Home = colnames(west)) %>%
+  select_(.dots = c("Home", colnames(west))),
+  row.names = F)
+
+
+
+east <- matchups[rownames(matchups) %in% standings$Team[standings$Conf == "east"], 
+                 colnames(matchups) %in% standings$Team[standings$Conf == "east"]] %>%
+  as.data.frame()
+east <- east %>%
+  select(which(sapply(east, function(x) sum(x) > 0) | apply(east, 1, function(x) sum(x) > 0))) %>%
+  filter(sapply(east, function(x) sum(x) > 0) | apply(east, 1, function(x) sum(x) > 0))
+print(east %>%
+        mutate(Home = colnames(east)) %>%
+        select_(.dots = c("Home", colnames(east))),
+      row.names = F)
 
