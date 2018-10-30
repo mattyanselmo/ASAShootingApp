@@ -1772,6 +1772,18 @@ shinyServer(function(input, output, session) {
       formatPercentage(columns = c("1", "2", "3", "4", "5", "6", "Playoffs", "Shield", "Bye"), digits = 1)
   })
   
+  # MLS Cup predictions ####
+  
+  output$cupchances_table <- DT::renderDataTable({
+    
+    DT::datatable(cupchances,
+                  rownames = F,
+                  options(list(autoWidth = T,
+                               pageLength = 15,
+                               dom = "t"))) %>%
+      formatPercentage(columns = c("Conf Semis", "Conf Finals", "Finals", "Champs"), digits = 1)
+  })
+  
   # Salary ####
   # Player salary inputs ####
   playersalaries_inputs <- reactiveValues(posfilter = c("GK", "D", "B", "M", "A", "F"),

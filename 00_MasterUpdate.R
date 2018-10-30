@@ -21,6 +21,7 @@ source('03_TeamPMData.R')
 source("03_TunePMModels.R")
 source("03_TeamPMDataThruCurrentWeek.R")
 source("03_SimulateSeasonResults.R")
+source("03_SimulateMLSCupResults.R")
 
 if(length(grep("_master", getwd())) > 0){
   source("03_CreateHTMLTables.R")
