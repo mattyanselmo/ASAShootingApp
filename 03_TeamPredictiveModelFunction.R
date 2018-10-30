@@ -1,11 +1,14 @@
 # Predict Function ####
 # library(dplyr)
-# 
-# pred.data <- readRDS('IgnoreList/TeamPredictionsData_week35.rds')
-# load('IgnoreList/UnivariatePoissonModels.Rdata')
 
-# mod.data.recent should be each teams most recent updates to xGoals
-pm.function <- function(pred.data, model.home, model.away, team.home, team.away, season = 2017){
+# Sample function inputs 
+# pred.data <- readRDS("IgnoreList/TeamPredictionsData.rds")
+# load('IgnoreList/UnivariatePoissonModels.Rdata')
+# team.home = "FCD"
+# team.away = "POR"
+# season = 2018
+
+pm.function <- function(pred.data, model.home, model.away, team.home, team.away, season = 2018, time = 1){
   
   temp.home <- pred.data %>%
     filter(team == team.home, Season == season)
@@ -19,11 +22,11 @@ pm.function <- function(pred.data, model.home, model.away, team.home, team.away,
   
   lambda.home <- predict(model.home, 
                          predict.game, 
-                         type = 'response')
+                         type = 'response') * time
   
   lambda.away <- predict(model.away, 
                          predict.game, 
-                         type = 'response')
+                         type = 'response') * time
   
   dist.home <- sapply(0:10, function(x) dpois(x, lambda = lambda.home))
   dist.away <- sapply(0:10, function(x) dpois(x, lambda = lambda.away))
@@ -45,4 +48,4 @@ pm.function <- function(pred.data, model.home, model.away, team.home, team.away,
   
 }
 
-# pm.function(pred.data, model.home, model.away, 'SEA', 'VAN')
+#  pm.function(pred.data, model.home, model.away, 'SEA', 'VAN', season = 2018)
