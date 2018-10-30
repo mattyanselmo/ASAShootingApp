@@ -63,6 +63,7 @@ teampassing.defense <- readRDS("IgnoreList/xPassingByTeamDefense.rds")
 playerchaindata <- readRDS("IgnoreList/PlayerxGChainData.rds")
 playoffsseeding_west <- readRDS("IgnoreList/CurrentSimulationResults_playoffseeding_west.rds")
 playoffsseeding_east <- readRDS("IgnoreList/CurrentSimulationResults_playoffseeding_east.rds")
+cupchances <- readRDS(paste0("AppData/", sort(grep(".rds", grep("MLSCupSimulationResults", list.files("AppData"), value = T), value = T), decreasing = T)[1]))
 salary.data <- readRDS("AppData/SalaryData.rds")
 
 #pred.data <- readRDS('IgnoreList/TeamPredictionsData_week35.rds')
