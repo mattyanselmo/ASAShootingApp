@@ -822,8 +822,8 @@ shinyUI(
                                    tags$head(
                                      tags$style(".datatables .display {margin-left: 0;}"))),
                                  h1('Playoffs seeding probabilities'),
-                                 p(HTML("Based on 5,000 simulated runs of the remaining MLS Cup playoffs. <br>
-                                        Percentages shown to tenths only to reinforce mathematical certainties; margin of error is greater than 0.5% for probabilities between 5.0% and 95.0%.")), 
+                                 p(HTML("Based on 10,000 simulated runs of the remaining MLS Cup playoffs. <br>
+                                        Percentages shown to tenths only to reinforce mathematical certainties; margin of error is greater than 0.5% for probabilities between 10.0% and 90.0%.")), 
                                  br(),
                                  DT::dataTableOutput("cupchances_table"),
                                  br()
