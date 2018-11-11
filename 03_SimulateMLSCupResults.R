@@ -13,19 +13,21 @@ source("Functions/PlayoffSimulationFunctions.R")
 
 # Edit these each round to "seed" the simulation
 east <- (standings %>% filter(Conf == "east"))$Team[1:6] # original seeding
-east.sim <- (standings %>% filter(Conf == "east"))$Team[1:6] # teams left
 west <- (standings %>% filter(Conf == "west"))$Team[1:6] # original seeding
-west.sim <- (standings %>% filter(Conf == "west"))$Team[1:6] # teams left
 overall <- standings$Team
 
-N <- 5000
+N <- 10000
 results <- data.frame(Team = c(), Round = c(), Run = c())
 for(run in 1:N){
+  east.sim <- c("NYRB", "CLB", "ATL", "NYC")
+  west.sim <- c("SKC", "RSL", "SEA", "POR")
+  # east.sim <- (standings %>% filter(Conf == "east"))$Team[1:6] # teams left
+  # west.sim <- (standings %>% filter(Conf == "west"))$Team[1:6] # teams left
   
   # Eastern conference
-  rnd.east <- ifelse(length(east) == 6, 1,
-                     ifelse(length(east) == 4, 2,
-                            ifelse(length(east) == 2, 3, 4)))
+  rnd.east <- ifelse(length(east.sim) == 6, 1,
+                     ifelse(length(east.sim) == 4, 2,
+                            ifelse(length(east.sim) == 2, 3, 4)))
   while(rnd.east < 4){
     if(rnd.east == 1){
       sim <- sim.round(teams = east[c(3, 6, 4, 5)], roundtype = "knockout")
@@ -43,9 +45,9 @@ for(run in 1:N){
   }
   
   # Western conference
-  rnd.west <- ifelse(length(west) == 6, 1,
-                     ifelse(length(west) == 4, 2,
-                            ifelse(length(west) == 2, 3, 4)))
+  rnd.west <- ifelse(length(west.sim) == 6, 1,
+                     ifelse(length(west.sim) == 4, 2,
+                            ifelse(length(west.sim) == 2, 3, 4)))
   while(rnd.west < 4){
     if(rnd.west == 1){
       sim <- sim.round(teams = west[c(3, 6, 4, 5)], roundtype = "knockout")
@@ -73,12 +75,13 @@ for(run in 1:N){
 table(results %>% filter(Round == 5) %>% select(Team))/N
 
 (sim.summ <- results %>%
-  group_by(Team) %>%
-  summarize(`Conf Semis` = sum(Round == 2)/N,
-            `Conf Finals` = sum(Round == 3)/N,
-            Finals = sum(Round == 4)/N,
-            Champs = sum(Round == 5)/N) %>%
-  arrange(desc(Champs), desc(Finals)))
+    group_by(Team) %>%
+    summarize(`Conf Semis` = 1,
+              #`Conf Semis` = sum(Round == 2)/N,
+              `Conf Finals` = sum(Round == 3)/N,
+              Finals = sum(Round == 4)/N,
+              Champs = sum(Round == 5)/N) %>%
+    arrange(desc(Champs), desc(Finals)))
 
 write.csv(sim.summ, paste0("AppData/MLSCupSimulationResults - ", Sys.Date(), ".csv"))
 saveRDS(sim.summ, paste0("AppData/MLSCupSimulationResults - ", Sys.Date(), ".rds"))
