@@ -1,7 +1,7 @@
-# library
+# library(dplyr)
 # playerxgoals <- readRDS('IgnoreList/xGoalsByPlayer.rds') %>%
 #   mutate(date = as.Date(date, format = '%m/%d/%Y'))
-# minutes_df <- readRDS("IgnoreList/MinutesByGameID.rds")
+# minutes_df <- readRDS("IgnoreList/MinutesByGameID_forapp.rds")
 # playerpos <- readRDS("IgnoreList/playerpositions_byseason.rds")
 # date1 = as.Date('2000-01-01')
 # date2 = as.Date('9999-12-31')
@@ -42,7 +42,7 @@ shooterxgoals.func <- function(playerxgoals = playerxgoals,
   tempdat <- playerxgoals %>%
     filter(date >= date1 & date <= date2,
            Season %in% season,
-           type %in% c("Open play"[OpenPlay], 'FK'[FK], 'PK'[PK], "Set piece"[SetPiece]))
+           type %in% c("Open play"[OpenPlay], 'Direct FK'[FK], 'PK'[PK], "Set piece"[SetPiece]))
   
   if(byteams & byseasons){
     aggdata <- tempdat %>%
@@ -207,7 +207,7 @@ shooterxgoals.func <- function(playerxgoals = playerxgoals,
 # }
 # shooterxgoals.func(playerxgoals = readRDS('IgnoreList/xGoalsByPlayer.rds') %>%
 #                      mutate(date = as.Date(date, format = '%m/%d/%Y')),
-#                    minutes_df <- readRDS("IgnoreList/MinutesByGameID.rds"),
+#                    minutes_df <- readRDS("IgnoreList/MinutesByGameID_forapp.rds"),
 #                    date1 = as.Date('2000-01-01'),
 #                    date2 = as.Date('9999-12-31'),
 #                    season = 2018,
@@ -215,7 +215,7 @@ shooterxgoals.func <- function(playerxgoals = playerxgoals,
 #                    keyfilter = 0,
 #                    byteams = F,
 #                    byseasons = T,
-#                    OpenPlay = T
+#                    OpenPlay = T,
 #                    FK = T,
 #                    PK = T,
 #                    SetPiece = T) %>%

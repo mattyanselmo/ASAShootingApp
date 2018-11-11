@@ -2,7 +2,7 @@
 # library(dplyr)
 # playerxgoals <- readRDS('IgnoreList/xGoalsByPlayer.rds') %>%
 #   mutate(date = as.Date(date, format = '%m/%d/%Y'))
-# minutes_df <- readRDS('IgnoreList/MinutesByGameID.rds')
+# minutes_df <- readRDS('IgnoreList/MinutesByGameID_forapp.rds')
 # playerpos <- readRDS("IgnoreList/playerpositions_byseason.rds")
 # date1 = as.Date('2000-01-01')
 # date2 = as.Date('9999-12-31')
@@ -39,7 +39,7 @@ shooterxgoals_perminute <- function(playerxgoals = playerxgoals,
   tempdat <- playerxgoals %>%
     filter(date >= date1 & date <= date2,
            Season %in% season,
-           type %in% c('Open play'[OpenPlay], 'FK'[FK], 'PK'[PK], "Set piece"[SetPiece]))
+           type %in% c('Open play'[OpenPlay], 'Direct FK'[FK], 'PK'[PK], "Set piece"[SetPiece]))
   
   tempmins <- minutes_df %>%
     filter(date >= date1 & date <= date2,
@@ -170,7 +170,7 @@ shooterxgoals_perminute <- function(playerxgoals = playerxgoals,
 #   ux[which.max(tabulate(match(x, ux)))]
 # }
 # shooterxgoals_perminute(playerxgoals = readRDS('IgnoreList/xGoalsByPlayer.rds'),
-#                    minutes_df = readRDS('IgnoreList/MinutesByGameID.rds'),
+#                    minutes_df = readRDS('IgnoreList/MinutesByGameID_forapp.rds'),
 #                    date1 = as.Date('2000-01-01'),
 #                    date2 = as.Date('9999-12-31'),
 #                    season = 2017,
