@@ -9,6 +9,7 @@
 # minfilter = 0
 # shotfilter = 0
 # keyfilter = 0
+# teamfilter = unique(playerxgoals$team)
 # byteams = F
 # byseasons = T
 # FK = T
@@ -28,6 +29,7 @@ shooterxgoals.func <- function(playerxgoals = playerxgoals,
                                minfilter = 0,
                                shotfilter = 0, 
                                keyfilter = 0,
+                               teamfilter = unique(playerxgoals$team),
                                byteams = F,
                                byseasons = T,
                                OpenPlay = T,
@@ -42,7 +44,8 @@ shooterxgoals.func <- function(playerxgoals = playerxgoals,
   tempdat <- playerxgoals %>%
     filter(date >= date1 & date <= date2,
            Season %in% season,
-           type %in% c("Open play"[OpenPlay], 'Direct FK'[FK], 'PK'[PK], "Set piece"[SetPiece]))
+           type %in% c("Open play"[OpenPlay], 'Direct FK'[FK], 'PK'[PK], "Set piece"[SetPiece]),
+           team %in% teamfilter)
   
   if(byteams & byseasons){
     aggdata <- tempdat %>%

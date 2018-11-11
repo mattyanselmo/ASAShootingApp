@@ -13,7 +13,7 @@ shinyUI(
              theme = 'bootstrap_edited.css',
              id = "headnavbar",
              navbarMenu(strong('xGoals'),
-                        # Players tab panel ####
+                        # Shooting xGoals tab panel ####
                         tabPanel('Players',
                                  value = "playerxgoals",
                                  sidebarLayout(
@@ -120,6 +120,12 @@ shinyUI(
                                      p(paste0('Updated through games on ', max(as.Date(playerxgoals$date)))),
                                      downloadButton('player_download', 'Download CSV'),
                                      br(),
+                                     selectInput("shooting_teamfilter",
+                                                 label = "Team filter:",
+                                                 choices = c("All", sort(unique(playerxgoals$team))),
+                                                 selected = "All",
+                                                 multiple = T,
+                                                 width = "50%"),
                                      tabsetPanel(id = 'player_subtab',
                                                  tabPanel('Tables: totals',
                                                           value = "tablestotals",

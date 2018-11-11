@@ -10,6 +10,7 @@
 # shotfilter = 0
 # keyfilter = 0
 # minfilter = 0
+# teamfilter = unique(playerxgoals$team)
 # byseasons = T
 # byteams = T
 # FK = T
@@ -29,6 +30,7 @@ shooterxgoals_perminute <- function(playerxgoals = playerxgoals,
                                     minfilter = 0,
                                     shotfilter = 0, 
                                     keyfilter = 0,
+                                    teamfilter = unique(playerxgoals$team),
                                     byseasons = T,
                                     byteams = T,
                                     OpenPlay = T,
@@ -36,14 +38,16 @@ shooterxgoals_perminute <- function(playerxgoals = playerxgoals,
                                     PK = T,
                                     SetPiece = T){
   
-  tempdat <- playerxgoals %>%
-    filter(date >= date1 & date <= date2,
-           Season %in% season,
-           type %in% c('Open play'[OpenPlay], 'Direct FK'[FK], 'PK'[PK], "Set piece"[SetPiece]))
-  
   tempmins <- minutes_df %>%
     filter(date >= date1 & date <= date2,
            Season %in% season)
+  
+  tempdat <- playerxgoals %>%
+    filter(date >= date1 & date <= date2,
+           Season %in% season,
+           type %in% c('Open play'[OpenPlay], 'Direct FK'[FK], 'PK'[PK], "Set piece"[SetPiece]),
+           team %in% teamfilter)
+  
   # Make byteams splits also, copy from non96 shooterxgoals function
   if(byseasons & byteams){
     aggdata <- tempdat %>%

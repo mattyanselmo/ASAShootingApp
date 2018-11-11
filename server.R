@@ -46,6 +46,7 @@ shinyServer(function(input, output, session) {
                                    shooting_date2 = as.Date('9999-12-31'),
                                    shooting_seasonfilter = max(playerxgoals$Season),
                                    shooting_minfilter = 0,
+                                   teamfilter = "All",
                                    shooting_minshots = 0,
                                    shooting_minkeypasses = 0,
                                    shooting_position = c("G", "D", "B", "M", "A", "F", "S"),
@@ -68,6 +69,7 @@ shinyServer(function(input, output, session) {
                  shooter_inputs$shooting_date2 <- input$shooting_date2
                  shooter_inputs$shooting_seasonfilter <- input$shooting_seasonfilter
                  shooter_inputs$shooting_minfilter <- input$shooting_minfilter
+                 shooter_inputs$teamfilter <- input$shooting_teamfilter
                  shooter_inputs$shooting_minshots <- input$shooting_minshots
                  shooter_inputs$shooting_minkeypasses <- input$shooting_minkeypasses
                  shooter_inputs$shooting_position <- input$shooting_position
@@ -85,6 +87,11 @@ shinyServer(function(input, output, session) {
   
   # Shooter tables ####
   dt_total <- reactive({
+    if(shooter_inputs$teamfilter == "All"){
+      teamfilter <- unique(playerxgoals$team)
+    } else{
+      teamfilter <- shooter_inputs$teamfilter
+    }
     if(shooter_inputs$shooting_seasonordate == 'Season'){
       dt_total <- shooterxgoals.func(playerxgoals,
                                      date1 = as.Date('2000-01-01'),
@@ -93,6 +100,7 @@ shinyServer(function(input, output, session) {
                                      minfilter = shooter_inputs$shooting_minfilter,
                                      shotfilter = shooter_inputs$shooting_minshots,
                                      keyfilter = shooter_inputs$shooting_minkeypasses,
+                                     teamfilter = teamfilter,
                                      byteams = shooter_inputs$shooting_byteams,
                                      byseasons = shooter_inputs$shooting_byseasons,
                                      OpenPlay = shooter_inputs$shooting_other,
@@ -111,6 +119,7 @@ shinyServer(function(input, output, session) {
                                      minfilter = shooter_inputs$shooting_minfilter,
                                      shotfilter = shooter_inputs$shooting_minshots,
                                      keyfilter = shooter_inputs$shooting_minkeypasses,
+                                     teamfilter = teamfilter,
                                      byteams = shooter_inputs$shooting_byteams,
                                      byseasons = shooter_inputs$shooting_byseasons,
                                      OpenPlay = shooter_inputs$shooting_other,
@@ -131,6 +140,11 @@ shinyServer(function(input, output, session) {
   })
   
   dt_per96 <- reactive({
+    if(shooter_inputs$teamfilter == "All"){
+      teamfilter <- unique(playerxgoals$team)
+    } else{
+      teamfilter <- shooter_inputs$teamfilter
+    }
     if(shooter_inputs$shooting_seasonordate == 'Season'){
       dt_per96 <- shooterxgoals_perminute(playerxgoals,
                                           minutes_df = minutesPlayed,
@@ -140,6 +154,7 @@ shinyServer(function(input, output, session) {
                                           shotfilter = shooter_inputs$shooting_minshots,
                                           keyfilter = shooter_inputs$shooting_minkeypasses,
                                           minfilter = shooter_inputs$shooting_minfilter,
+                                          teamfilter = teamfilter,
                                           byseasons = shooter_inputs$shooting_byseasons,
                                           byteams = shooter_inputs$shooting_byteams,
                                           OpenPlay = shooter_inputs$shooting_other,
@@ -155,6 +170,7 @@ shinyServer(function(input, output, session) {
                                           shotfilter = shooter_inputs$shooting_minshots,
                                           keyfilter = shooter_inputs$shooting_minkeypasses,
                                           minfilter = shooter_inputs$shooting_minfilter,
+                                          teamfilter = teamfilter,
                                           byseasons = shooter_inputs$shooting_byseasons,
                                           byteams = shooter_inputs$shooting_byteams,
                                           OpenPlay = shooter_inputs$shooting_other,
