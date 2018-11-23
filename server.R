@@ -52,10 +52,11 @@ shinyServer(function(input, output, session) {
                                    shooting_position = c("G", "D", "B", "M", "A", "F", "S"),
                                    shooting_byteams = F,
                                    shooting_byseasons = T,
-                                   shooting_other = T,
-                                   shooting_fk = T,
-                                   shooting_pk = T,
-                                   setpiece = T,
+                                   pattern = c("Open", "PK", "FK", "Setpiece"),
+                                   # shooting_other = T, REPLACED BY SINGLE CHECKBOX GROUP "PATTERN"
+                                   # shooting_fk = T,
+                                   # shooting_pk = T,
+                                   # setpiece = T,
                                    shooterplot_xvar = "xG",
                                    shooterplot_yvar = "Goals",
                                    shooterplot_per96_xvar = "xG",
@@ -75,10 +76,11 @@ shinyServer(function(input, output, session) {
                  shooter_inputs$shooting_position <- input$shooting_position
                  shooter_inputs$shooting_byteams <- input$shooting_byteams
                  shooter_inputs$shooting_byseasons <- input$shooting_byseasons
-                 shooter_inputs$shooting_other <- input$shooting_other
-                 shooter_inputs$shooting_fk <- input$shooting_fk
-                 shooter_inputs$shooting_pk <- input$shooting_pk
-                 shooter_inputs$setpiece <- input$shooting_setpiece
+                 shooter_inputs$pattern <- input$shooting_pattern
+                 # shooter_inputs$shooting_other <- input$shooting_other BEING REPLACED BY A SINGLE CHECKBOX GROUP "PATTERN"
+                 # shooter_inputs$shooting_fk <- input$shooting_fk
+                 # shooter_inputs$shooting_pk <- input$shooting_pk
+                 # shooter_inputs$setpiece <- input$shooting_setpiece
                  shooter_inputs$shooterplot_xvar <- input$shooterplot_xvar
                  shooter_inputs$shooterplot_yvar <- input$shooterplot_yvar
                  # shooter_inputs$shooterplot_per96_xvar <- input$shooterplot_per96_xvar
@@ -103,10 +105,10 @@ shinyServer(function(input, output, session) {
                                      teamfilter = teamfilter,
                                      byteams = shooter_inputs$shooting_byteams,
                                      byseasons = shooter_inputs$shooting_byseasons,
-                                     OpenPlay = shooter_inputs$shooting_other,
-                                     FK = shooter_inputs$shooting_fk,
-                                     PK = shooter_inputs$shooting_pk,
-                                     SetPiece = shooter_inputs$setpiece) %>%
+                                     OpenPlay = "Open" %in% shooter_inputs$pattern,
+                                     FK = "FK" %in% shooter_inputs$pattern,
+                                     PK = "PK" %in% shooter_inputs$pattern,
+                                     SetPiece = "Setpiece" %in% shooter_inputs$pattern) %>%
         mutate(`xG/shot` = ifelse(Shots > 0, xG/Shots, 0),
                `xA/pass` = ifelse(KeyP > 0, xA/KeyP, 0),
                `G-xG/shot` = ifelse(Shots > 0, `G-xG`/Shots, 0),
@@ -122,10 +124,10 @@ shinyServer(function(input, output, session) {
                                      teamfilter = teamfilter,
                                      byteams = shooter_inputs$shooting_byteams,
                                      byseasons = shooter_inputs$shooting_byseasons,
-                                     OpenPlay = shooter_inputs$shooting_other,
-                                     FK = shooter_inputs$shooting_fk,
-                                     PK = shooter_inputs$shooting_pk,
-                                     SetPiece = shooter_inputs$setpiece) %>%
+                                     OpenPlay = "Open" %in% shooter_inputs$pattern,
+                                     FK = "FK" %in% shooter_inputs$pattern,
+                                     PK = "PK" %in% shooter_inputs$pattern,
+                                     SetPiece = "Setpiece" %in% shooter_inputs$pattern) %>%
         mutate(`xG/shot` = ifelse(Shots > 0, xG/Shots, 0),
                `xA/pass` = ifelse(KeyP > 0, xA/KeyP, 0),
                `G-xG/shot` = ifelse(Shots > 0, `G-xG`/Shots, 0),
@@ -157,10 +159,10 @@ shinyServer(function(input, output, session) {
                                           teamfilter = teamfilter,
                                           byseasons = shooter_inputs$shooting_byseasons,
                                           byteams = shooter_inputs$shooting_byteams,
-                                          OpenPlay = shooter_inputs$shooting_other,
-                                          FK = shooter_inputs$shooting_fk,
-                                          PK = shooter_inputs$shooting_pk,
-                                          SetPiece = shooter_inputs$setpiece)
+                                          OpenPlay = "Open" %in% shooter_inputs$pattern,
+                                          FK = "FK" %in% shooter_inputs$pattern,
+                                          PK = "PK" %in% shooter_inputs$pattern,
+                                          SetPiece = "Setpiece" %in% shooter_inputs$pattern)
     } else{
       dt_per96 <- shooterxgoals_perminute(playerxgoals,
                                           minutes_df = minutesPlayed,
@@ -173,10 +175,10 @@ shinyServer(function(input, output, session) {
                                           teamfilter = teamfilter,
                                           byseasons = shooter_inputs$shooting_byseasons,
                                           byteams = shooter_inputs$shooting_byteams,
-                                          OpenPlay = shooter_inputs$shooting_other,
-                                          FK = shooter_inputs$shooting_fk,
-                                          PK = shooter_inputs$shooting_pk,
-                                          SetPiece = shooter_inputs$setpiece)
+                                          OpenPlay = "Open" %in% shooter_inputs$pattern,
+                                          FK = "FK" %in% shooter_inputs$pattern,
+                                          PK = "PK" %in% shooter_inputs$pattern,
+                                          SetPiece = "Setpiece" %in% shooter_inputs$pattern)
     }
     
     dt_per96 %>% filter(Pos %in% shooter_inputs$shooting_position)
