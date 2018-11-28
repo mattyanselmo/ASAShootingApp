@@ -810,10 +810,10 @@ shinyUI(
                                           Percentages shown to tenths only to reinforce mathematical certainties; margin of error is greater than 0.5% for probabilities between 1.0% and 99.0%. <br>
                                           Western conference shown first because everyone around here is tired of hearing about Atlanta."))),                                 
                                  h2("Western Conference"),
-                                 DT::dataTableOutput("playoffsseeding_west"),
+                                 div(DT::dataTableOutput("playoffsseeding_west"), style = "width: 75%"),
                                  br(),
                                  h2("Eastern Conference"),
-                                 DT::dataTableOutput("playoffsseeding_east"),
+                                 div(DT::dataTableOutput("playoffsseeding_east"), style = "width: 75%"),
                                  br()
                         ),
                         tabPanel("Cup chances",
@@ -825,7 +825,7 @@ shinyUI(
                                  p(HTML("Based on 10,000 simulated runs of the remaining MLS Cup playoffs. <br>
                                         Percentages shown to tenths only to reinforce mathematical certainties; margin of error is greater than 0.5% for probabilities between 10.0% and 90.0%.")), 
                                  br(),
-                                 DT::dataTableOutput("cupchances_table"),
+                                 div(DT::dataTableOutput("cupchances_table"), style = "width: 50%"),
                                  br()
                         )),
              navbarMenu(strong('Salaries'),
