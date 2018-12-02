@@ -19,8 +19,8 @@ overall <- standings$Team
 N <- 10000
 results <- data.frame(Team = c(), Round = c(), Run = c())
 for(run in 1:N){
-  east.sim <- c("NYRB", "ATL")
-  west.sim <- c("SKC", "POR")
+  east.sim <- c("ATL")
+  west.sim <- c("POR")
   # east.sim <- (standings %>% filter(Conf == "east"))$Team[1:6] # teams left
   # west.sim <- (standings %>% filter(Conf == "west"))$Team[1:6] # teams left
   
@@ -66,7 +66,7 @@ for(run in 1:N){
   
   # Finals
   results <- bind_rows(results, 
-                       data.frame(Team = sim.round(teams = intersect(overall, c(east.sim, west.sim)), roundtype = "aggregate"),
+                       data.frame(Team = sim.round(teams = intersect(overall, c(east.sim, west.sim)), roundtype = "knockout"),
                                   Round = 5,
                                   Run = run,
                                   stringsAsFactors = F))
@@ -78,9 +78,10 @@ table(results %>% filter(Round == 5) %>% select(Team))/N
     group_by(Team) %>%
     summarize(`Conf Semis` = 1,
               `Conf Finals` = 1,
+              Finals = 1,
               #`Conf Semis` = sum(Round == 2)/N,
               #`Conf Finals` = sum(Round == 3)/N,
-              Finals = sum(Round == 4)/N,
+              #Finals = sum(Round == 4)/N,
               Champs = sum(Round == 5)/N) %>%
     arrange(desc(Champs), desc(Finals)))
 
