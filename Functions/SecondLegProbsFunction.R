@@ -5,7 +5,7 @@ source("03_TunePMModels.R")
 source("03_TeamPMDataThruCurrentWeek.R")
 source("03_TeamPredictiveModelFunction.R")
 
-mat <- pm.function(pred.data %>% mutate(Season = year), model.home, model.away, "NYRB", "ATL", season = year)$score.mat
+mat <- pm.function(pred.data %>% mutate(Season = year), model.home, model.away, "ATL", "POR", season = year)$score.mat
 score <- c(0, 0)
 
 deficit = score[2] - score[1]
