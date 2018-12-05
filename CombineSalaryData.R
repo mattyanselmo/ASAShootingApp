@@ -14,20 +14,20 @@ temp <- lapply(files,
 salary.data <- bind_rows(temp)
 
 # Clean data ####
-salary.data <- salary.data %>%
+salary.data.clean <- salary.data %>%
   mutate(Club = ifelse(Club %in% c("No Team", "None", "Unassigned", "Pool", "POOL") | is.na(Club), "NONE", Club))
 
 teamnamelinks <- read.csv("TeamNameLinks_Salaries.csv", stringsAsFactors = F)
 
-salary.data <- salary.data %>%
+salary.data.clean <- salary.data.clean %>%
   left_join(teamnamelinks, by = c("Club" = "Team")) %>%
   mutate(Club = Abbr) %>%
   select(-Abbr)
 
-salary.data <- salary.data %>%
+salary.data.clean <- salary.data.clean %>%
   rename(Team = Club) %>%
   mutate(Pos = ifelse(Pos %in% c("D-F", "D-M", "D/F", "D/M", "M-D", "M/D"), "B",
                       ifelse(Pos %in% c("F-M", "F/M", "M-F", "M/F"), "A",
                              ifelse(Pos %in% c("MF"), "M", Pos))))
 
-saveRDS(salary.data, "AppData/SalaryData.rds")
+saveRDS(salary.data.clean, "AppData/SalaryData.rds")
