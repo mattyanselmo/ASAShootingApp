@@ -86,15 +86,58 @@ shinyServer(function(input, output, session) {
                  # shooter_inputs$shooterplot_per96_xvar <- input$shooterplot_per96_xvar
                  # shooter_inputs$shooterplot_per96_yvar <- input$shooterplot_per96_yvar
                })
+
+  # Select all checkboxes  
+  observeEvent(input$shooting_teamfilter_selectall,
+               {
+                 updateCheckboxGroupInput(
+                   session, 
+                   "shooting_teamfilter", 
+                   choices = sort(unique(playerxgoals$team)),
+                   selected = if (input$shooting_teamfilter_selectall) sort(unique(playerxgoals$team))
+                 )
+               },
+               ignoreInit = T)
   
-  observe({
-    updateCheckboxGroupInput(
-      session, 
-      "shooting_teamfilter", 
-      choices = sort(unique(playerxgoals$team)),
-      selected = if (input$shooting_teamfilter_selectall) sort(unique(playerxgoals$team))
-    )
-  })
+  observeEvent(input$shooting_seasonfilter_selectall,
+               {
+                 updateCheckboxGroupInput(
+                   session, 
+                   "shooting_seasonfilter", 
+                   choices = min(playerxgoals$Season):max(playerxgoals$Season),
+                   selected = if (input$shooting_seasonfilter_selectall) min(playerxgoals$Season):max(playerxgoals$Season)
+                 )
+               },
+               ignoreInit = T)
+  
+  observeEvent(input$shooting_position_selectall,
+               {
+                 updateCheckboxGroupInput(
+                   session, 
+                   "shooting_position", 
+                   choices = c("Keeper (G)" = "G",
+                               "Central Def (D)" = "D",
+                               "Back (B)" = "B",
+                               "Midfielder (M)" = "M",
+                               "Attacking Mid (A)" = "A",
+                               "Forward (F)" = "F",
+                               "Sub (S)" = "S"),
+                   selected = if (input$shooting_position_selectall) c("G", "D", "B", "M", "A", "F", "S")
+                 )
+               },
+               ignoreInit = T)
+  
+  observeEvent(input$shooting_pattern_selectall,
+               {
+                 updateCheckboxGroupInput(
+                   session, 
+                   "shooting_pattern", 
+                   choices = c("Open", "PK", "FK", "Setpiece"),
+                   selected = if (input$shooting_pattern_selectall) c("Open", "PK", "FK", "Setpiece")
+                 )
+               },
+               ignoreInit = T)
+
   
   # Shooter tables ####
   dt_total <- reactive({
