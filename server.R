@@ -246,7 +246,12 @@ shinyServer(function(input, output, session) {
                            lengthMenu = seq(25, 100, 25)))) %>%
       formatRound(columns = c('Dist', 'xG', 'G-xG', 'xPlace', 'xA', 'A-xA', 'xG+xA'), 
                   digits = 1) %>%
-      formatPercentage(columns = c('Solo'), digits = 1)
+      formatPercentage(columns = c('Solo'), digits = 1) %>%
+      formatCurrency(columns = c("Salary"),
+                     currency = "$",
+                     interval = 3,
+                     mark = ",",
+                     digits = 0)
   })
   
   # Player table - per96
@@ -259,7 +264,12 @@ shinyServer(function(input, output, session) {
                            pageLength = 25,
                            lengthMenu = seq(25, 100, 25)))) %>%
       formatRound(columns = c("Shots", "SoT", "Goals", "xG", "xPlace", "G-xG", "KeyP", "Assts", "xA", "A-xA", "xG+xA"), 
-                  digits = 2)
+                  digits = 2) %>%
+      formatCurrency(columns = c("Salary"),
+                     currency = "$",
+                     interval = 3,
+                     mark = ",",
+                     digits = 0)
   })
   
   # Shooter plots ####
@@ -289,7 +299,7 @@ shinyServer(function(input, output, session) {
   observeEvent(input$shooting_action, {
     choices.total <- names(dt_total())[!(names(dt_total()) %in% c("Player", "Team", "Season", "Pos"))]
     if(min(input$shooting_seasonfilter) >= 2015){
-      choices.96 <- paste0(names(dt_per96())[!(names(dt_per96()) %in% c("Player", "Team", "Season", "Pos", "Min"))], "/96")
+      choices.96 <- paste0(names(dt_per96())[!(names(dt_per96()) %in% c("Player", "Team", "Season", "Pos", "Min", "Salary"))], "/96")
     } else{
       choices.96 <- c("")
     }
@@ -312,7 +322,7 @@ shinyServer(function(input, output, session) {
     {
       choices.total <- names(dt_total())[!(names(dt_total()) %in% c("Player", "Team", "Season", "Pos"))]
       if(min(input$shooting_seasonfilter) >= 2015){
-        choices.96 <- paste0(names(dt_per96())[!(names(dt_per96()) %in% c("Player", "Team", "Season", "Pos", "Min"))], "/96")
+        choices.96 <- paste0(names(dt_per96())[!(names(dt_per96()) %in% c("Player", "Team", "Season", "Pos", "Min", "Salary"))], "/96")
       } else{
         choices.96 <- c("")
       }
