@@ -36,7 +36,7 @@ shooting15 <- bind_rows(lapply(paste0('IgnoreList/', grep('shots with xG', list.
          time = sapply(strsplit(time, ':'), function(x) as.numeric(x[1]) + as.numeric(x[2])/60))
 
 shooting14 <- bind_rows(lapply(paste0('IgnoreList/', grep('shotdata with xgoals', list.files("IgnoreList"), value = T)), 
-                             function(x) read.csv(x, stringsAsFactors = F))) %>%
+                               function(x) read.csv(x, stringsAsFactors = F))) %>%
   left_join(teamnames, by = c('Team' = 'FullName')) %>%
   left_join(teamnames, by = c('Team.1' = 'FullName')) %>%
   mutate(team = Abbr.x,
@@ -102,7 +102,7 @@ xgoal.model.keeper <- glm(result == 'Goal' ~
 
 # Save once per year...
 # save(xgoal.model, xgoal.model.keeper, file = paste0('IgnoreList/UpdatedModels_', Sys.Date(), '.Rdata'))
-     
+
 # Note: Tested interaction between free kicks and distance: worse fit on holdout 2015 - 2017
 
 shooting[['xGShooter']] <- predict(xgoal.model, 
@@ -129,22 +129,84 @@ shooting <- team.xgoal.adj(shooting, 5/60)
 
 shooting <- shooting %>%
   mutate(shooter = str_replace_all(shooter, 
-                                   c('Kazaishvili' = 'Qazaishvili', 
-                                     'Jorge Villafaña' = 'Jorge Villafana',
+                                   c("Alexandre De Lima" = "Alex",
+                                     "Aly Ghazal" = "Ali Ghazal",
+                                     "Ambroise Oyongo Bitolo" = "Ambroise Oyongo",
+                                     "Andreas Ivanschitz" = "Andreas Ivan",
                                      "Antonio Mlinar Dalamea" = "Antonio Mlinar Delamea",
-                                     "Ismael Tajouri-Shradi" = "Ismael Tajouri")),
+                                     "Carlo Franco Chueco del Rio" = "Carlo Chueca",
+                                     "Christian Hernandez" = "Cristhian Hernandez",
+                                     "Clinton Irwin" = "Clint Irwin",
+                                     "Cristian Nazarith" = "Cristian Nazarit",
+                                     "Eric Ayuk Mbu" = "Eric Ayuk",
+                                     "Felipe Martins Campanholi" = "Felipe Martins",
+                                     "Franck Pangop" = "Frantz Pangop",
+                                     "Harrison Shipp" = "Harry Shipp",
+                                     "Helbert (Fred) da Silva" = "Fred",
+                                     "Ibrahim Diop" = "Birahim Diop",
+                                     "Ismael Tajouri-Shradi" = "Ismael Tajouri",
+                                     'Jorge Villafaña' = 'Jorge Villafana',
+                                     "Jose Leonardo Ribeiro da Silva" = "Leonardo",
+                                     'Kazaishvili' = 'Qazaishvili', 
+                                     "Kim Kee-hee" = "Kim Kee-Hee",
+                                     "Martin Perez Garcia" = "Matias Perez Garcia",
+                                     "Matt VanOekel" = "Matt Van Oekel",
+                                     "Maxine Chanot" = "Maxime Chanot",
+                                     "Michel Garbini Pereira" = "Michel",
+                                     "Miguel Lopez" = "Mikey Lopez",
+                                     "Nicholas DePuy" = "Nick DePuy",
+                                     "Nick Depuy" = "Nick DePuy",
+                                     "Oriol Rosell Argerich" = "Oriol Rosell",
+                                     "Samba" = "Sambinha",
+                                     "Sebastian Ibeagha" = "Sebastien Ibeagha",
+                                     "Vitor Gomes Pereira Junior" = "Juninho",
+                                     "Yefferson Quintana" = "Yeferson Quintana"
+                                   )),
          shooter = ifelse(row_number() %in% grep("Boniek", shooter), "Oscar Boniek Garcia", 
-                          ifelse(shooter == "Eddie Johnson" & year == 2011, "Eddie Johnson (no, not that one)", shooter)),
+                          ifelse(shooter == "Eddie Johnson" & year == 2011, "Eddie Johnson (no, not that one)",
+                                 ifelse(shooter == "Jose Hernandez" & team == "ATL" & year == 2018, "Jose Rafael Hernandez", 
+                                        shooter))),
          passer = str_replace_all(passer, 
-                                  c('Kazaishvili' = 'Qazaishvili', 
-                                    'Jorge Villafaña' = 'Jorge Villafana',
+                                  c("Alexandre De Lima" = "Alex",
+                                    "Aly Ghazal" = "Ali Ghazal",
+                                    "Ambroise Oyongo Bitolo" = "Ambroise Oyongo",
+                                    "Andreas Ivanschitz" = "Andreas Ivan",
                                     "Antonio Mlinar Dalamea" = "Antonio Mlinar Delamea",
-                                    "Ismael Tajouri-Shradi" = "Ismael Tajouri")),
+                                    "Carlo Franco Chueco del Rio" = "Carlo Chueca",
+                                    "Christian Hernandez" = "Cristhian Hernandez",
+                                    "Clinton Irwin" = "Clint Irwin",
+                                    "Cristian Nazarith" = "Cristian Nazarit",
+                                    "Eric Ayuk Mbu" = "Eric Ayuk",
+                                    "Felipe Martins Campanholi" = "Felipe Martins",
+                                    "Franck Pangop" = "Frantz Pangop",
+                                    "Harrison Shipp" = "Harry Shipp",
+                                    "Helbert (Fred) da Silva" = "Fred",
+                                    "Ibrahim Diop" = "Birahim Diop",
+                                    "Ismael Tajouri-Shradi" = "Ismael Tajouri",
+                                    'Jorge Villafaña' = 'Jorge Villafana',
+                                    "Jose Leonardo Ribeiro da Silva" = "Leonardo",
+                                    'Kazaishvili' = 'Qazaishvili', 
+                                    "Kim Kee-hee" = "Kim Kee-Hee",
+                                    "Martin Perez Garcia" = "Matias Perez Garcia",
+                                    "Matt VanOekel" = "Matt Van Oekel",
+                                    "Maxine Chanot" = "Maxime Chanot",
+                                    "Michel Garbini Pereira" = "Michel",
+                                    "Miguel Lopez" = "Mikey Lopez",
+                                    "Nicholas DePuy" = "Nick DePuy",
+                                    "Nick Depuy" = "Nick DePuy",
+                                    "Oriol Rosell Argerich" = "Oriol Rosell",
+                                    "Samba" = "Sambinha",
+                                    "Sebastian Ibeagha" = "Sebastien Ibeagha",
+                                    "Vitor Gomes Pereira Junior" = "Juninho",
+                                    "Yefferson Quintana" = "Yeferson Quintana"
+                                  )),
          passer = ifelse(row_number() %in% grep("Boniek", passer), "Oscar Boniek Garcia", 
-                         ifelse(passer == "Eddie Johnson" & year == 2011, "Eddie Johnson (no, not that one)", passer)))
+                         ifelse(passer == "Eddie Johnson" & year == 2011, "Eddie Johnson (no, not that one)",
+                                ifelse(passer == "Jose Hernandez" & team == "ATL" & year == 2018, "Jose Rafael Hernandez", 
+                                       passer))))
 
 #### Ismael Tajouri
-         
+
 "Boniek Garcia" = "Oscar Boniek Garcia"
 saveRDS(shooting, 'IgnoreList/AllShotsData2011-2017.rds')
 
