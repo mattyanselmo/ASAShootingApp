@@ -52,7 +52,19 @@ playerxgoals <- shooterxgoals %>%
                          ifelse(gameID_shooter == 0, gameID_passer, gameID_shooter), 0)) %>%
   select(-c(gameID_passer, gameID_shooter))
 
+# Join position
 playerxgoals <- playerxgoals %>%
   left_join(playerpos, by = c("shooter" = "passer", "Season" = "year", "team"))
+
+# Join salary
+shot_salary_mapping <- read.csv("SalaryNameLinkingTable_shooting.csv")
+
+playerxgoals <- playerxgoals %>%
+  left_join(saldat %>% 
+              select(-c(First, Last, Team, Pos, Date)) %>%
+              left_join(shot_salary_mapping, 
+                        by = c("Player" = "salary_name", "Season")) %>%
+              select(-Player), 
+            by = c("shooter" = "shooting_name", "Season"))
 
 saveRDS(playerxgoals, file = 'IgnoreList/xGoalsByPlayer.rds')
