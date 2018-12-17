@@ -63,7 +63,8 @@ shooterxgoals_perminute <- function(playerxgoals = playerxgoals,
                 Assts = sum(assists),
                 xA = sum(xA),
                 `A-xA` = sum(`A-xA`),
-                `xG+xA` = sum(xG + xA)) %>%
+                `xG+xA` = sum(xG + xA),
+                Salary = mean(Guaranteed, na.rm = T)) %>%
       ungroup() %>%
       filter(Shots >= shotfilter,
              KeyP >= keyfilter) %>%
@@ -73,7 +74,7 @@ shooterxgoals_perminute <- function(playerxgoals = playerxgoals,
                 by = c('player', "Team", 'Season')) %>%
       mutate_at(.vars = vars(Shots:`xG+xA`),
                 .funs = funs(.*96/Min)) %>%
-      select(Player = player, Team, Season, Min, Pos, Shots:`xG+xA`) %>%
+      select(Player = player, Team, Season, Min, Pos, Shots:Salary) %>%
       filter(Min >= minfilter)
     
   } else if(byteams & !byseasons){
@@ -90,16 +91,17 @@ shooterxgoals_perminute <- function(playerxgoals = playerxgoals,
                 Assts = sum(assists),
                 xA = sum(xA),
                 `A-xA` = sum(`A-xA`),
-                `xG+xA` = sum(xG + xA)) %>%
+                `xG+xA` = sum(xG + xA),
+                Salary = mean(Guaranteed, na.rm = T)) %>%
       filter(Shots >= shotfilter,
              KeyP >= keyfilter) %>%
-        left_join(tempmins %>%
-                    group_by(player, Team = team) %>%
-                    summarize(Min = sum(minutes)),
-                  by = c("player", "Team")) %>%
-        select(Player = player, Team, Min, Pos, Shots:`xG+xA`) %>%
-        mutate_at(.vars = vars(Shots:`xG+xA`),
-                  .funs = funs(.*96/Min)) %>%
+      left_join(tempmins %>%
+                  group_by(player, Team = team) %>%
+                  summarize(Min = sum(minutes)),
+                by = c("player", "Team")) %>%
+      select(Player = player, Team, Min, Pos, Shots:Salary) %>%
+      mutate_at(.vars = vars(Shots:`xG+xA`),
+                .funs = funs(.*96/Min)) %>%
       filter(Min >= minfilter) %>%
       ungroup()
     
@@ -118,14 +120,15 @@ shooterxgoals_perminute <- function(playerxgoals = playerxgoals,
                 Assts = sum(assists),
                 xA = sum(xA),
                 `A-xA` = sum(`A-xA`),
-                `xG+xA` = sum(xG + xA)) %>%
+                `xG+xA` = sum(xG + xA),
+                Salary = mean(Guaranteed, na.rm = T)) %>%
       filter(Shots >= shotfilter,
              KeyP >= keyfilter) %>%
       left_join(tempmins %>%
                   group_by(player, Season) %>%
                   summarize(Min = sum(minutes)),
                 by = c("player", "Season")) %>%
-      select(Player = player, Team, Season, Min, Pos, Shots:`xG+xA`) %>%
+      select(Player = player, Team, Season, Min, Pos, Shots:Salary) %>%
       mutate_at(.vars = vars(Shots:`xG+xA`),
                 .funs = funs(.*96/Min)) %>%
       filter(Min >= minfilter) %>%
@@ -146,14 +149,15 @@ shooterxgoals_perminute <- function(playerxgoals = playerxgoals,
                 Assts = sum(assists),
                 xA = sum(xA),
                 `A-xA` = sum(`A-xA`),
-                `xG+xA` = sum(xG + xA)) %>%
+                `xG+xA` = sum(xG + xA),
+                Salary = mean(Guaranteed, na.rm = T)) %>%
       filter(Shots >= shotfilter,
              KeyP >= keyfilter) %>%
-        left_join(tempmins %>%
-                    group_by(player) %>%
-                    summarize(Min = sum(minutes)),
-                  by = c("player")) %>%
-        select(Player = player, Team, Min, Pos, Shots:`xG+xA`) %>%
+      left_join(tempmins %>%
+                  group_by(player) %>%
+                  summarize(Min = sum(minutes)),
+                by = c("player")) %>%
+      select(Player = player, Team, Min, Pos, Shots:Salary) %>%
       mutate_at(.vars = vars(Shots:`xG+xA`),
                 .funs = funs(.*96/Min)) %>%
       filter(Min >= minfilter) %>%
