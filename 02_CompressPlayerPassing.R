@@ -23,9 +23,39 @@ if(file.exists('C:/Users/Matthias')){
 touches <- bind_rows(lapply(grep('touches', list.files("IgnoreList/"), value = T),
                             function(x) read.csv(paste0("IgnoreList/", x), stringsAsFactors = F))) %>%
   mutate(player = str_replace_all(player, 
-                                  c('Kazaishvili' = 'Qazaishvili', 
+                                  c("Alexandre De Lima" = "Alex",
+                                    "Aly Ghazal" = "Ali Ghazal",
+                                    "Ambroise Oyongo Bitolo" = "Ambroise Oyongo",
+                                    "Andreas Ivanschitz" = "Andreas Ivan",
+                                    "Antonio Mlinar Dalamea" = "Antonio Mlinar Delamea",
+                                    "Carlo Franco Chueco del Rio" = "Carlo Chueca",
+                                    "Christian Hernandez" = "Cristhian Hernandez",
+                                    "Clinton Irwin" = "Clint Irwin",
+                                    "Cristian Nazarith" = "Cristian Nazarit",
+                                    "Eric Ayuk Mbu" = "Eric Ayuk",
+                                    "Felipe Martins Campanholi" = "Felipe Martins",
+                                    "Franck Pangop" = "Frantz Pangop",
+                                    "Harrison Shipp" = "Harry Shipp",
+                                    "Helbert (Fred) da Silva" = "Fred",
+                                    "Ibrahim Diop" = "Birahim Diop",
+                                    "Ismael Tajouri-Shradi" = "Ismael Tajouri",
                                     'Jorge Villafaña' = 'Jorge Villafana',
-                                    "Antonio Mlinar Dalamea" = "Antonio Mlinar Delamea")),
+                                    "Jose Leonardo Ribeiro da Silva" = "Leonardo",
+                                    'Kazaishvili' = 'Qazaishvili', 
+                                    "Kim Kee-hee" = "Kim Kee-Hee",
+                                    "Martin Perez Garcia" = "Matias Perez Garcia",
+                                    "Matt VanOekel" = "Matt Van Oekel",
+                                    "Maxine Chanot" = "Maxime Chanot",
+                                    "Michel Garbini Pereira" = "Michel",
+                                    "Miguel Lopez" = "Mikey Lopez",
+                                    "Nicholas DePuy" = "Nick DePuy",
+                                    "Nick Depuy" = "Nick DePuy",
+                                    "Oriol Rosell Argerich" = "Oriol Rosell",
+                                    "Samba" = "Sambinha",
+                                    "Sebastian Ibeagha" = "Sebastien Ibeagha",
+                                    "Vitor Gomes Pereira Junior" = "Juninho",
+                                    "Yefferson Quintana" = "Yeferson Quintana"
+                                  )),
          player = ifelse(row_number() %in% grep("Boniek", player), "Oscar Boniek Garcia", player)) %>%
   left_join(teamnames, by = c('team' = 'FullName')) %>%
   mutate(team = Abbr) %>%
@@ -66,5 +96,18 @@ player.stats <- pass.summ %>%
   mutate(Season = as.numeric(format(date, "%Y"))) %>%
   filter(!is.na(touches))
 
-saveRDS(player.stats, "IgnoreList/xPassingByPlayer.rds")
-write.csv(player.stats, "IgnoreList/xPassingByPlayer.csv", row.names = F)
+# Passing
+pass_salary_mapping <- read.csv("SalaryNameLinkingTable_passing.csv")
+playerpassing <- player.stats %>%
+  left_join(saldat %>% 
+              select(-c(First, Last, Team, Pos, Date)) %>%
+              left_join(pass_salary_mapping, 
+                        by = c("Player" = "salary_name", "Season")) %>%
+              select(-Player), 
+            by = c("passer" = "passing_name", "Season"))
+
+saveRDS(playerpassing, "IgnoreList/xPassingByPlayer.rds")
+write.csv(playerpassing, "IgnoreList/xPassingByPlayer.csv", row.names = F)
+
+rm(player.stats, playerpassing)
+gc()
