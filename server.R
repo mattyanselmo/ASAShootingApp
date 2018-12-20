@@ -132,13 +132,12 @@ shinyServer(function(input, output, session) {
                  updateCheckboxGroupInput(
                    session, 
                    "shooting_pattern", 
-                   choices = c("Open", "PK", "FK", "Setpiece"),
-                   selected = if (input$shooting_pattern_selectall) c("Open", "PK", "FK", "Setpiece")
+                   choices = c("Open play" = "Open", "PK", "Direct FK" = "FK", "Set piece" = "Setpiece"),
+                   selected = if (input$shooting_pattern_selectall) c("Open play" = "Open", "PK", "Direct FK" = "FK", "Set piece" = "Setpiece")
                  )
                },
                ignoreInit = T)
 
-  
   # Shooter tables ####
   dt_total <- reactive({
     # if(shooter_inputs$teamfilter == "All"){
@@ -164,7 +163,9 @@ shinyServer(function(input, output, session) {
         mutate(`xG/shot` = ifelse(Shots > 0, xG/Shots, 0),
                `xA/pass` = ifelse(KeyP > 0, xA/KeyP, 0),
                `G-xG/shot` = ifelse(Shots > 0, `G-xG`/Shots, 0),
-               `A-xA/pass` = ifelse(KeyP > 0, `A-xA`/KeyP, 0))
+               `A-xA/pass` = ifelse(KeyP > 0, `A-xA`/KeyP, 0)) %>%
+        mutate(`Comp ($K)` = round(Salary/1000, 0)) %>%
+        select(-Salary)
     } else{
       dt_total <- shooterxgoals.func(playerxgoals,
                                      date1 = shooter_inputs$shooting_date1,
@@ -183,7 +184,9 @@ shinyServer(function(input, output, session) {
         mutate(`xG/shot` = ifelse(Shots > 0, xG/Shots, 0),
                `xA/pass` = ifelse(KeyP > 0, xA/KeyP, 0),
                `G-xG/shot` = ifelse(Shots > 0, `G-xG`/Shots, 0),
-               `A-xA/pass` = ifelse(KeyP > 0, `A-xA`/KeyP, 0))
+               `A-xA/pass` = ifelse(KeyP > 0, `A-xA`/KeyP, 0)) %>%
+        mutate(`Comp ($K)` = round(Salary/1000, 0)) %>%
+        select(-Salary)
     }
     
     if("Pos" %in% names(dt_total)){
@@ -214,7 +217,10 @@ shinyServer(function(input, output, session) {
                                           OpenPlay = "Open" %in% shooter_inputs$pattern,
                                           FK = "FK" %in% shooter_inputs$pattern,
                                           PK = "PK" %in% shooter_inputs$pattern,
-                                          SetPiece = "Setpiece" %in% shooter_inputs$pattern)
+                                          SetPiece = "Setpiece" %in% shooter_inputs$pattern) %>%
+        mutate(`Comp ($K)` = round(Salary/1000, 0)) %>%
+        select(-Salary)
+      
     } else{
       dt_per96 <- shooterxgoals_perminute(playerxgoals,
                                           minutes_df = minutesPlayed,
@@ -230,7 +236,9 @@ shinyServer(function(input, output, session) {
                                           OpenPlay = "Open" %in% shooter_inputs$pattern,
                                           FK = "FK" %in% shooter_inputs$pattern,
                                           PK = "PK" %in% shooter_inputs$pattern,
-                                          SetPiece = "Setpiece" %in% shooter_inputs$pattern)
+                                          SetPiece = "Setpiece" %in% shooter_inputs$pattern) %>%
+        mutate(`Comp ($K)` = round(Salary/1000, 0)) %>%
+        select(-Salary)
     }
     
     dt_per96 %>% filter(Pos %in% shooter_inputs$shooting_position)
@@ -247,7 +255,7 @@ shinyServer(function(input, output, session) {
       formatRound(columns = c('Dist', 'xG', 'G-xG', 'xPlace', 'xA', 'A-xA', 'xG+xA'), 
                   digits = 1) %>%
       formatPercentage(columns = c('Solo'), digits = 1) %>%
-      formatCurrency(columns = c("Salary"),
+      formatCurrency(columns = c("Comp ($K)"),
                      currency = "$",
                      interval = 3,
                      mark = ",",
@@ -264,8 +272,8 @@ shinyServer(function(input, output, session) {
                            pageLength = 25,
                            lengthMenu = seq(25, 100, 25)))) %>%
       formatRound(columns = c("Shots", "SoT", "Goals", "xG", "xPlace", "G-xG", "KeyP", "Assts", "xA", "A-xA", "xG+xA"), 
-                  digits = 2) %>%
-      formatCurrency(columns = c("Salary"),
+                  digits = 2)  %>%
+      formatCurrency(columns = c("Comp ($K)"),
                      currency = "$",
                      interval = 3,
                      mark = ",",
@@ -299,7 +307,7 @@ shinyServer(function(input, output, session) {
   observeEvent(input$shooting_action, {
     choices.total <- names(dt_total())[!(names(dt_total()) %in% c("Player", "Team", "Season", "Pos"))]
     if(min(input$shooting_seasonfilter) >= 2015){
-      choices.96 <- paste0(names(dt_per96())[!(names(dt_per96()) %in% c("Player", "Team", "Season", "Pos", "Min", "Salary"))], "/96")
+      choices.96 <- paste0(names(dt_per96())[!(names(dt_per96()) %in% c("Player", "Team", "Season", "Pos", "Min", "Comp ($K)"))], "/96")
     } else{
       choices.96 <- c("")
     }
@@ -322,7 +330,7 @@ shinyServer(function(input, output, session) {
     {
       choices.total <- names(dt_total())[!(names(dt_total()) %in% c("Player", "Team", "Season", "Pos"))]
       if(min(input$shooting_seasonfilter) >= 2015){
-        choices.96 <- paste0(names(dt_per96())[!(names(dt_per96()) %in% c("Player", "Team", "Season", "Pos", "Min", "Salary"))], "/96")
+        choices.96 <- paste0(names(dt_per96())[!(names(dt_per96()) %in% c("Player", "Team", "Season", "Pos", "Min", "Comp ($K)"))], "/96")
       } else{
         choices.96 <- c("")
       }
