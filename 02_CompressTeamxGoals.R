@@ -47,5 +47,20 @@ teamxgoals <- teamxgoalsF %>%
   mutate(Season = as.numeric(format(date, '%Y'))) %>%
   left_join(Pts, by = c('Team', 'date'))
 
+# Join salary
+library(DescTools) 
+saldat <- readRDS("AppData/SalaryData.rds")
+shot_salary_mapping <- read.csv("SalaryNameLinkingTable_shooting.csv")
+team.saldat <- saldat %>%
+  group_by(Team, Season) %>%
+  summarize(Comp = sum(Guaranteed, na.rm = T),
+            Gini = Gini(Guaranteed[!is.na(Guaranteed)]),
+            Gini18 = Gini(sort(Guaranteed[!is.na(Guaranteed)], decreasing = T)[1:18])) %>%
+  ungroup()
+
+teamxgoals <- teamxgoals %>%
+  left_join(team.saldat, 
+            by = c("Team", "Season"))
+
 saveRDS(teamxgoals, file = 'IgnoreList/xGoalsByTeam.rds')
 saveRDS(xGByGame, file = 'IgnoreList/xGoalsByTeam_byGame.rds')
