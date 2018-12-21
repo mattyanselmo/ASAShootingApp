@@ -57,6 +57,7 @@ playerxgoals <- playerxgoals %>%
   left_join(playerpos, by = c("shooter" = "passer", "Season" = "year", "team"))
 
 # Join salary
+saldat <- readRDS("AppData/SalaryData.rds")
 shot_salary_mapping <- read.csv("SalaryNameLinkingTable_shooting.csv")
 
 playerxgoals <- playerxgoals %>%
