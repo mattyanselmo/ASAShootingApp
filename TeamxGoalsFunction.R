@@ -34,9 +34,11 @@ teamxgoals.func <- function(teamxgoals = teamxgoals,
            Pts = ifelse(is.na(Pts), 0, Pts)) %>%
     ungroup()
   
-  ptsdat <- unique(tempdat %>% select_(.dots = c('Team', 'Season', 'date', 'Pts')[c(T, byseasons, T, T)])) %>%
+  ptsdat <- unique(tempdat %>% select_(.dots = c('Team', 'Season', 'date', 'Pts', "Comp", "Gini18")[c(T, byseasons, T, T, T, T)])) %>%
     group_by_(.dots = c('Team', 'Season')[c(T, byseasons)]) %>%
-    summarize(Pts = sum(Pts)) %>%
+    summarize(Pts = sum(Pts),
+              Comp = mean(Comp),
+              Gini18 = mean(Gini18)) %>%
     ungroup()
   
   tempdat <- tempdat %>%
