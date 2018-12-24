@@ -1117,7 +1117,9 @@ shinyServer(function(input, output, session) {
                             advanced = ifelse(input$team_advanced == 'Basic stats', F, T),
                             venue = input$team_home,
                             byseasons = input$team_byseasons,
-                            confview = input$team_conferenceview)
+                            confview = input$team_conferenceview) %>%
+        mutate(`Comp ($MM)` = Comp/1000000) %>%
+        select(-Comp)
       
     } else{
       dt <- teamxgoals.func(teamxgoals, 
@@ -1130,7 +1132,9 @@ shinyServer(function(input, output, session) {
                             advanced = ifelse(input$team_advanced == 'Basic stats', F, T),
                             venue = input$team_home,
                             byseasons = input$team_byseasons,
-                            confview = input$team_conferenceview)
+                            confview = input$team_conferenceview) %>%
+        mutate(`Comp ($MM)` = Comp/1000000) %>%
+        select(-Comp)
     }
     
     is.num <- sapply(dt, is.numeric)
@@ -1153,11 +1157,11 @@ shinyServer(function(input, output, session) {
     if(input$team_advanced == "Basic stats"){
       columns.perc1 <- c('SoT%F', 'SoT%A', 'Finish%F', 'Finish%A')
       columns.dec1 <- c()
-      columns.dec2 <- c()
+      columns.dec2 <- c("Gini18")
     } else{
       columns.perc1 <- c() #c("Solo%F", "Solo%A")
       columns.dec1 <- c("xGF", "xGA", "xGD", "GD-xGD", "PDO")
-      columns.dec2 <- c("TSR")
+      columns.dec2 <- c("TSR", "Gini18")
     }
     
     if(!input$team_conferenceview | length(input$team_seasonfilter) > 1){
@@ -1167,7 +1171,12 @@ shinyServer(function(input, output, session) {
                                  pageLength = 25))) %>%
         formatPercentage(columns = columns.perc1, digits = 1) %>%
         formatRound(columns = columns.dec1, digits = 1) %>%
-        formatRound(columns = columns.dec2, digits = 2)
+        formatRound(columns = columns.dec2, digits = 2) %>%
+        formatCurrency(columns = c("Comp ($MM)"),
+                       currency = "$",
+                       interval = 3,
+                       mark = ",",
+                       digits = 1) 
     } else{
       DT::datatable(dt,
                     rownames = F,
@@ -1176,7 +1185,12 @@ shinyServer(function(input, output, session) {
                                  dom = 't'))) %>%
         formatPercentage(columns = columns.perc1, digits = 1) %>%
         formatRound(columns = columns.dec1, digits = 1) %>%
-        formatRound(columns = columns.dec2, digits = 2)
+        formatRound(columns = columns.dec2, digits = 2) %>%
+        formatCurrency(columns = c("Comp ($MM)"),
+                       currency = "$",
+                       interval = 3,
+                       mark = ",",
+                       digits = 1)
       
     }
   })
