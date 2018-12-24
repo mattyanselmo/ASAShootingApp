@@ -729,7 +729,9 @@ shinyServer(function(input, output, session) {
                              byteams = playerxgchain_inputs$playerxgchain_byteams,
                              byseasons = playerxgchain_inputs$playerxgchain_byseasons,
                              #gamestateind = playerxgchain_inputs$playerxgchain_gamestate0ind,
-                             perminute = F)
+                             perminute = F) %>%
+        mutate(`Comp ($K)`= Comp / 1000) %>%
+        select(-Comp)
     } else{
       dt <- xgchain.function(playerchaindata,
                              min.filter = playerxgchain_inputs$playerxgchain_minfilter,
@@ -739,7 +741,9 @@ shinyServer(function(input, output, session) {
                              byteams = playerxgchain_inputs$playerxgchain_byteams,
                              byseasons = playerxgchain_inputs$playerxgchain_byseasons,
                              #gamestateind = playerxgchain_inputs$playerxgchain_gamestate0ind,
-                             perminute = F)
+                             perminute = F) %>%
+        mutate(`Comp ($K)`= Comp / 1000) %>%
+        select(-Comp)
     }
     
     dt %>%
@@ -756,7 +760,9 @@ shinyServer(function(input, output, session) {
                              byteams = playerxgchain_inputs$playerxgchain_byteams,
                              byseasons = playerxgchain_inputs$playerxgchain_byseasons,
                              #gamestateind = playerxgchain_inputs$playerxgchain_gamestate0ind,
-                             perminute = T)
+                             perminute = T) %>%
+        mutate(`Comp ($K)`= Comp / 1000) %>%
+        select(-Comp)
     } else{
       dt <- xgchain.function(playerchaindata,
                              min.filter = playerxgchain_inputs$playerxgchain_minfilter,
@@ -766,7 +772,9 @@ shinyServer(function(input, output, session) {
                              byteams = playerxgchain_inputs$playerxgchain_byteams,
                              byseasons = playerxgchain_inputs$playerxgchain_byseasons,
                              #gamestateind = playerxgchain_inputs$playerxgchain_gamestate0ind,
-                             perminute = T)
+                             perminute = T) %>%
+        mutate(`Comp ($K)`= Comp / 1000) %>%
+        select(-Comp)
     }
     
     dt %>%
@@ -784,7 +792,12 @@ shinyServer(function(input, output, session) {
       formatRound(columns = c("xB", "xGChain"), 
                   digits = 2) %>%
       formatPercentage(columns = c("TeamChain%", "ChainShot%", "PlayerShot%", "PlayerKP%", "xB%", "xB% (0)"), 
-                       digits = 1)
+                       digits = 1) %>%
+      formatCurrency(columns = c("Comp ($K)"),
+                     currency = "$",
+                     interval = 3,
+                     mark = ",",
+                     digits = 0) 
   })
   
   output$playerxgchain_per96 <- DT::renderDataTable({
@@ -798,7 +811,12 @@ shinyServer(function(input, output, session) {
       formatRound(columns = c("xB/96", "xGChain/96"), 
                   digits = 2) %>%
       formatPercentage(columns = c("TeamChain%", "ChainShot%", "PlayerShot%", "PlayerKP%", "xB%", "xB% (0)"), 
-                       digits = 1)
+                       digits = 1) %>%
+      formatCurrency(columns = c("Comp ($K)"),
+                     currency = "$",
+                     interval = 3,
+                     mark = ",",
+                     digits = 0)
   })
   
   # Player xGChain downloads ####
