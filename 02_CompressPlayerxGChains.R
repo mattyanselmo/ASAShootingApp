@@ -48,6 +48,18 @@ playerchaindata <- playerchaindata %>%
   left_join(minutesPlayed_gameID, by = c("player", "team", "gameID")) %>%
   rename(Season = year)
 
+# Join salary
+saldat <- readRDS("AppData/SalaryData.rds")
+pass_salary_mapping <- read.csv("SalaryNameLinkingTable_passing.csv")
+
+playerchaindata <- playerchaindata %>%
+  left_join(saldat %>% 
+              select(-c(First, Last, Team, Pos, Date)) %>%
+              left_join(pass_salary_mapping, 
+                        by = c("Player" = "salary_name", "Season")) %>%
+              select(-Player), 
+            by = c("player" = "passing_name", "Season"))
+
 # write file
 saveRDS(playerchaindata, "IgnoreList/PlayerxGChainData.rds")
 write.csv(playerchaindata, "IgnoreList/PlayerxGChainData.csv", row.names = F)
