@@ -908,7 +908,9 @@ shinyServer(function(input, output, session) {
                `G-xG/Shot` = `G-xG`/Shots)
     }
     
-    dt_keeper
+    dt_keeper %>%
+      mutate(`Comp ($K)` = Comp / 1000) %>%
+      select(-Comp)
   })
   
   dt_keeper_per96 <- reactive({
@@ -940,7 +942,9 @@ shinyServer(function(input, output, session) {
                                                  PK = keeper_inputs$keeper_pk)
     }
     
-    dt_keeper_per96
+    dt_keeper_per96 %>%
+      mutate(`Comp ($K)` = Comp / 1000) %>%
+      select(-Comp)
   })
   
   output$keepertable <- DT::renderDataTable({
@@ -955,7 +959,12 @@ shinyServer(function(input, output, session) {
       formatRound(columns = c('xG', 'G-xG'), 
                   digits = 2) %>%
       formatPercentage(columns = c("Header%"), 
-                       digits = 1)
+                       digits = 1) %>%
+      formatCurrency(columns = c("Comp ($K)"),
+                     currency = "$",
+                     interval = 3,
+                     mark = ",",
+                     digits = 1)
   })
   
   output$keepertable_per96 <- DT::renderDataTable({
@@ -970,7 +979,12 @@ shinyServer(function(input, output, session) {
       formatRound(columns = c("Shots", "Goals", "Saves", 'xG', 'G-xG'), 
                   digits = 2) %>%
       formatPercentage(columns = c("Header%"), 
-                       digits = 1)
+                       digits = 1) %>%
+      formatCurrency(columns = c("Comp ($K)"),
+                     currency = "$",
+                     interval = 3,
+                     mark = ",",
+                     digits = 1)
   })
   
   # Keeper plots ####
@@ -1001,7 +1015,7 @@ shinyServer(function(input, output, session) {
   observeEvent(input$keeper_action, {
     choices.total <- names(dt_keeper())[!(names(dt_keeper()) %in% c("Keeper", "Team", "Season"))]
     if(min(input$keeper_seasonfilter) >= 2015){
-      choices.96 <- paste0(names(dt_keeper_per96())[!(names(dt_keeper_per96()) %in% c("Keeper", "Team", "Season"))], "/96")
+      choices.96 <- paste0(names(dt_keeper_per96())[!(names(dt_keeper_per96()) %in% c("Keeper", "Team", "Season", "Comp ($K)"))], "/96")
     } else{
       choices.96 <- c("")
     }
@@ -1024,7 +1038,7 @@ shinyServer(function(input, output, session) {
     {
       choices.total <- names(dt_keeper())[!(names(dt_keeper()) %in% c("Keeper", "Team", "Season"))]
       if(min(input$keeper_seasonfilter) >= 2015){
-        choices.96 <- paste0(names(dt_keeper_per96())[!(names(dt_keeper_per96()) %in% c("Keeper", "Team", "Season"))], "/96")
+        choices.96 <- paste0(names(dt_keeper_per96())[!(names(dt_keeper_per96()) %in% c("Keeper", "Team", "Season", "Comp ($K)"))], "/96")
       } else{
         choices.96 <- c("")
       }
