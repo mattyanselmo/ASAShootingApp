@@ -19,4 +19,17 @@ keeperxgoals <- shooting %>%
   ungroup() %>%
   mutate(Season = as.numeric(format(date, '%Y')))
 
+# Join salary data ####
+saldat <- readRDS("AppData/SalaryData.rds")
+keeper_salary_mapping <- read.csv("SalaryNameLinkingTable_keeping.csv")
+
+keeperxgoals <- keeperxgoals %>%
+  left_join(saldat %>% 
+              select(-c(First, Last, Team, Pos, Date)) %>%
+              left_join(keeper_salary_mapping, 
+                        by = c("Player" = "salary_name", "Season")) %>%
+              select(-Player), 
+            by = c("goalie" = "keeping_name", "Season"))
+
+
 saveRDS(keeperxgoals, file = 'IgnoreList/xGoalsByKeeper.rds')
