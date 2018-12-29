@@ -44,7 +44,8 @@ keeperxgoals_per96.func <- function(keeperxgoals = keeperxgoals,
                 `Header%` = sum(headers)/sum(shotsfaced),
                 Dist = sum(shotsfaced*meddist, na.rm = T)/sum(shotsfaced),
                 xG = sum(xG),
-                `G-xG` = sum(`G-xG`)) %>%
+                `G-xG` = sum(`G-xG`),
+                Comp = mean(Guaranteed, na.rm = T)) %>%
       filter(Shots >= shotfilter)  %>%
       left_join(tempmins %>%
                   group_by(player, Team = team, Season) %>%
@@ -63,7 +64,8 @@ keeperxgoals_per96.func <- function(keeperxgoals = keeperxgoals,
                 `Header%` = sum(headers)/sum(shotsfaced),
                 Dist = sum(shotsfaced*meddist, na.rm = T)/sum(shotsfaced),
                 xG = sum(xG),
-                `G-xG` = sum(`G-xG`)) %>%
+                `G-xG` = sum(`G-xG`),
+                Comp = mean(Guaranteed, na.rm = T)) %>%
       filter(Shots >= shotfilter) %>%
       left_join(tempmins %>%
                   group_by(player, Team = team) %>%
@@ -83,7 +85,8 @@ keeperxgoals_per96.func <- function(keeperxgoals = keeperxgoals,
                 `Header%` = sum(headers)/sum(shotsfaced),
                 Dist = sum(shotsfaced*meddist, na.rm = T)/sum(shotsfaced),
                 xG = sum(xG),
-                `G-xG` = sum(`G-xG`)) %>%
+                `G-xG` = sum(`G-xG`),
+                Comp = mean(Guaranteed, na.rm = T)) %>%
       filter(Shots >= shotfilter) %>% 
       left_join(tempmins %>%
                   group_by(player, Season) %>%
@@ -103,7 +106,8 @@ keeperxgoals_per96.func <- function(keeperxgoals = keeperxgoals,
                 `Header%` = sum(headers)/sum(shotsfaced),
                 Dist = sum(shotsfaced*meddist, na.rm = T)/sum(shotsfaced),
                 xG = sum(xG),
-                `G-xG` = sum(`G-xG`)) %>%
+                `G-xG` = sum(`G-xG`),
+                Comp = mean(Guaranteed, na.rm = T)) %>%
       filter(Shots >= shotfilter) %>%
       left_join(tempmins %>%
                   group_by(player) %>%
@@ -121,7 +125,7 @@ keeperxgoals_per96.func <- function(keeperxgoals = keeperxgoals,
            arrange(`G-xG`)) %>%
     select(one_of(c("Keeper", "Team", "Season", "Min", 
                     "Shots", "Goals", "Saves", "Header%", 
-                    "Dist", "xG", "G-xG"))) %>%
+                    "Dist", "xG", "G-xG", "Comp"))) %>%
     ungroup()
   
 }

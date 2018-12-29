@@ -1,6 +1,6 @@
 # keeperxgoals <- readRDS('IgnoreList/xGoalsByKeeper.rds') %>%
 #   mutate(date = as.Date(date, format = '%m/%d/%Y'))
-# minutes_df <- readRDS("IgnoreList/MinutesByGameID.rds")
+# minutes_df <- readRDS('IgnoreList/MinutesByGameID_forapp.rds')
 # date1 = as.Date('2000-01-01')
 # date2 = as.Date('9999-12-31')
 # season = 2015:2017
@@ -43,7 +43,8 @@ keeperxgoals.func <- function(keeperxgoals = keeperxgoals,
                 `Header%` = sum(headers)/sum(shotsfaced),
                 Dist = sum(shotsfaced*meddist, na.rm = T)/sum(shotsfaced),
                 xG = sum(xG),
-                `G-xG` = sum(`G-xG`)) %>%
+                `G-xG` = sum(`G-xG`),
+                Comp = mean(Guaranteed, na.rm = T)) %>%
       filter(Shots >= shotfilter)  %>%
       left_join(tempmins %>%
                   group_by(player, Team = team, Season) %>%
@@ -60,7 +61,8 @@ keeperxgoals.func <- function(keeperxgoals = keeperxgoals,
                 `Header%` = sum(headers)/sum(shotsfaced),
                 Dist = sum(shotsfaced*meddist, na.rm = T)/sum(shotsfaced),
                 xG = sum(xG),
-                `G-xG` = sum(`G-xG`)) %>%
+                `G-xG` = sum(`G-xG`),
+                Comp = mean(Guaranteed, na.rm = T)) %>%
       filter(Shots >= shotfilter)
     
     if(min(season) >= 2015){
@@ -82,7 +84,8 @@ keeperxgoals.func <- function(keeperxgoals = keeperxgoals,
                 `Header%` = sum(headers)/sum(shotsfaced),
                 Dist = sum(shotsfaced*meddist, na.rm = T)/sum(shotsfaced),
                 xG = sum(xG),
-                `G-xG` = sum(`G-xG`)) %>%
+                `G-xG` = sum(`G-xG`),
+                Comp = mean(Guaranteed, na.rm = T)) %>%
       filter(Shots >= shotfilter) %>% 
       left_join(tempmins %>%
                   group_by(player, Season) %>%
@@ -100,7 +103,8 @@ keeperxgoals.func <- function(keeperxgoals = keeperxgoals,
                 `Header%` = sum(headers)/sum(shotsfaced),
                 Dist = sum(shotsfaced*meddist, na.rm = T)/sum(shotsfaced),
                 xG = sum(xG),
-                `G-xG` = sum(`G-xG`)) %>%
+                `G-xG` = sum(`G-xG`),
+                Comp = mean(Guaranteed, na.rm = T)) %>%
       filter(Shots >= shotfilter)
     
     if(min(season) >= 2015){
@@ -119,7 +123,7 @@ keeperxgoals.func <- function(keeperxgoals = keeperxgoals,
            arrange(`G-xG`)) %>%
     select(one_of(c("Keeper", "Team", "Season", "Min", 
                     "Shots", "Goals", "Saves", "Header%", 
-                    "Dist", "xG", "G-xG"))) %>%
+                    "Dist", "xG", "G-xG", "Comp"))) %>%
     ungroup()
   
 }
