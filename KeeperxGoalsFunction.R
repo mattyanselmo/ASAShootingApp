@@ -6,11 +6,13 @@
 # season = 2015:2017
 # shotfilter = 0
 # minfilter = 0
+# teamfilter = unique(keeperxgoals$team.1)
 # byteams = F
 # byseasons = T
-# OtherShots = T
+# OpenPlay = T
 # FK = T
 # PK = T
+# SetPiece = T
 
 keeperxgoals.func <- function(keeperxgoals = keeperxgoals,
                               minutes_df,
@@ -19,11 +21,13 @@ keeperxgoals.func <- function(keeperxgoals = keeperxgoals,
                               season = 2011:2017,
                               shotfilter = 0, 
                               minfilter = 0,
+                              teamfilter = unique(keeperxgoals$team.1),
                               byteams = F,
                               byseasons = T,
-                              OtherShots = T,
-                              FK = F,
-                              PK = F){
+                              OpenPlay = T,
+                              FK = T,
+                              PK = T,
+                              SetPiece = T){
   
   tempmins <- minutes_df %>%
     filter(date >= date1 & date <= date2,
@@ -32,7 +36,8 @@ keeperxgoals.func <- function(keeperxgoals = keeperxgoals,
   tempdat <- keeperxgoals %>%
     filter(date >= date1 & date <= date2,
            Season %in% season,
-           type %in% c('Other'[OtherShots], 'FK'[FK], 'PK'[PK]))
+           type %in% c('Open play'[OpenPlay], 'Direct FK'[FK], 'PK'[PK], "Set piece"[SetPiece]),
+           team.1 %in% teamfilter)
   
   if(byteams & byseasons){
     aggdata <- tempdat %>%
@@ -140,6 +145,7 @@ keeperxgoals.func <- function(keeperxgoals = keeperxgoals,
 #                   minfilter = 0,
 #                   byteams = F,
 #                   byseasons = T,
-#                   OtherShots = T,
+#                   OpenPlay = T,
 #                   FK = T,
-#                   PK = T)
+#                   PK = T,
+#                   SetPiece = T)

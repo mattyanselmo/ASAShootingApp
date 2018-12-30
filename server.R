@@ -77,10 +77,6 @@ shinyServer(function(input, output, session) {
                  shooter_inputs$shooting_byteams <- input$shooting_byteams
                  shooter_inputs$shooting_byseasons <- input$shooting_byseasons
                  shooter_inputs$pattern <- input$shooting_pattern
-                 # shooter_inputs$shooting_other <- input$shooting_other BEING REPLACED BY A SINGLE CHECKBOX GROUP "PATTERN"
-                 # shooter_inputs$shooting_fk <- input$shooting_fk
-                 # shooter_inputs$shooting_pk <- input$shooting_pk
-                 # shooter_inputs$setpiece <- input$shooting_setpiece
                  shooter_inputs$shooterplot_xvar <- input$shooterplot_xvar
                  shooter_inputs$shooterplot_yvar <- input$shooterplot_yvar
                  # shooter_inputs$shooterplot_per96_xvar <- input$shooterplot_per96_xvar
@@ -842,15 +838,14 @@ shinyServer(function(input, output, session) {
   # Initial values
   keeper_inputs <- reactiveValues(keeper_minshots = 0,
                                   keeper_minfilter = 0,
+                                  teamfilter = unique(keeperxgoals$team.1),
                                   keeper_date1 = as.Date('2000-01-01'),
                                   keeper_date2 = as.Date('9999-12-31'),
                                   keeper_seasonfilter = max(keeperxgoals$Season),
                                   keeper_seasonordate = 'Season',
                                   keeper_byseasons = T,
                                   keeper_byteams = F,
-                                  keeper_pk = T,
-                                  keeper_fk = T,
-                                  keeper_othershots = T,
+                                  pattern = c("Open", "FK", "PK", "Setpiece"),
                                   keeperplot_xvar = 'xG',
                                   keeperplot_yvar = 'G-xG')
   
@@ -859,18 +854,51 @@ shinyServer(function(input, output, session) {
                {
                  keeper_inputs$keeper_minshots <- input$keeper_minshots
                  keeper_inputs$keeper_minfilter <- input$keeper_minfilter
+                 keeper_inputs$teamfilter <- input$keeper_teamfilter
                  keeper_inputs$keeper_date1 <- input$keeper_date1
                  keeper_inputs$keeper_date2 <- input$keeper_date2
                  keeper_inputs$keeper_seasonfilter <- input$keeper_seasonfilter
                  keeper_inputs$keeper_seasonordate <- input$keeper_seasonordate
                  keeper_inputs$keeper_byseasons <- input$keeper_byseasons
                  keeper_inputs$keeper_byteams <- input$keeper_byteams
-                 keeper_inputs$keeper_pk <- input$keeper_pk
-                 keeper_inputs$keeper_fk <- input$keeper_fk
-                 keeper_inputs$keeper_othershots <- input$keeper_othershots
+                 keeper_inputs$pattern <- input$keeper_pattern
                  keeper_inputs$keeperplot_xvar <- input$keeperplot_xvar
                  keeper_inputs$keeperplot_yvar <- input$keeperplot_yvar
                })
+  
+  # Select all checkboxes  
+  observeEvent(input$keeper_teamfilter_selectall,
+               {
+                 updateCheckboxGroupInput(
+                   session, 
+                   "keeper_teamfilter", 
+                   choices = sort(unique(keeperxgoals$team.1)),
+                   selected = if (input$keeper_teamfilter_selectall) sort(unique(keeperxgoals$team.1))
+                 )
+               },
+               ignoreInit = T)
+  
+  observeEvent(input$keeper_seasonfilter_selectall,
+               {
+                 updateCheckboxGroupInput(
+                   session, 
+                   "keeper_seasonfilter", 
+                   choices = min(keeperxgoals$Season):max(keeperxgoals$Season),
+                   selected = if (input$keeper_seasonfilter_selectall) min(keeperxgoals$Season):max(keeperxgoals$Season)
+                 )
+               },
+               ignoreInit = T)
+  
+  observeEvent(input$keeper_pattern_selectall,
+               {
+                 updateCheckboxGroupInput(
+                   session, 
+                   "keeper_pattern", 
+                   choices = c("Open play" = "Open", "PK", "Direct FK" = "FK", "Set piece" = "Setpiece"),
+                   selected = if (input$keeper_pattern_selectall) c("Open play" = "Open", "PK", "Direct FK" = "FK", "Set piece" = "Setpiece")
+                 )
+               },
+               ignoreInit = T)
   
   # Keeper tables ####
   dt_keeper <- reactive({
@@ -882,11 +910,13 @@ shinyServer(function(input, output, session) {
                                      season = keeper_inputs$keeper_seasonfilter,
                                      shotfilter = keeper_inputs$keeper_minshots,
                                      minfilter = keeper_inputs$keeper_minfilter,
+                                     teamfilter = keeper_inputs$teamfilter,
                                      byteams = keeper_inputs$keeper_byteams,
                                      byseasons = keeper_inputs$keeper_byseasons,
-                                     OtherShots = keeper_inputs$keeper_othershots,
-                                     FK = keeper_inputs$keeper_fk,
-                                     PK = keeper_inputs$keeper_pk) %>%
+                                     OpenPlay = "Open" %in% keeper_inputs$pattern,
+                                     FK = "FK" %in% keeper_inputs$pattern,
+                                     PK = "PK" %in% keeper_inputs$pattern,
+                                     SetPiece = "Setpiece" %in% keeper_inputs$pattern) %>%
         mutate(`Goals/Shot` = Goals/Shots, 
                `xG/Shot` = xG/Shots,
                `G-xG/Shot` = `G-xG`/Shots)
@@ -898,11 +928,13 @@ shinyServer(function(input, output, session) {
                                      season = min(playerxgoals$Season):max(playerxgoals$Season),
                                      shotfilter = keeper_inputs$keeper_minshots,
                                      minfilter = keeper_inputs$keeper_minfilter,
+                                     teamfilter = keeper_inputs$teamfilter,
                                      byteams = keeper_inputs$keeper_byteams,
                                      byseasons = keeper_inputs$keeper_byseasons,
-                                     OtherShots = keeper_inputs$keeper_othershots,
-                                     FK = keeper_inputs$keeper_fk,
-                                     PK = keeper_inputs$keeper_pk) %>%
+                                     OpenPlay = "Open" %in% keeper_inputs$pattern,
+                                     FK = "FK" %in% keeper_inputs$pattern,
+                                     PK = "PK" %in% keeper_inputs$pattern,
+                                     SetPiece = "Setpiece" %in% keeper_inputs$pattern) %>%
         mutate(`Goals/Shot` = Goals/Shots, 
                `xG/Shot` = xG/Shots,
                `G-xG/Shot` = `G-xG`/Shots)
@@ -922,11 +954,13 @@ shinyServer(function(input, output, session) {
                                                  season = keeper_inputs$keeper_seasonfilter[keeper_inputs$keeper_seasonfilter >= 2015],
                                                  shotfilter = keeper_inputs$keeper_minshots,
                                                  minfilter = keeper_inputs$keeper_minfilter,
+                                                 teamfilter = keeper_inputs$teamfilter,
                                                  byteams = keeper_inputs$keeper_byteams,
                                                  byseasons = keeper_inputs$keeper_byseasons,
-                                                 OtherShots = keeper_inputs$keeper_othershots,
-                                                 FK = keeper_inputs$keeper_fk,
-                                                 PK = keeper_inputs$keeper_pk)
+                                                 OpenPlay = "Open" %in% keeper_inputs$pattern,
+                                                 FK = "FK" %in% keeper_inputs$pattern,
+                                                 PK = "PK" %in% keeper_inputs$pattern,
+                                                 SetPiece = "Setpiece" %in% keeper_inputs$pattern)
     } else{
       dt_keeper_per96 <- keeperxgoals_per96.func(keeperxgoals,
                                                  minutes_df = minutesPlayed,
@@ -935,11 +969,13 @@ shinyServer(function(input, output, session) {
                                                  season = min(playerxgoals$Season):max(playerxgoals$Season),
                                                  shotfilter = keeper_inputs$keeper_minshots,
                                                  minfilter = keeper_inputs$keeper_minfilter,
+                                                 teamfilter = keeper_inputs$teamfilter,
                                                  byteams = keeper_inputs$keeper_byteams,
                                                  byseasons = keeper_inputs$keeper_byseasons,
-                                                 OtherShots = keeper_inputs$keeper_othershots,
-                                                 FK = keeper_inputs$keeper_fk,
-                                                 PK = keeper_inputs$keeper_pk)
+                                                 OpenPlay = "Open" %in% keeper_inputs$pattern,
+                                                 FK = "FK" %in% keeper_inputs$pattern,
+                                                 PK = "PK" %in% keeper_inputs$pattern,
+                                                 SetPiece = "Setpiece" %in% keeper_inputs$pattern)
     }
     
     dt_keeper_per96 %>%

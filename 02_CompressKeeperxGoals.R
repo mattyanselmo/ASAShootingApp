@@ -9,7 +9,8 @@ shooting <- shooting %>%
 keeperxgoals <- shooting %>%
   mutate(date = as.Date(date, format = '%m/%d/%Y')) %>%
   group_by(date, team.1, goalie, type = ifelse(patternOfPlay == 'Penalty', 'PK',
-                                              ifelse(patternOfPlay == 'Free kick', 'FK', 'Other'))) %>%
+                                               ifelse(patternOfPlay == 'Free kick', 'Direct FK',
+                                                      ifelse(patternOfPlay %in% c("Set piece", "Corner", "Throw in"), "Set piece", "Open play")))) %>%
   summarize(shotsfaced = n(),
             meddist = median(distance),
             headers = sum(bodypart == 'Head'),
