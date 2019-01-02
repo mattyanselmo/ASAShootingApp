@@ -35,15 +35,14 @@ playerxgoals <- readRDS('AppData/xGoalsByPlayer.rds')
 #                        gameID = 666,
 #                        check.names = F))
 
-minutesPlayed <- readRDS('IgnoreList/MinutesByGameID_forapp.rds')
-# minutesPlayedPassing <- readRDS("IgnoreList/MinutesBySeason.rds")
-teamxgoals <- readRDS('IgnoreList/xGoalsByTeam.rds')
-xgbygame <- readRDS('IgnoreList/xGoalsByTeam_byGame.rds')
+minutesPlayed <- readRDS('AppData/MinutesByGameID_forapp.rds')
+teamxgoals <- readRDS('AppData/xGoalsByTeam.rds')
+xgbygame <- readRDS('AppData/xGoalsByTeam_byGame.rds')
 keeperxgoals <- readRDS('AppData/xGoalsByKeeper.rds')
 conferences <- read.csv('teamsbyconferencebyseason.csv')
-glossary <- read.csv('Glossary.csv')
-playerpos <- readRDS("IgnoreList/playerpositions_byseason.rds")
-playerpassing <- readRDS("IgnoreList/xPassingByPlayer.rds")
+glossary <- read.csv('AppData/Glossary.csv')
+playerpos <- readRDS("AppData/playerpositions_byseason.rds")
+playerpassing <- readRDS("AppData/xPassingByPlayer.rds")
 # %>%
 #   bind_rows(data.frame(passer = "God Zlatan",
 #                        year = 2018,
@@ -59,11 +58,11 @@ playerpassing <- readRDS("IgnoreList/xPassingByPlayer.rds")
 #                        minutes = 666,
 #                        touches = 1))
 
-teampassing.offense <- readRDS("IgnoreList/xPassingByTeamOffense.rds")
-teampassing.defense <- readRDS("IgnoreList/xPassingByTeamDefense.rds")
+teampassing.offense <- readRDS("AppData/xPassingByTeamOffense.rds")
+teampassing.defense <- readRDS("AppData/xPassingByTeamDefense.rds")
 playerchaindata <- readRDS("AppData/PlayerxGChainData.rds")
-playoffsseeding_west <- readRDS("IgnoreList/CurrentSimulationResults_playoffseeding_west.rds")
-playoffsseeding_east <- readRDS("IgnoreList/CurrentSimulationResults_playoffseeding_east.rds")
+playoffsseeding_west <- readRDS("AppData/CurrentSimulationResults_playoffseeding_west.rds")
+playoffsseeding_east <- readRDS("AppData/CurrentSimulationResults_playoffseeding_east.rds")
 cupchances <- readRDS(paste0("AppData/", sort(grep(".rds", grep("MLSCupSimulationResults", list.files("AppData"), value = T), value = T), decreasing = T)[1]))
 salary.data <- readRDS("AppData/SalaryData.rds")
 
