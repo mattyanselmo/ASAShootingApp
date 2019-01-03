@@ -1211,6 +1211,39 @@ shinyServer(function(input, output, session) {
     dt
   })
   
+  # Select all controls
+  observeEvent(input$team_seasonfilter_selectall,
+               { print(c(min(teamxgoals$Season):max(teamxgoals$Season))[-c(length(unique(teamxgoals$Season)))[input$team_subtab == "teamxgoalsplitsplots"]])
+                 updateCheckboxGroupInput(
+                   session, 
+                   "team_seasonfilter", 
+                   choices = min(teamxgoals$Season):ifelse(input$team_subtab == "teamxgoalsplitsplots", max(teamxgoals$Season) - 1, max(teamxgoals$Season)),
+                   selected = if (input$team_seasonfilter_selectall) min(teamxgoals$Season):ifelse(input$team_subtab == "teamxgoalsplitsplots", max(teamxgoals$Season) - 1, max(teamxgoals$Season))
+                 )
+               },
+               ignoreInit = T)
+  
+  observeEvent(input$team_seasonfilter2_selectall,
+               {
+                 updateCheckboxGroupInput(
+                   session, 
+                   "team_seasonfilter2", 
+                   choices = min(teamxgoals$Season):ifelse(input$team_subtab == "teamxgoalsplitsplots", max(teamxgoals$Season) - 1, max(teamxgoals$Season)),
+                   selected = if (input$team_seasonfilter2_selectall) min(teamxgoals$Season):ifelse(input$team_subtab == "teamxgoalsplitsplots", max(teamxgoals$Season) - 1, max(teamxgoals$Season))
+                 )
+               },
+               ignoreInit = T)
+
+  observeEvent(input$team_pattern_selectall,
+               {
+                 updateCheckboxGroupInput(
+                   session, 
+                   "team_pattern", 
+                   choices = sort(unique(teamxgoals$patternOfPlay.model)),
+                   selected = if (input$team_pattern_selectall) sort(unique(teamxgoals$patternOfPlay.model))
+                 )
+               },
+               ignoreInit = T)
   
   
   output$teamtotalxgoalswest <- DT::renderDataTable({
@@ -1901,6 +1934,18 @@ shinyServer(function(input, output, session) {
     dt[is.num] <- lapply(dt[is.num], round, 2)
     dt
   })
+  
+  # Select all/none ####
+  observeEvent(input$teambygame_seasonfilter_selectall,
+               { 
+                 updateCheckboxGroupInput(
+                   session, 
+                   "teambygame_seasonfilter", 
+                   choices = min(teamxgoals$Season):max(teamxgoals$Season),
+                   selected = if (input$teambygame_seasonfilter_selectall) min(teamxgoals$Season):max(teamxgoals$Season)
+                 )
+               },
+               ignoreInit = T)
   
   output$teamxgoalsbygame <- DT::renderDataTable({
     

@@ -27,13 +27,10 @@ teamshootingsplits.func <- function(teamxgoals = teamxgoals,
     summarize(Pts = sum(Pts)) %>%
     ungroup()
   
-  tempdat <- tempdat %>%
-    filter(evengamestate %in% ifelse(rep(even, 2), c(1, 1), c(0, 1)))
   
-  if(pattern != 'All'){
-    tempdat <- tempdat %>% 
-      filter(patternOfPlay.model == pattern)
-  }
+  tempdat <- tempdat %>%
+    filter(evengamestate %in% ifelse(rep(even, 2), c(1, 1), c(0, 1)),
+           patternOfPlay.model %in% pattern)
   
   aggdata <- tempdat %>%
     group_by(Team, Season, split = ifelse(gamesplayed <= game_split, 1, 2)) %>%

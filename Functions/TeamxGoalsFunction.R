@@ -1,5 +1,5 @@
 # # Function testing
-# teamxgoals <- readRDS('IgnoreList/xGoalsByTeam.rds')
+# teamxgoals <- readRDS('AppData/xGoalsByTeam.rds')
 # conferences <- read.csv('teamsbyconferencebyseason.csv')
 # date1 = as.Date('2000-01-01')
 # date2 = as.Date('9999-12-31')
@@ -42,11 +42,8 @@ teamxgoals.func <- function(teamxgoals = teamxgoals,
     ungroup()
   
   tempdat <- tempdat %>%
-    filter(evengamestate %in% ifelse(rep(even, 2), c(1, 1), c(0, 1)))
-  
-  if(pattern != 'All'){
-    tempdat <- tempdat %>% filter(patternOfPlay.model == pattern)
-  }
+    filter(evengamestate %in% ifelse(rep(even, 2), c(1, 1), c(0, 1)), 
+           patternOfPlay.model %in% pattern)
   
   if(pergame){
     if(advanced){
