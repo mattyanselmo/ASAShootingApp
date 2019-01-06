@@ -383,7 +383,8 @@ shinyUI(
                                                                                selected = "GD (after split")))),
                                                           htmlOutput("teamshootingsplitsplot_text"),
                                                           plotlyOutput("teamsplitsplot"))
-                                     )
+                                     ),
+                                     br()
                                    )
                                  )
                         ),
