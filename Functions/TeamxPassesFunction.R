@@ -2,10 +2,12 @@
 
 # # Sample inputs ####
 # library(dplyr)
-# offense <- readRDS("IgnoreList/xPassingByTeamOffense.rds")
-# defense <- readRDS("IgnoreList/xPassingByTeamDefense.rds")
+# offense <- readRDS("AppData/xPassingByTeamOffense.rds")
+# defense <- readRDS("AppData/xPassingByTeamDefense.rds")
 # gamesplayed <- readRDS("IgnoreList/GamesPlayed_forTeamPassing.rds")
 # season <- 2016:2017
+# date1 <- as.Date("2000-01-01")
+# date2 <- as.Date("9999-12-31")
 # byseasons <- T
 # third.filter <- c("Att")
 # pergame = T
@@ -50,7 +52,9 @@ teampassing.func <- function(offense,
               ScoreA = (PctA - xPctA)*PassA,
               Per100A = ScoreA*100/PassA,
               ScoreDiff = ScoreF - ScoreA,
-              VertDiff = VertF - VertA) %>%
+              VertDiff = VertF - VertA,
+              Gini18 = mean(Gini18f),
+              Comp = mean(Compf)) %>%
     ungroup()
   
   if(byseasons){
@@ -65,11 +69,12 @@ teampassing.func <- function(offense,
                     `PassA/g` = PassA/Games,
                     `ScoreA/g` = ScoreA/Games,
                     `ScoreDiff/g` = ScoreDiff/Games) %>%
-             select(-c(PassF, ScoreF, PassA, ScoreA, ScoreDiff))%>%
+             #select(-c(PassF, ScoreF, PassA, ScoreA, ScoreDiff))%>%
              select_(.dots = c("team", "Season"[byseasons], "Games", "`PassF/g`", 
                                "PctF", "xPctF", "`ScoreF/g`", "Per100F", 
                                "VertF", "`PassA/g`", "PctA", "xPctA", 
-                               "`ScoreA/g`", "Per100A", "VertA", "`ScoreDiff/g`", "VertDiff")) %>%
+                               "`ScoreA/g`", "Per100A", "VertA", "`ScoreDiff/g`", 
+                               "VertDiff", "Gini18", "Comp")) %>%
              arrange(desc(`ScoreDiff/g`)) %>%
              rename("Team" = "team"))
     
@@ -82,8 +87,8 @@ teampassing.func <- function(offense,
 
 # # Function example
 # library(dplyr)
-# teampassing.func(offense = readRDS("IgnoreList/xPassingByTeamOffense.rds"),
-#                  defense = readRDS("IgnoreList/xPassingByTeamDefense.rds"),
+# teampassing.func(offense = readRDS("AppData/xPassingByTeamOffense.rds"),
+#                  defense = readRDS("AppData/xPassingByTeamDefense.rds"),
 #                  date1 = as.Date('2000-01-01'),
 #                  date2 = as.Date('9999-12-31'),
 #                  season = 2017:2018,
