@@ -425,6 +425,7 @@ shinyServer(function(input, output, session) {
                                   passing_date1 = as.Date("2000-01-01"),
                                   passing_date2 = as.Date("9999-12-31"),
                                   passing_seasonfilter = max(playerpassing$Season),
+                                  teamfilter = sort(unique(playerpassing$team)),
                                   passing_minpasses = 0,
                                   passing_minfilter = 0,
                                   passing_byteams = F,
@@ -447,6 +448,7 @@ shinyServer(function(input, output, session) {
                  passer_inputs$passing_third <- input$passing_third
                  passer_inputs$passing_seasonordate <- input$passing_seasonordate
                  passer_inputs$passing_seasonfilter <- input$passing_seasonfilter
+                 passer_inputs$teamfilter <- input$passing_teamfilter
                  passer_inputs$passing_date1 <- input$passing_date1
                  passer_inputs$passing_date2 <- input$passing_date2
                  passer_inputs$passing_minpasses <- input$passing_minpasses
@@ -497,10 +499,17 @@ shinyServer(function(input, output, session) {
                },
                ignoreInit = T)
   
-  # Third dropdown
-  # Season dropdown
-  # Team dropdown (needs to be created first)
-  
+  observeEvent(input$passing_teamfilter_selectall,
+               {
+                 updateCheckboxGroupInput(
+                   session, 
+                   "passing_teamfilter", 
+                   choices = sort(unique(playerpassing$team)),
+                   selected = if (input$passing_teamfilter_selectall) sort(unique(playerpassing$team))
+                 )
+               },
+               ignoreInit = T)
+ 
   # Passer tables ####
   dt_passer <- reactive({
     if(passer_inputs$passing_seasonordate == "Season"){
@@ -508,6 +517,7 @@ shinyServer(function(input, output, session) {
                            minpasses = passer_inputs$passing_minpasses,
                            minfilter = passer_inputs$passing_minfilter,
                            seasonfilter = passer_inputs$passing_seasonfilter,
+                           teamfilter = passer_inputs$teamfilter,
                            date1 = as.Date('2000-01-01'),
                            date2 = as.Date('9999-12-31'), 
                            byteams = passer_inputs$passing_byteams,
@@ -519,6 +529,7 @@ shinyServer(function(input, output, session) {
                            minpasses = passer_inputs$passing_minpasses,
                            minfilter = passer_inputs$passing_minfilter,
                            seasonfilter = min(playerpassing$Season):max(playerpassing$Season),
+                           teamfilter = passer_inputs$teamfilter,
                            date1 = passer_inputs$passing_date1,
                            date2 = passer_inputs$passing_date2, 
                            byteams = passer_inputs$passing_byteams,
@@ -539,6 +550,7 @@ shinyServer(function(input, output, session) {
                                minpasses = passer_inputs$passing_minpasses,
                                minfilter = passer_inputs$passing_minfilter,
                                seasonfilter = passer_inputs$passing_seasonfilter,
+                               teamfilter = passer_inputs$teamfilter,
                                date1 = as.Date('2000-01-01'),
                                date2 = as.Date('9999-12-31'), 
                                byteams = passer_inputs$passing_byteams,
@@ -551,6 +563,7 @@ shinyServer(function(input, output, session) {
                                minpasses = passer_inputs$passing_minpasses,
                                minfilter = passer_inputs$passing_minfilter,
                                seasonfilter = min(playerpassing$Season):max(playerpassing$Season),
+                               teamfilter = passer_inputs$teamfilter,
                                date1 = passer_inputs$passing_date1,
                                date2 = passer_inputs$passing_date2,                               
                                byteams = passer_inputs$passing_byteams,

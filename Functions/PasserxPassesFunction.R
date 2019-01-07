@@ -8,6 +8,7 @@
 # date1 = as.Date('2000-01-01') 
 # date2 = as.Date('9999-12-31')
 # seasonfilter = 2015:2018
+# teamfilter = unique(playerpassing$team)
 # byteams = F
 # byseasons = T
 # third.filter = "All"
@@ -19,6 +20,7 @@ passer.xpasses <- function(playerpassing,
                            date1 = as.Date('2000-01-01'), 
                            date2 = as.Date('9999-12-31'),
                            seasonfilter,
+                           teamfilter,
                            byteams,
                            byseasons,
                            third.filter = "All", # options = c("All", "Att", "Def", "Mid"),
@@ -28,6 +30,7 @@ passer.xpasses <- function(playerpassing,
   playerpassing.temp <- playerpassing %>%
     ungroup() %>%
     filter(Season %in% seasonfilter,
+           team %in% teamfilter,
            date >= date1 & date <= date2,
            Position %in% pos.filter) %>%
     group_by_(.dots = c("Player" = "passer", "Season", "team", "third")[c(T, byseasons, byteams, third.filter != "All")]) %>%
@@ -63,6 +66,7 @@ passer.xpasses <- function(playerpassing,
 #                minpasses = 50,
 #                minfilter = 0,
 #                seasonfilter = 2015:2018,
+#                teamfilter = unique(playerpassing$team),
 #                byteams = T,
 #                byseasons = T,
 #                third.filter = "All",
