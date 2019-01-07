@@ -42,7 +42,8 @@ passer.xpasses <- function(playerpassing,
               Distance = sum(Distance)/sum(successes),
               Vertical = sum(Vert.Dist)/sum(successes),
               `Touch%` = sum(tapply(touches*touchpct, gameID, function(x) x[1])/
-                               sum(tapply(touches, gameID, function(x) x[1])))) %>%
+                               sum(tapply(touches, gameID, function(x) x[1]))),
+              Comp = mean(Guaranteed, na.rm = T)) %>%
     ungroup() %>%
     select(-one_of("team")) %>%
     filter(Passes >= minpasses, Min >= minfilter)
@@ -57,8 +58,8 @@ passer.xpasses <- function(playerpassing,
   
 }
 
-# Function example:
-# passer.xpasses(playerpassing = readRDS("IgnoreList/xPassingByPlayer.rds"),
+# # Function example:
+# passer.xpasses(playerpassing = readRDS("AppData/xPassingByPlayer.rds"),
 #                minpasses = 50,
 #                minfilter = 0,
 #                seasonfilter = 2015:2018,

@@ -468,6 +468,39 @@ shinyServer(function(input, output, session) {
   #                passer_per96_inputs$passerplot_per96_yvar <- input$passerplot_per96_yvar
   #              })
   
+  # Select all checkboxes  
+  observeEvent(input$passing_position_selectall,
+               {
+                 updateCheckboxGroupInput(
+                   session, 
+                   "passing_position", 
+                   choices = c("Keeper (G)" = "G",
+                               "Central Def (D)" = "D",
+                               "Back (B)" = "B",
+                               "Midfielder (M)" = "M",
+                               "Attacking Mid (A)" = "A",
+                               "Forward (F)" = "F",
+                               "Sub (S)" = "S"),
+                   selected = if (input$passing_position_selectall) c("G", "D", "B", "M", "A", "F", "S")
+                 )
+               },
+               ignoreInit = T)
+  
+  observeEvent(input$passing_seasonfilter_selectall,
+               {
+                 updateCheckboxGroupInput(
+                   session, 
+                   "passing_seasonfilter", 
+                   choices = min(playerpassing$Season):max(playerpassing$Season),
+                   selected = if (input$passing_seasonfilter_selectall) min(playerpassing$Season):max(playerpassing$Season)
+                 )
+               },
+               ignoreInit = T)
+  
+  # Third dropdown
+  # Season dropdown
+  # Team dropdown (needs to be created first)
+  
   # Passer tables ####
   dt_passer <- reactive({
     if(passer_inputs$passing_seasonordate == "Season"){
@@ -494,7 +527,9 @@ shinyServer(function(input, output, session) {
                            pos.filter = passer_inputs$passing_position)
     }
     
-    dt
+    dt %>%
+      mutate(`Comp ($K)` = Comp / 1000) %>%
+      select(-Comp)
     # Append passer names and extreme obs for plotting?
   })
   
@@ -523,7 +558,9 @@ shinyServer(function(input, output, session) {
                                third.filter = passer_inputs$passing_third,
                                pos.filter = passer_inputs$passing_position)
     }
-    dt
+    dt %>%
+      mutate(`Comp ($K)` = Comp / 1000) %>%
+      select(-Comp)
   })
   
   output$passingtable_player <- DT::renderDataTable({
@@ -535,7 +572,12 @@ shinyServer(function(input, output, session) {
       formatRound(columns = c("Score", "Per100", "Distance", "Vertical"), 
                   digits = 1) %>%
       formatPercentage(columns = c("PassPct", "xPassPct", "Touch%")[c(T, T, passer_inputs$passing_third == "All")], 
-                       digits = 1)
+                       digits = 1) %>%
+      formatCurrency(columns = c("Comp ($K)"),
+                     currency = "$",
+                     interval = 3,
+                     mark = ",",
+                     digits = 0) 
   })
   
   output$passingtable_player_per96 <- DT::renderDataTable({
@@ -549,13 +591,18 @@ shinyServer(function(input, output, session) {
       formatRound(columns = c("Score"),
                   digits = 2) %>%
       formatPercentage(columns = c("PassPct", "xPassPct", "Touch%")[c(T, T, passer_inputs$passing_third == "All")], 
-                       digits = 1)
+                       digits = 1) %>%
+      formatCurrency(columns = c("Comp ($K)"),
+                     currency = "$",
+                     interval = 3,
+                     mark = ",",
+                     digits = 0) 
   })
   
   # Passer plots ####
   dt_passer_plot <- reactive({
     dt <- dt_passer() %>%
-      left_join(dt_passer_per96() %>% select(-one_of(c("Pos", "Min", "Team"))),
+      left_join(dt_passer_per96() %>% select(-one_of(c("Pos", "Min", "Team", "Comp ($K)"))),
                 by = c("Player", "Season")[c(T, passer_inputs$passing_byseasons)],
                 suffix = c("", "/96"))
     
@@ -577,9 +624,9 @@ shinyServer(function(input, output, session) {
   playerpassing_plotvalues <- reactiveValues(passerplot_xvar = "xPassPct", passerplot_yvar = "PassPct")
   
   observeEvent(input$passing_action, {
-    choices.total <- setdiff(names(dt_passer()), c("Player", "Team", "Season", "Pos"))
+    choices.total <- setdiff(names(dt_passer()), c("Player", "Team", "Season", "Pos", "Comp ($K)"))
     choices.96 <- c("Passes/96", "Score/96")
-    
+
     updateSelectInput(session,
                       inputId = 'passerplot_xvar',
                       label = 'X-axis variable',
@@ -598,7 +645,7 @@ shinyServer(function(input, output, session) {
     dt_passer_per96()
   },
   {
-    choices.total <- setdiff(names(dt_passer()), c("Player", "Team", "Season", "Pos"))
+    choices.total <- setdiff(names(dt_passer()), c("Player", "Team", "Season", "Pos", "Comp ($K)"))
     choices.96 <- c("Passes/96", "Score/96")
     
     updateSelectInput(session,
