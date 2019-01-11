@@ -1,11 +1,11 @@
 # library(dplyr)
-# playerxgoals <- readRDS('IgnoreList/xGoalsByPlayer.rds') %>%
+# playerxgoals <- readRDS('AppData/xGoalsByPlayer.rds') %>%
 #   mutate(date = as.Date(date, format = '%m/%d/%Y'))
-# minutes_df <- readRDS("IgnoreList/MinutesByGameID_forapp.rds")
-# playerpos <- readRDS("IgnoreList/playerpositions_byseason.rds")
-# date1 = as.Date('2000-01-01')
-# date2 = as.Date('9999-12-31')
-# season = 2018
+# minutes_df <- readRDS("AppData/MinutesByGameID_forapp.rds")
+# playerpos <- readRDS("AppData/playerpositions_byseason.rds")
+# date1 = as.Date('2011-01-01')
+# date2 = as.Date('2018-12-31')
+# season = 2011:2018
 # minfilter = 0
 # shotfilter = 0
 # keyfilter = 0
@@ -70,7 +70,7 @@ shooterxgoals.func <- function(playerxgoals = playerxgoals,
              KeyP >= keyfilter) %>%
       ungroup()
     
-    if(min(season) >= 2015){
+    if(max(season) >= 2015){
       aggdata <- aggdata %>%
         left_join(tempmins %>%
                     group_by(player, Team = team, Season) %>%
@@ -107,7 +107,7 @@ shooterxgoals.func <- function(playerxgoals = playerxgoals,
              KeyP >= keyfilter) %>%
       ungroup()
     
-    if(min(season) >= 2015){
+    if(max(season) >= 2015){
       aggdata <- aggdata %>%
         left_join(tempmins %>%
                     group_by(player, Team = team) %>%
@@ -146,7 +146,7 @@ shooterxgoals.func <- function(playerxgoals = playerxgoals,
              KeyP >= keyfilter) %>%
       ungroup()
     
-    if(min(season) >= 2015){
+    if(max(season) >= 2015){
     aggdata <- aggdata  %>%
       left_join(tempmins %>%
                   group_by(player, Season) %>%
@@ -184,7 +184,7 @@ shooterxgoals.func <- function(playerxgoals = playerxgoals,
              KeyP >= keyfilter) %>%
       ungroup()
     
-    if(min(season) >= 2015){
+    if(max(season) >= 2015){
       aggdata <- aggdata %>%
         left_join(tempmins %>%
                     group_by(player) %>%
@@ -207,17 +207,17 @@ shooterxgoals.func <- function(playerxgoals = playerxgoals,
 
 # # Function example
 # library(dplyr)
-# playerpos <- readRDS("IgnoreList/playerpositions_byseason.rds")
+# playerpos <- readRDS("AppData/playerpositions_byseason.rds")
 # Mode <- function(x) {
 #   ux <- unique(x)
 #   ux[which.max(tabulate(match(x, ux)))]
 # }
-# shooterxgoals.func(playerxgoals = readRDS('IgnoreList/xGoalsByPlayer.rds') %>%
+# shooterxgoals.func(playerxgoals = readRDS('AppData/xGoalsByPlayer.rds') %>%
 #                      mutate(date = as.Date(date, format = '%m/%d/%Y')),
-#                    minutes_df <- readRDS("IgnoreList/MinutesByGameID_forapp.rds"),
-#                    date1 = as.Date('2000-01-01'),
-#                    date2 = as.Date('9999-12-31'),
-#                    season = 2018,
+#                    minutes_df <- readRDS("AppData/MinutesByGameID_forapp.rds"),
+#                    date1 = as.Date('2011-03-01'),
+#                    date2 = as.Date('2018-12-31'),
+#                    season = as.numeric(format(as.Date('2011-03-01'), "%Y")):as.numeric(format(as.Date('2018-12-01'), "%Y")),
 #                    shotfilter = 0,
 #                    keyfilter = 0,
 #                    byteams = F,
