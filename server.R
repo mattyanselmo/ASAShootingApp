@@ -141,6 +141,7 @@ shinyServer(function(input, output, session) {
     # } else{
     #   teamfilter <- shooter_inputs$teamfilter
     # }
+
     if(shooter_inputs$shooting_seasonordate == 'Season'){
       dt_total <- shooterxgoals.func(playerxgoals,
                                      date1 = as.Date('2000-01-01'),
@@ -166,7 +167,7 @@ shinyServer(function(input, output, session) {
       dt_total <- shooterxgoals.func(playerxgoals,
                                      date1 = shooter_inputs$shooting_date1,
                                      date2 = shooter_inputs$shooting_date2,
-                                     season = min(playerxgoals$Season):max(playerxgoals$Season),
+                                     season = as.numeric(format(shooter_inputs$shooting_date1, "%Y")):as.numeric(format(shooter_inputs$shooting_date2, "%Y")),
                                      minfilter = shooter_inputs$shooting_minfilter,
                                      shotfilter = shooter_inputs$shooting_minshots,
                                      keyfilter = shooter_inputs$shooting_minkeypasses,
@@ -186,7 +187,7 @@ shinyServer(function(input, output, session) {
     }
     
     if("Pos" %in% names(dt_total)){
-      dt_total %>% filter(Pos %in% shooter_inputs$shooting_position)
+      dt_total %>% filter(Pos %in% shooter_inputs$shooting_position | is.na(Pos))
     } else{
       dt_total
     }
