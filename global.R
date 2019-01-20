@@ -1,12 +1,13 @@
 library(dplyr)
 library(shiny)
+library(shinyWidgets)
 library(DT)
 library(shinyjs)
 library(ggplot2)
 library(plotly)
 library(ggrepel)
 
-playerxgoals <- readRDS('IgnoreList/xGoalsByPlayer.rds') 
+playerxgoals <- readRDS('AppData/xGoalsByPlayer.rds') 
 # Create made-up players
 # %>% 
 #   bind_rows(data.frame(date = as.Date("2018-04-01"),
@@ -34,15 +35,14 @@ playerxgoals <- readRDS('IgnoreList/xGoalsByPlayer.rds')
 #                        gameID = 666,
 #                        check.names = F))
 
-minutesPlayed <- readRDS('IgnoreList/MinutesByGameID_forapp.rds')
-# minutesPlayedPassing <- readRDS("IgnoreList/MinutesBySeason.rds")
-teamxgoals <- readRDS('IgnoreList/xGoalsByTeam.rds')
-xgbygame <- readRDS('IgnoreList/xGoalsByTeam_byGame.rds')
-keeperxgoals <- readRDS('IgnoreList/xGoalsByKeeper.rds')
-conferences <- read.csv('teamsbyconferencebyseason.csv')
-glossary <- read.csv('Glossary.csv')
-playerpos <- readRDS("IgnoreList/playerpositions_byseason.rds")
-playerpassing <- readRDS("IgnoreList/xPassingByPlayer.rds")
+minutesPlayed <- readRDS('AppData/MinutesByGameID_forapp.rds')
+teamxgoals <- readRDS('AppData/xGoalsByTeam.rds')
+xgbygame <- readRDS('AppData/xGoalsByTeam_byGame.rds')
+keeperxgoals <- readRDS('AppData/xGoalsByKeeper.rds')
+conferences <- read.csv('AppData/teamsbyconferencebyseason.csv')
+glossary <- read.csv('AppData/Glossary.csv')
+playerpos <- readRDS("AppData/playerpositions_byseason.rds")
+playerpassing <- readRDS("AppData/xPassingByPlayer.rds")
 # %>%
 #   bind_rows(data.frame(passer = "God Zlatan",
 #                        year = 2018,
@@ -58,11 +58,11 @@ playerpassing <- readRDS("IgnoreList/xPassingByPlayer.rds")
 #                        minutes = 666,
 #                        touches = 1))
 
-teampassing.offense <- readRDS("IgnoreList/xPassingByTeamOffense.rds")
-teampassing.defense <- readRDS("IgnoreList/xPassingByTeamDefense.rds")
-playerchaindata <- readRDS("IgnoreList/PlayerxGChainData.rds")
-playoffsseeding_west <- readRDS("IgnoreList/CurrentSimulationResults_playoffseeding_west.rds")
-playoffsseeding_east <- readRDS("IgnoreList/CurrentSimulationResults_playoffseeding_east.rds")
+teampassing.offense <- readRDS("AppData/xPassingByTeamOffense.rds")
+teampassing.defense <- readRDS("AppData/xPassingByTeamDefense.rds")
+playerchaindata <- readRDS("AppData/PlayerxGChainData.rds")
+playoffsseeding_west <- readRDS("AppData/CurrentSimulationResults_playoffseeding_west.rds")
+playoffsseeding_east <- readRDS("AppData/CurrentSimulationResults_playoffseeding_east.rds")
 cupchances <- readRDS(paste0("AppData/", sort(grep(".rds", grep("MLSCupSimulationResults", list.files("AppData"), value = T), value = T), decreasing = T)[1]))
 salary.data <- readRDS("AppData/SalaryData.rds")
 
@@ -95,15 +95,15 @@ Mode <- function(x) {
   ux[which.max(tabulate(match(x, ux)))]
 }
 
-source('ShooterxGoalsFunction.R')
-source('ShooterxGoalsFunction_perminute.R')
-source('TeamxGoalsFunction.R')
-source("TeamxGoalsFunction_splits.R")
-source('KeeperxGoalsFunction.R')
-source('KeeperxGoalsFunction_perminute.R')
-source("PasserxPassesFunction.R")
-source("PasserxPassesFunction_perminute.R")
-source("TeamxPassesFunction.R")
-source("xGChainPlayerFunction.R")
-source("SalaryFunction_Player.R")
-source("SalaryFunction_Team.R")
+source('Functions/ShooterxGoalsFunction.R')
+source('Functions/ShooterxGoalsFunction_perminute.R')
+source('Functions/TeamxGoalsFunction.R')
+source("Functions/TeamxGoalsFunction_splits.R")
+source('Functions/KeeperxGoalsFunction.R')
+source('Functions/KeeperxGoalsFunction_perminute.R')
+source("Functions/PasserxPassesFunction.R")
+source("Functions/PasserxPassesFunction_perminute.R")
+source("Functions/TeamxPassesFunction.R")
+source("Functions/xGChainPlayerFunction.R")
+source("Functions/SalaryFunction_Player.R")
+source("Functions/SalaryFunction_Team.R")
