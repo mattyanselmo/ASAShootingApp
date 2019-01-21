@@ -1841,6 +1841,30 @@ shinyServer(function(input, output, session) {
     dt
   })
   
+  
+  # Select all checkboxes  
+  observeEvent(input$teampassing_seasonfilter_selectall,
+               {
+                 updateCheckboxGroupInput(
+                   session, 
+                   "teampassing_seasonfilter", 
+                   choices = min(teampassing.offense$year):max(teampassing.offense$year),
+                   selected = if (input$teampassing_seasonfilter_selectall) min(teampassing.offense$year):max(teampassing.offense$year)
+                 )
+               },
+               ignoreInit = T)
+  
+  observeEvent(input$teampassing_thirdfilter_selectall,
+               {
+                 updateCheckboxGroupInput(
+                   session, 
+                   "teampassing_thirdfilter", 
+                   choices = c("Defensive" = "Def", "Middle" = "Mid", "Attacking" = "Att"),
+                   selected = if (input$teampassing_thirdfilter_selectall) c("Defensive" = "Def", "Middle" = "Mid", "Attacking" = "Att")
+                 )
+               },
+               ignoreInit = T)
+  
   output$teampassing_total <- DT::renderDataTable({
     dt <- dt_team_passing() %>%
       mutate(`Comp ($MM)` = Comp/1000000) %>%
