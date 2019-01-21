@@ -32,6 +32,8 @@ shinyServer(function(input, output, session) {
   #   
   # })
   
+  
+  # Create tab redirect ####
   observe({
     query <- parseQueryString(session$clientData$url_search)
     if(!is.null(query[["headnavbar"]])){
