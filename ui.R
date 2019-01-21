@@ -1079,8 +1079,8 @@ shinyUI(
              tabPanel(strong('App info'),
                       value = "appinfo",
                       h1('App info'),
-                      p("We built this interactive web application to give ASA's loyal readers more control over 
-                        sorting and filtering our data. This is a work in progress, and we plan to continue to
+                      p("We built this interactive web application to give ASA's loyal readers more autonomy to 
+                        sort, filter, and download our data. This is a work in progress, and we plan to continue to
                         add new features on a regular basis.
                         If you have an idea for a feature that will make the app totes better,
                         then please don't hesitate to email Matthias (mkullowatz at gmail) with your idea."),
@@ -1092,10 +1092,9 @@ shinyUI(
                         we show player statistics on a per-96-minute basis, too, so that the average number of goals per game
                         at the team level will be equal to the average number of goals per 96 minutes at the player level.'),
                       br(),
-                      p('Please note that the statistics displayed in this app for previous seasons are very similiar to, but not exactly
-                        the same as, those in our static tables. This is because this app utilizes
-                        updated xGoal models, fit through 2017, with a better method of capturing penalty kicks. For most
-                        players the differences are negligible. We will correct this very soon.'))
+                      p('Relevant links can be found below:'),
+                      p(a("xG models explanation", href="https://www.americansocceranalysis.com/explanation/")),
+                      p(a("Passing model explanation", href="https://www.americansocceranalysis.com/home/2018/4/19/an-updated-expected-passing-model")))
              
   )
 )
