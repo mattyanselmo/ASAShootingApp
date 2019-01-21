@@ -838,6 +838,41 @@ shinyServer(function(input, output, session) {
       filter(Pos %in% playerxgchain_inputs$playerxgchain_position)
   })
   
+  # Select all checkboxes  
+  observeEvent(input$playerxgchain_position_selectall,
+               {
+                 updateCheckboxGroupInput(
+                   session, 
+                   "playerxgchain_position", 
+                   choices = c("Keeper (G)" = "G",
+                               "Central Def (D)" = "D",
+                               "Back (B)" = "B",
+                               "Midfielder (M)" = "M",
+                               "Attacking Mid (A)" = "A",
+                               "Forward (F)" = "F",
+                               "Sub (S)" = "S"),
+                   selected = if (input$playerxgchain_position_selectall) c("Keeper (G)" = "G",
+                                                                              "Central Def (D)" = "D",
+                                                                              "Back (B)" = "B",
+                                                                              "Midfielder (M)" = "M",
+                                                                              "Attacking Mid (A)" = "A",
+                                                                              "Forward (F)" = "F",
+                                                                              "Sub (S)" = "S")
+                 )
+               },
+               ignoreInit = T)
+  
+  observeEvent(input$playerxgchain_seasonfilter_selectall,
+               {
+                 updateCheckboxGroupInput(
+                   session, 
+                   "playerxgchain_seasonfilter", 
+                   choices = min(playerchaindata$Season):max(playerchaindata$Season),
+                   selected = if (input$playerxgchain_seasonfilter_selectall) min(playerchaindata$Season):max(playerchaindata$Season)
+                 )
+               },
+               ignoreInit = T)
+  
   output$playerxgchain_totals <- DT::renderDataTable({
     DT::datatable(dt_playerxgchain_totals(),
                   rownames = F,
