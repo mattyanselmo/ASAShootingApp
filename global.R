@@ -7,6 +7,8 @@ library(ggplot2)
 library(plotly)
 library(ggrepel)
 
+seasonFilter <- 2015
+
 playerxgoals <- readRDS('AppData/xGoalsByPlayer.rds') 
 # Create made-up players
 # %>% 
@@ -35,14 +37,17 @@ playerxgoals <- readRDS('AppData/xGoalsByPlayer.rds')
 #                        gameID = 666,
 #                        check.names = F))
 
-minutesPlayed <- readRDS('AppData/MinutesByGameID_forapp.rds')
+minutesPlayed <- readRDS('AppData/MinutesByGameID_forapp.rds') %>%
+  filter(Season >= seasonFilter)
 teamxgoals <- readRDS('AppData/xGoalsByTeam.rds')
 xgbygame <- readRDS('AppData/xGoalsByTeam_byGame.rds')
 keeperxgoals <- readRDS('AppData/xGoalsByKeeper.rds')
 conferences <- read.csv('AppData/teamsbyconferencebyseason.csv')
 glossary <- read.csv('AppData/Glossary.csv')
-playerpos <- readRDS("AppData/playerpositions_byseason.rds")
-playerpassing <- readRDS("AppData/xPassingByPlayer.rds")
+playerpos <- readRDS("AppData/playerpositions_byseason.rds") %>%
+  filter(year >= seasonFilter)
+playerpassing <- readRDS("AppData/xPassingByPlayer.rds") %>%
+  filter(Season >= seasonFilter)
 # %>%
 #   bind_rows(data.frame(passer = "God Zlatan",
 #                        year = 2018,
@@ -58,9 +63,12 @@ playerpassing <- readRDS("AppData/xPassingByPlayer.rds")
 #                        minutes = 666,
 #                        touches = 1))
 
-teampassing.offense <- readRDS("AppData/xPassingByTeamOffense.rds")
-teampassing.defense <- readRDS("AppData/xPassingByTeamDefense.rds")
-playerchaindata <- readRDS("AppData/PlayerxGChainData.rds")
+teampassing.offense <- readRDS("AppData/xPassingByTeamOffense.rds") %>%
+  filter(year >= seasonFilter)
+teampassing.defense <- readRDS("AppData/xPassingByTeamDefense.rds") %>%
+  filter(year >= seasonFilter)
+playerchaindata <- readRDS("AppData/PlayerxGChainData.rds") %>%
+  filter(Season >= seasonFilter)
 playoffsseeding_west <- readRDS("AppData/CurrentSimulationResults_playoffseeding_west.rds")
 playoffsseeding_east <- readRDS("AppData/CurrentSimulationResults_playoffseeding_east.rds")
 cupchances <- readRDS(paste0("AppData/", sort(grep(".rds", grep("MLSCupSimulationResults", list.files("AppData"), value = T), value = T), decreasing = T)[1]))
