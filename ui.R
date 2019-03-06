@@ -962,37 +962,37 @@ shinyUI(
                                  )
                         )
              ),
-             navbarMenu(strong('Predictions'),
-                        # Predictions tab ####
-                        tabPanel('Playoffs seeding',
-                                 value = "playoffsseeding",
-                                 tagList(
-                                   tags$head(
-                                     tags$style(".datatables .display {margin-left: 0;}"))),
-                                 h1('Playoffs seeding probabilities'),
-                                 p(HTML(paste0('Updated through games on ', max(as.Date(playerxgoals$date)), ".<br> 
-                                          Based on 1,000 simulated runs of the remaining schedule. <br>
-                                          Percentages shown to tenths only to reinforce mathematical certainties; margin of error is greater than 0.5% for probabilities between 1.0% and 99.0%. <br>
-                                          Western conference shown first because everyone around here is tired of hearing about Atlanta."))),                                 
-                                 h2("Western Conference"),
-                                 div(DT::dataTableOutput("playoffsseeding_west"), style = "width: 75%"),
-                                 br(),
-                                 h2("Eastern Conference"),
-                                 div(DT::dataTableOutput("playoffsseeding_east"), style = "width: 75%"),
-                                 br()
-                        ),
-                        tabPanel("Cup chances",
-                                 value = "cupchancestab",
-                                 tagList(
-                                   tags$head(
-                                     tags$style(".datatables .display {margin-left: 0;}"))),
-                                 h1('Playoffs seeding probabilities'),
-                                 p(HTML("Based on 10,000 simulated runs of the remaining MLS Cup playoffs. <br>
-                                        Percentages shown to tenths only to reinforce mathematical certainties; margin of error is greater than 0.5% for probabilities between 10.0% and 90.0%.")), 
-                                 br(),
-                                 div(DT::dataTableOutput("cupchances_table"), style = "width: 50%"),
-                                 br()
-                        )),
+             # navbarMenu(strong('Predictions'),
+             #            # Predictions tab ####
+             #            tabPanel('Playoffs seeding',
+             #                     value = "playoffsseeding",
+             #                     tagList(
+             #                       tags$head(
+             #                         tags$style(".datatables .display {margin-left: 0;}"))),
+             #                     h1('Playoffs seeding probabilities'),
+             #                     p(HTML(paste0('Updated through games on ', max(as.Date(playerxgoals$date)), ".<br> 
+             #                              Based on 1,000 simulated runs of the remaining schedule. <br>
+             #                              Percentages shown to tenths only to reinforce mathematical certainties; margin of error is greater than 0.5% for probabilities between 1.0% and 99.0%. <br>
+             #                              Western conference shown first because everyone around here is tired of hearing about Atlanta."))),                                 
+             #                     h2("Western Conference"),
+             #                     div(DT::dataTableOutput("playoffsseeding_west"), style = "width: 75%"),
+             #                     br(),
+             #                     h2("Eastern Conference"),
+             #                     div(DT::dataTableOutput("playoffsseeding_east"), style = "width: 75%"),
+             #                     br()
+             #            ),
+             #            tabPanel("Cup chances",
+             #                     value = "cupchancestab",
+             #                     tagList(
+             #                       tags$head(
+             #                         tags$style(".datatables .display {margin-left: 0;}"))),
+             #                     h1('Playoffs seeding probabilities'),
+             #                     p(HTML("Based on 10,000 simulated runs of the remaining MLS Cup playoffs. <br>
+             #                            Percentages shown to tenths only to reinforce mathematical certainties; margin of error is greater than 0.5% for probabilities between 10.0% and 90.0%.")), 
+             #                     br(),
+             #                     div(DT::dataTableOutput("cupchances_table"), style = "width: 50%"),
+             #                     br()
+             #            )),
              navbarMenu(strong('Salaries'),
                         # Salary tabs ####
                         tabPanel('Players',
