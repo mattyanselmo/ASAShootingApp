@@ -1,11 +1,11 @@
 # # Function testing
 # teamxgoals <- readRDS('AppData/xGoalsByTeam.rds')
-# conferences <- read.csv('teamsbyconferencebyseason.csv')
+# conferences <- read.csv('AppData/teamsbyconferencebyseason.csv')
 # date1 = as.Date('2000-01-01')
 # date2 = as.Date('9999-12-31')
 # season = 2016:2017
 # even = F
-# pattern = 'All'
+# pattern = unique(teamxgoals$patternOfPlay.model)
 # pergame = T
 # advanced = T
 # venue = c('Home', 'Away')
@@ -17,7 +17,7 @@ teamxgoals.func <- function(teamxgoals = teamxgoals,
                             date2 = as.Date('9999-12-31'),
                             season = 2011:2017,
                             even = F,
-                            pattern = 'All',
+                            pattern = unique(teamxgoals$patternOfPlay.model),
                             pergame = F,
                             advanced = F,
                             venue = c('Home', 'Away'),
@@ -169,7 +169,7 @@ teamxgoals.func <- function(teamxgoals = teamxgoals,
 #                 date2 = as.Date('9999-12-31'),
 #                 season = 2016:2017,
 #                 even = F,
-#                 pattern = 'All',
+#                 pattern = unique(teamxgoals$patternOfPlay.model),
 #                 pergame = T,
 #                 advanced = T,
 #                 venue = c('Home', 'Away'),
