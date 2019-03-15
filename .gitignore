@@ -6,3 +6,5 @@ IgnoreList/
 MasterUpdate/
 Research/
 rsconnect/
+GithubKey.pub
+GithubKey*
