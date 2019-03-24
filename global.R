@@ -38,7 +38,8 @@ playerxgoals <- readRDS('AppData/xGoalsByPlayer.rds')
 #                        check.names = F))
 
 minutesPlayed <- readRDS('AppData/MinutesByGameID_forapp.rds') %>%
-  filter(Season >= seasonFilter)
+  filter(Season >= seasonFilter) %>%
+  mutate(minutes = as.integer(minutes))
 teamxgoals <- readRDS('AppData/xGoalsByTeam.rds')
 teamxgoals.adj <- readRDS("AppData/xGoalsByTeam_HomeAdjusted.rds")
 xgbygame <- readRDS('AppData/xGoalsByTeam_byGame.rds')
