@@ -1,9 +1,23 @@
 # Summarize team chain data across games and seasons
 
-
+library(dplyr)
 teamchaindata.game <- readRDS("AppData/TeamxGChainData.rds")
 
-teamchains.func <- function(){}
+teamchains.func <- function(teamchaindata = teamchaindata.game, 
+                            date1 = as.Date('2000-01-01'), 
+                            date2 = as.Date('9999-12-31'),
+                            season = 2011:2017,
+                            even = F,
+                            pattern = unique(teamxgoals$patternOfPlay.model),
+                            pergame = F,
+                            advanced = F,
+                            venue = c('Home', 'Away'),
+                            byseasons = T, 
+                            confview = T,
+                            plot = F){
+  
+  
+}
 
 DO STUFF!
   
