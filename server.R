@@ -2124,22 +2124,22 @@ shinyServer(function(input, output, session) {
   # Playoffs seeding ####
   output$playoffsseeding_west <- DT::renderDataTable({
     
-    DT::datatable(playoffsseeding_west,
+    DT::datatable(playoffsseeding_west %>% select(-Bye),
                   rownames = F,
                   options(list(autoWidth = T,
                                pageLength = 15,
                                dom = "t"))) %>%
-      formatPercentage(columns = c("1", "2", "3", "4", "5", "6", "Playoffs", "Shield", "Bye"), digits = 1)
+      formatPercentage(columns = c("1", "2", "3", "4", "5", "6", "7", "Playoffs", "Shield"), digits = 1)
   })
   
   output$playoffsseeding_east <- DT::renderDataTable({
 
-    DT::datatable(playoffsseeding_east,
+    DT::datatable(playoffsseeding_east %>% select(-Bye),
                   rownames = F,
                   options(list(autoWidth = T,
                                pageLength = 15,
                                dom = "t"))) %>%
-      formatPercentage(columns = c("1", "2", "3", "4", "5", "6", "Playoffs", "Shield", "Bye"), digits = 1)
+      formatPercentage(columns = c("1", "2", "3", "4", "5", "6", "7", "Playoffs", "Shield"), digits = 1)
   })
   
   # MLS Cup predictions ####
