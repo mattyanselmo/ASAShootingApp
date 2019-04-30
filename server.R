@@ -1273,6 +1273,21 @@ shinyServer(function(input, output, session) {
   # Team shots tables ####
   dt_team <- reactive({
     if(input$team_seasonordate == 'Season'){
+      if(input$team_homeadjusted == "Home-adjusted"){
+        dt <- teamxgoals.func(teamxgoals.adj, 
+                              date1 = as.Date('2000-01-01'), 
+                              date2 = as.Date('9999-12-31'),
+                              season = input$team_seasonfilter,
+                              even = input$team_evenstate,
+                              pattern = input$team_pattern,
+                              pergame = F,
+                              advanced = ifelse(input$team_advanced == 'Basic stats', F, T),
+                              venue = input$team_home,
+                              byseasons = input$team_byseasons,
+                              confview = input$team_conferenceview) %>%
+          mutate(`Comp ($MM)` = Comp/1000000) %>%
+          select(-Comp)  
+      } else{
       dt <- teamxgoals.func(teamxgoals, 
                             date1 = as.Date('2000-01-01'), 
                             date2 = as.Date('9999-12-31'),
@@ -1286,8 +1301,25 @@ shinyServer(function(input, output, session) {
                             confview = input$team_conferenceview) %>%
         mutate(`Comp ($MM)` = Comp/1000000) %>%
         select(-Comp)
+      }
       
     } else{
+      if(input$team_homeadjusted == "Home-adjusted"){
+        
+        dt <- teamxgoals.func(teamxgoals.adj, 
+                              date1 = input$team_date1, 
+                              date2 = input$team_date2,
+                              season = as.numeric(format(input$team_date1, "%Y")):as.numeric(format(input$team_date2, "%Y")),
+                              even = input$team_evenstate,
+                              pattern = input$team_pattern,
+                              pergame = F,
+                              advanced = ifelse(input$team_advanced == 'Basic stats', F, T),
+                              venue = input$team_home,
+                              byseasons = input$team_byseasons,
+                              confview = input$team_conferenceview) %>%
+          mutate(`Comp ($MM)` = Comp/1000000) %>%
+          select(-Comp)
+      }else{
       dt <- teamxgoals.func(teamxgoals, 
                             date1 = input$team_date1, 
                             date2 = input$team_date2,
@@ -1301,6 +1333,7 @@ shinyServer(function(input, output, session) {
                             confview = input$team_conferenceview) %>%
         mutate(`Comp ($MM)` = Comp/1000000) %>%
         select(-Comp)
+      }
     }
     
     is.num <- sapply(dt, is.numeric)
@@ -1417,7 +1450,7 @@ shinyServer(function(input, output, session) {
                   rownames = F,
                   options(list(autoWidth = T,
                                pageLength = 25,
-                               dom = 't'))) %>%
+                               dom = 'ft'))) %>%
       formatPercentage(columns = columns.perc1, digits = 1) %>%
       formatRound(columns = columns.dec1, digits = 1) %>%
       formatRound(columns = columns.dec2, digits = 2) %>%
@@ -1439,6 +1472,21 @@ shinyServer(function(input, output, session) {
   # Per game team stats
   dt_team_pergame <- reactive({
     if(input$team_seasonordate == 'Season'){
+      if(input$team_homeadjusted == "Home-adjusted"){
+        dt <- teamxgoals.func(teamxgoals.adj, 
+                              date1 = as.Date('2000-01-01'), 
+                              date2 = as.Date('9999-12-31'),
+                              season = input$team_seasonfilter,
+                              even = input$team_evenstate,
+                              pattern = input$team_pattern,
+                              pergame = T,
+                              advanced = ifelse(input$team_advanced == 'Basic stats', F, T),
+                              venue = input$team_home,
+                              byseasons = input$team_byseasons,
+                              confview = input$team_conferenceview) %>%
+          mutate(`Comp ($MM)` = Comp/1000000) %>%
+          select(-Comp) 
+      } else{
       dt <- teamxgoals.func(teamxgoals, 
                             date1 = as.Date('2000-01-01'), 
                             date2 = as.Date('9999-12-31'),
@@ -1452,8 +1500,24 @@ shinyServer(function(input, output, session) {
                             confview = input$team_conferenceview) %>%
         mutate(`Comp ($MM)` = Comp/1000000) %>%
         select(-Comp)
+      }
       
     } else{
+      if(input$team_homeadjusted == "Home-adjusted"){
+        dt <- teamxgoals.func(teamxgoals.adj, 
+                              date1 = input$team_date1, 
+                              date2 = input$team_date2,
+                              season = as.numeric(format(input$team_date1, "%Y")):as.numeric(format(input$team_date2, "%Y")),
+                              even = input$team_evenstate,
+                              pattern = input$team_pattern,
+                              pergame = T,
+                              advanced = ifelse(input$team_advanced == 'Basic stats', F, T),
+                              venue = input$team_home,
+                              byseasons = input$team_byseasons,
+                              confview = input$team_conferenceview) %>%
+          mutate(`Comp ($MM)` = Comp/1000000) %>%
+          select(-Comp)
+      }else{
       dt <- teamxgoals.func(teamxgoals, 
                             date1 = input$team_date1, 
                             date2 = input$team_date2,
@@ -1467,6 +1531,7 @@ shinyServer(function(input, output, session) {
                             confview = input$team_conferenceview) %>%
         mutate(`Comp ($MM)` = Comp/1000000) %>%
         select(-Comp)
+      }
     }
     
     is.num <- sapply(dt, is.numeric)
@@ -1494,11 +1559,11 @@ shinyServer(function(input, output, session) {
       columns.dec2 <- c("xGF", "xGA", "xGD", "GF", "GA", "GD", "GD-xGD", "TSR", "Pts")
     }
     
-    datatable(dt,
+    DT::datatable(dt,
               rownames = F,
               options(list(autoWidth = T,
                            pageLength = 25,
-                           dom = 't'))) %>%
+                           dom = 'ft'))) %>%
       formatPercentage(columns = columns.perc1, digits = 1) %>%
       formatRound(columns = columns.dec1, digits = 1) %>%
       formatRound(columns = columns.dec2, digits = 2) %>%
@@ -1529,11 +1594,11 @@ shinyServer(function(input, output, session) {
       columns.dec2 <- c("xGF", "xGA", "xGD", "GF", "GA", "GD", "GD-xGD", "TSR", "Pts", "Gini18")
     }
     
-    datatable(dt,
+    DT::datatable(dt,
               rownames = F,
               options(list(autoWidth = T,
                            pageLength = 25,
-                           dom = 't'))) %>%
+                           dom = 'ft'))) %>%
       formatPercentage(columns = columns.perc1, digits = 1) %>%
       formatRound(columns = columns.dec1, digits = 1) %>%
       formatRound(columns = columns.dec2, digits = 2) %>%
