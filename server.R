@@ -1450,7 +1450,7 @@ shinyServer(function(input, output, session) {
                   rownames = F,
                   options(list(autoWidth = T,
                                pageLength = 25,
-                               dom = 't'))) %>%
+                               dom = 'ft'))) %>%
       formatPercentage(columns = columns.perc1, digits = 1) %>%
       formatRound(columns = columns.dec1, digits = 1) %>%
       formatRound(columns = columns.dec2, digits = 2) %>%
@@ -1559,11 +1559,11 @@ shinyServer(function(input, output, session) {
       columns.dec2 <- c("xGF", "xGA", "xGD", "GF", "GA", "GD", "GD-xGD", "TSR", "Pts")
     }
     
-    datatable(dt,
+    DT::datatable(dt,
               rownames = F,
               options(list(autoWidth = T,
                            pageLength = 25,
-                           dom = 't'))) %>%
+                           dom = 'ft'))) %>%
       formatPercentage(columns = columns.perc1, digits = 1) %>%
       formatRound(columns = columns.dec1, digits = 1) %>%
       formatRound(columns = columns.dec2, digits = 2) %>%
@@ -1594,11 +1594,11 @@ shinyServer(function(input, output, session) {
       columns.dec2 <- c("xGF", "xGA", "xGD", "GF", "GA", "GD", "GD-xGD", "TSR", "Pts", "Gini18")
     }
     
-    datatable(dt,
+    DT::datatable(dt,
               rownames = F,
               options(list(autoWidth = T,
                            pageLength = 25,
-                           dom = 't'))) %>%
+                           dom = 'ft'))) %>%
       formatPercentage(columns = columns.perc1, digits = 1) %>%
       formatRound(columns = columns.dec1, digits = 1) %>%
       formatRound(columns = columns.dec2, digits = 2) %>%
