@@ -232,7 +232,10 @@ shinyUI(
                                                   'Stats option:',
                                                   choices = c('Basic' = "Basic stats", 'Advanced' = "Advanced stats"),
                                                   inline = T),
-                                     
+                                     radioButtons("team_homeadjusted",
+                                                  "Home adjustment:",
+                                                  choices = c("Standard", "Home-adjusted"),
+                                                  inline = T),
                                      conditionalPanel("(input.team_seasonordate == 'Season' && 
                                                       input.team_seasonfilter.length == 1) ||
                                                       (input.team_seasonordate == 'Date' && 
