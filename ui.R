@@ -231,6 +231,7 @@ shinyUI(
                                      radioButtons('team_advanced',
                                                   'Stats option:',
                                                   choices = c('Basic' = "Basic stats", 'Advanced' = "Advanced stats"),
+                                                  selected = "Advanced stats",
                                                   inline = T),
                                      
                                      conditionalPanel("(input.team_seasonordate == 'Season' && 
