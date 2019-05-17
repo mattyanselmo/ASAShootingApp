@@ -1387,12 +1387,12 @@ shinyServer(function(input, output, session) {
     }
     
     if(input$team_advanced == "Basic stats"){
-      columns.perc1 <- c('SoT%F', 'SoT%A', 'Finish%F', 'Finish%A')
+      columns.perc1 <- c('SoT%F', 'SoT%A', 'Finish%F', 'Finish%A', "xPts")
       columns.dec1 <- c()
       columns.dec2 <- c("Gini18")
     } else{
       columns.perc1 <- c() #c("Solo%F", "Solo%A")
-      columns.dec1 <- c("xGF", "xGA", "xGD", "GD-xGD", "PDO")
+      columns.dec1 <- c("xGF", "xGA", "xGD", "GD-xGD", "PDO", "xPts")
       columns.dec2 <- c("TSR", "Gini18")
     }
     
@@ -1437,12 +1437,12 @@ shinyServer(function(input, output, session) {
     }
     
     if(input$team_advanced == "Basic stats"){
-      columns.perc1 <- c('SoT%F', 'SoT%A', 'Finish%F', 'Finish%A')
+      columns.perc1 <- c('SoT%F', 'SoT%A', 'Finish%F', 'Finish%A', "xPts")
       columns.dec1 <- c()
       columns.dec2 <- c("Gini18")
     } else{
       columns.perc1 <- c() #c("Solo%F", "Solo%A")
-      columns.dec1 <- c("xGF", "xGA", "xGD", "GD-xGD", "PDO")
+      columns.dec1 <- c("xGF", "xGA", "xGD", "GD-xGD", "PDO", "xPts")
       columns.dec2 <- c("TSR", "Gini18")
     }
     
@@ -1552,11 +1552,11 @@ shinyServer(function(input, output, session) {
     if(input$team_advanced == "Basic stats"){
       columns.perc1 <- c('SoT%F', 'SoT%A', 'Finish%F', 'Finish%A')
       columns.dec1 <- c("ShtF", "ShtA", "SoTF", "SoTA")
-      columns.dec2 <- c("GF", "GA", "GD", "Pts")
+      columns.dec2 <- c("GF", "GA", "GD", "Pts", "xPts")
     } else{
       columns.perc1 <- c() #c("Solo%F", "Solo%A")
       columns.dec1 <- c("ShtF", "ShtA","PDO")
-      columns.dec2 <- c("xGF", "xGA", "xGD", "GF", "GA", "GD", "GD-xGD", "TSR", "Pts")
+      columns.dec2 <- c("xGF", "xGA", "xGD", "GF", "GA", "GD", "GD-xGD", "TSR", "Pts", "xPts")
     }
     
     DT::datatable(dt,
@@ -1587,11 +1587,11 @@ shinyServer(function(input, output, session) {
     if(input$team_advanced == "Basic stats"){
       columns.perc1 <- c('SoT%F', 'SoT%A', 'Finish%F', 'Finish%A')
       columns.dec1 <- c("ShtF", "ShtA", "SoTF", "SoTA")
-      columns.dec2 <- c("GF", "GA", "GD", "Pts", "Gini18")
+      columns.dec2 <- c("GF", "GA", "GD", "Pts", "Gini18", "xPts")
     } else{
       columns.perc1 <- c() #c("Solo%F", "Solo%A")
       columns.dec1 <- c("ShtF", "ShtA","PDO")
-      columns.dec2 <- c("xGF", "xGA", "xGD", "GF", "GA", "GD", "GD-xGD", "TSR", "Pts", "Gini18")
+      columns.dec2 <- c("xGF", "xGA", "xGD", "GF", "GA", "GD", "GD-xGD", "TSR", "Pts", "Gini18", "xPts")
     }
     
     DT::datatable(dt,
@@ -2168,12 +2168,13 @@ shinyServer(function(input, output, session) {
                ignoreInit = T)
   
   output$teamxgoalsbygame <- DT::renderDataTable({
-    
+    columns.dec1 <- c("HxPts", "AxPts")
     datatable(dt_bygame(),
               rownames = F,
               options(list(autoWidth = T,
                            pageLength = 25,
-                           lengthMenu = seq(25, 100, 25))))
+                           lengthMenu = seq(25, 100, 25)))) %>%
+      formatRound(columns = columns.dec1, digits = 1)
   })
   
   output$teambygame_download <- downloadHandler(

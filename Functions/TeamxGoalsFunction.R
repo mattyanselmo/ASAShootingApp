@@ -34,9 +34,10 @@ teamxgoals.func <- function(teamxgoals = teamxgoals,
            Pts = ifelse(is.na(Pts), 0, Pts)) %>%
     ungroup()
   
-  ptsdat <- unique(tempdat %>% select_(.dots = c('Team', 'Season', 'date', 'Pts', "Comp", "Gini18")[c(T, byseasons, T, T, T, T)])) %>%
+  ptsdat <- unique(tempdat %>% select_(.dots = c('Team', 'Season', 'date', 'Pts', "xPts", "Comp", "Gini18")[c(T, byseasons, T, T, T, T, T)])) %>%
     group_by_(.dots = c('Team', 'Season')[c(T, byseasons)]) %>%
     summarize(Pts = sum(Pts),
+              xPts = sum(xPts),
               Comp = mean(Comp),
               Gini18 = mean(Gini18)) %>%
     ungroup()
@@ -145,7 +146,8 @@ teamxgoals.func <- function(teamxgoals = teamxgoals,
   if(pergame){
     aggdata <- aggdata %>%
       left_join(ptsdat, by = c('Team', 'Season')[c(T, byseasons)]) %>%
-      mutate(Pts = Pts/Games)
+      mutate(Pts = Pts/Games,
+             xPts = xPts/Games)
   } else{
     aggdata <- aggdata %>%
       left_join(ptsdat, by = c('Team', 'Season')[c(T, byseasons)])
