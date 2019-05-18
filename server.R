@@ -1379,7 +1379,6 @@ shinyServer(function(input, output, session) {
   
   output$teamtotalxgoalswest <- DT::renderDataTable({
     dt <- dt_team()
-    
     if('Conf' %in% names(dt)){
       dt <- dt %>%
         filter(Conf == 'west') %>%
@@ -1387,12 +1386,14 @@ shinyServer(function(input, output, session) {
     }
     
     if(input$team_advanced == "Basic stats"){
-      columns.perc1 <- c('SoT%F', 'SoT%A', 'Finish%F', 'Finish%A', "xPts")
-      columns.dec1 <- c()
+      columns.perc1 <- c('SoT%F', 'SoT%A', 'Finish%F', 'Finish%A')      
+      columns.dec1 <- c("Pts", "xPts")[c(input$team_homeadjusted == "Home-adjusted", T)]
+      columns.dec1.2 <- c("ShtF", "ShtA", "SoTF", "SoTA", "GF", "GA", "GD")[rep(input$team_homeadjusted == "Home-adjusted", 7)]
       columns.dec2 <- c("Gini18")
     } else{
       columns.perc1 <- c() #c("Solo%F", "Solo%A")
-      columns.dec1 <- c("xGF", "xGA", "xGD", "GD-xGD", "PDO", "xPts")
+      columns.dec1 <- c("xGF", "xGA", "xGD", "GD-xGD", "xPts", "Pts")[c(T, T, T, T, T, input$team_homeadjusted == "Home-adjusted")]
+      columns.dec1.2 <- c("ShtF", "ShtA", "GF", "GA", "GD")[rep(input$team_homeadjusted == "Home-adjusted", 5)]
       columns.dec2 <- c("TSR", "Gini18")
     }
     
@@ -1403,6 +1404,7 @@ shinyServer(function(input, output, session) {
                                  pageLength = 25))) %>%
         formatPercentage(columns = columns.perc1, digits = 1) %>%
         formatRound(columns = columns.dec1, digits = 1) %>%
+        formatRound(columns = columns.dec1.2, digits = 1) %>%
         formatRound(columns = columns.dec2, digits = 2) %>%
         formatCurrency(columns = c("Comp ($MM)"),
                        currency = "$",
@@ -1417,6 +1419,7 @@ shinyServer(function(input, output, session) {
                                  dom = 't'))) %>%
         formatPercentage(columns = columns.perc1, digits = 1) %>%
         formatRound(columns = columns.dec1, digits = 1) %>%
+        formatRound(columns = columns.dec1.2, digits = 1) %>%
         formatRound(columns = columns.dec2, digits = 2) %>%
         formatCurrency(columns = c("Comp ($MM)"),
                        currency = "$",
@@ -1437,12 +1440,12 @@ shinyServer(function(input, output, session) {
     }
     
     if(input$team_advanced == "Basic stats"){
-      columns.perc1 <- c('SoT%F', 'SoT%A', 'Finish%F', 'Finish%A', "xPts")
-      columns.dec1 <- c()
+      columns.perc1 <- c('SoT%F', 'SoT%A', 'Finish%F', 'Finish%A')
+      columns.dec1 <- c("Pts", "xPts")[c(input$team_homeadjusted == "Home-adjusted", T)]
       columns.dec2 <- c("Gini18")
     } else{
       columns.perc1 <- c() #c("Solo%F", "Solo%A")
-      columns.dec1 <- c("xGF", "xGA", "xGD", "GD-xGD", "PDO", "xPts")
+      columns.dec1 <- c("xGF", "xGA", "xGD", "GD-xGD", "xPts", "Pts")[c(T, T, T, T, T, input$team_homeadjusted == "Home-adjusted")]
       columns.dec2 <- c("TSR", "Gini18")
     }
     
@@ -1555,7 +1558,7 @@ shinyServer(function(input, output, session) {
       columns.dec2 <- c("GF", "GA", "GD", "Pts", "xPts")
     } else{
       columns.perc1 <- c() #c("Solo%F", "Solo%A")
-      columns.dec1 <- c("ShtF", "ShtA","PDO")
+      columns.dec1 <- c("ShtF", "ShtA")
       columns.dec2 <- c("xGF", "xGA", "xGD", "GF", "GA", "GD", "GD-xGD", "TSR", "Pts", "xPts")
     }
     
@@ -1590,7 +1593,7 @@ shinyServer(function(input, output, session) {
       columns.dec2 <- c("GF", "GA", "GD", "Pts", "Gini18", "xPts")
     } else{
       columns.perc1 <- c() #c("Solo%F", "Solo%A")
-      columns.dec1 <- c("ShtF", "ShtA","PDO")
+      columns.dec1 <- c("ShtF", "ShtA")
       columns.dec2 <- c("xGF", "xGA", "xGD", "GF", "GA", "GD", "GD-xGD", "TSR", "Pts", "Gini18", "xPts")
     }
     
