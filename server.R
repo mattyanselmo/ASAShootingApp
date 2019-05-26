@@ -253,6 +253,8 @@ shinyServer(function(input, output, session) {
                            lengthMenu = seq(25, 100, 25)))) %>%
       formatRound(columns = c('Dist', 'xG', 'G-xG', 'xPlace', 'xA', 'A-xA', 'xG+xA'), 
                   digits = 1) %>%
+      formatRound(columns = c("PA", "xPA"), 
+                  digits = 2) %>%
       formatPercentage(columns = c('Solo'), digits = 1) %>%
       formatCurrency(columns = c("Comp ($K)"),
                      currency = "$",
@@ -270,7 +272,8 @@ shinyServer(function(input, output, session) {
               options(list(autoWidth = T,
                            pageLength = 25,
                            lengthMenu = seq(25, 100, 25)))) %>%
-      formatRound(columns = c("Shots", "SoT", "Goals", "xG", "xPlace", "G-xG", "KeyP", "Assts", "xA", "A-xA", "xG+xA"), 
+      formatRound(columns = c("Shots", "SoT", "Goals", "xG", "xPlace", "G-xG", 
+                              "KeyP", "Assts", "xA", "A-xA", "xG+xA", "PA", "xPA"), 
                   digits = 2)  %>%
       formatCurrency(columns = c("Comp ($K)"),
                      currency = "$",
