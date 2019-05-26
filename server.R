@@ -164,7 +164,9 @@ shinyServer(function(input, output, session) {
                `G-xG/shot` = ifelse(Shots > 0, `G-xG`/Shots, 0),
                `A-xA/pass` = ifelse(KeyP > 0, `A-xA`/KeyP, 0)) %>%
         mutate(`Comp ($K)` = round(Salary/1000, 0)) %>%
-        select(-Salary)
+        select(-Salary) %>%
+        rename(A = Assts,
+               G = Goals)
     } else{
       dt_total <- shooterxgoals.func(playerxgoals,
                                      date1 = shooter_inputs$shooting_date1,
@@ -185,7 +187,9 @@ shinyServer(function(input, output, session) {
                `G-xG/shot` = ifelse(Shots > 0, `G-xG`/Shots, 0),
                `A-xA/pass` = ifelse(KeyP > 0, `A-xA`/KeyP, 0)) %>%
         mutate(`Comp ($K)` = round(Salary/1000, 0)) %>%
-        select(-Salary)
+        select(-Salary) %>%
+        rename(A = Assts,
+               G = Goals)
     }
     
     if("Pos" %in% names(dt_total)){
@@ -218,7 +222,9 @@ shinyServer(function(input, output, session) {
                                           PK = "PK" %in% shooter_inputs$pattern,
                                           SetPiece = "Setpiece" %in% shooter_inputs$pattern) %>%
         mutate(`Comp ($K)` = round(Salary/1000, 0)) %>%
-        select(-Salary)
+        select(-Salary) %>%
+        rename(A = Assts,
+               G = Goals)
       
     } else{
       dt_per96 <- shooterxgoals_perminute(playerxgoals,
@@ -237,7 +243,9 @@ shinyServer(function(input, output, session) {
                                           PK = "PK" %in% shooter_inputs$pattern,
                                           SetPiece = "Setpiece" %in% shooter_inputs$pattern) %>%
         mutate(`Comp ($K)` = round(Salary/1000, 0)) %>%
-        select(-Salary)
+        select(-Salary) %>%
+        rename(A = Assts,
+               G = Goals)
     }
     
     dt_per96 %>% filter(Pos %in% shooter_inputs$shooting_position)
@@ -272,8 +280,8 @@ shinyServer(function(input, output, session) {
               options(list(autoWidth = T,
                            pageLength = 25,
                            lengthMenu = seq(25, 100, 25)))) %>%
-      formatRound(columns = c("Shots", "SoT", "Goals", "xG", "xPlace", "G-xG", 
-                              "KeyP", "Assts", "xA", "A-xA", "xG+xA", "PA", "xPA"), 
+      formatRound(columns = c("Shots", "SoT", "G", "xG", "xPlace", "G-xG", 
+                              "KeyP", "A", "xA", "A-xA", "xG+xA", "PA", "xPA"), 
                   digits = 2)  %>%
       formatCurrency(columns = c("Comp ($K)"),
                      currency = "$",
@@ -346,7 +354,7 @@ shinyServer(function(input, output, session) {
                         inputId = 'shooterplot_yvar',
                         label = 'Y-axis variable',
                         choices = c(choices.total, choices.96),
-                        selected = "Goals")             
+                        selected = "G")             
     },
     once = T)
   
@@ -2172,7 +2180,7 @@ shinyServer(function(input, output, session) {
   
   output$teamxgoalsbygame <- DT::renderDataTable({
     columns.dec1 <- c("HxPts", "AxPts")
-    datatable(dt_bygame(),
+    DT::datatable(dt_bygame(),
               rownames = F,
               options(list(autoWidth = T,
                            pageLength = 25,
@@ -2189,6 +2197,39 @@ shinyServer(function(input, output, session) {
   )
   
   # Predictions ####
+  
+  # Win probability model ####
+  output$winproboutput <- DT::renderDataTable({
+    hwinprob <- predict(winmodel.purged, 
+                       data.frame(minute = input$minute_winprob,
+                                  gamestate = input$gamestate_winprob,
+                                  playerdiff = input$playerdiff_winprob),
+                       type = "response")
+    drawprob <- (1 - hwinprob)*predict(drawmodel.purged, 
+                       data.frame(minute = input$minute_winprob,
+                                  gamestate = input$gamestate_winprob,
+                                  playerdiff = input$playerdiff_winprob),
+                       type = "response")
+    awinprob <- 1 - hwinprob - drawprob
+    
+    hxpts = 3*hwinprob + drawprob
+    axpts = 3*awinprob + drawprob
+    
+    DT::datatable(data.frame(`Home win%` = hwinprob,
+                             `Draw%` = drawprob,
+                             `Away win%` = awinprob,
+                             `Home xPts` = hxpts,
+                             `Away xPts` = axpts,
+                             check.names = F),
+                  rownames = F,
+                  options(list(autoWidth = T,
+                               dom = "t"))) %>%
+      formatPercentage(columns = c("Home win%", "Draw%", "Away win%"), 
+                       digits = 1) %>%
+      formatRound(columns = c("Home xPts", "Away xPts"),
+                  digits = 1)
+    
+  })
   
   # Playoffs seeding ####
   output$playoffsseeding_west <- DT::renderDataTable({
