@@ -2,14 +2,14 @@
 
 # # Test inputs
 # library(dplyr)
-# playerchaindata <- readRDS("IgnoreList/PlayerxGChainData.rds")
+# playerchaindata <- readRDS("AppData/PlayerxGChainData.rds")
 # date1 = as.Date('2000-01-01')
 # date2 = as.Date('9999-12-31')
-# season.filter = 2015:2017
+# season.filter = 2019
 # min.filter = 0
 # team.filter = unique(playerchaindata$team)
 # byseasons = T
-# byteams = T
+# byteams = F
 # perminute = F
 # Mode <- function(x) {
 #   ux <- unique(x)
@@ -83,6 +83,7 @@ xgchain.function <- function(
 
 # # Function example
 # library(dplyr)
+# playerchaindata <- readRDS("AppData/PlayerxGChainData.rds")
 # Mode <- function(x) {
 #   ux <- unique(x)
 #   ux[which.max(tabulate(match(x, ux)))]
@@ -90,8 +91,8 @@ xgchain.function <- function(
 # xgchain.function(playerchaindata = playerchaindata,
 #                  date1 = "2000-01-01",
 #                  date2 = "9999-12-31",
-#                  season.filter = 2015:2016,
-#                  min.filter = 500,
+#                  season.filter = 2019,
+#                  min.filter = 0,
 #                  team.filter = unique(playerchaindata$team),
 #                  byseasons = T,
-#                  byteams = T)
+#                  byteams = F)
