@@ -60,9 +60,9 @@ shinyServer(function(input, output, session) {
                                    # shooting_pk = T,
                                    # setpiece = T,
                                    shooterplot_xvar = "xG",
-                                   shooterplot_yvar = "Goals",
+                                   shooterplot_yvar = "G",
                                    shooterplot_per96_xvar = "xG",
-                                   shooterplot_per96_yvar = "Goals")
+                                   shooterplot_per96_yvar = "G")
   
   # Updated values
   observeEvent(input$shooting_action,
