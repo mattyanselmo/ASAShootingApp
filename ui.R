@@ -199,8 +199,8 @@ shinyUI(
                                                             column(3,
                                                                    selectInput('shooterplot_yvar',
                                                                                label = 'Y-axis variable',
-                                                                               choices = "Goals",
-                                                                               selected = "Goals")))),
+                                                                               choices = "G",
+                                                                               selected = "G")))),
                                                           htmlOutput("shooterplot_text"),
                                                           plotlyOutput('shooterplot')                                                            )))
                                  )),
@@ -971,9 +971,11 @@ shinyUI(
                         tabPanel("Win probability model",
                                  value = "winprobmodel",
                                  h1("Win probability by gamestate"),
-                                 p(HTML("Using results from games in 2013 - 2019, we tuned a model to 
-                                        esimate the probability of winning and drawing the match based on
-                                        the minute, score differential, and player differential (due to red cards).")),
+                                 p(HTML("Using results from all games between 2013 - 2019, we tuned a model to 
+                                        esimate the probability of the home team winning and drawing the match based on
+                                        the minute, score differential, and player differential (due to red cards). <br>
+                                        <i> Use caution when extrapolating beyond the 90th minute, beyond a gamestate of 
+                                        +/- 3, or beyond a player differential of +/- 1. </i>")),
                                  fluidPage(fluidRow(
                                    column(2,
                                           numericInput("minute_winprob",
