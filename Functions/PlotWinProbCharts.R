@@ -85,24 +85,48 @@ winprobchart.func <- function(action.input,
   
   if(nrow(action.data) > 0){
     p +
-    geom_vline(data=action.data, 
-               aes(xintercept = minute), 
-               color = "black", 
-               linetype = "dashed",
-               alpha = 0.25) +
-    geom_text(data=action.data, 
-              inherit.aes = FALSE, 
-              aes(x=minute, 
-                  y=0.02, 
-                  label=paste(team, Action)), 
-              hjust = 0, 
-              vjust = 1, 
-              angle = 90, 
-              nudge_x = 1.2,
-              color = "white")+
-    theme_minimal()
+      geom_vline(data=action.data, 
+                 aes(xintercept = minute), 
+                 color = "black", 
+                 linetype = "dashed",
+                 alpha = 0.25) +
+      geom_text(data=action.data, 
+                inherit.aes = FALSE, 
+                aes(x=minute, 
+                    y=0.02, 
+                    label=paste(team, Action)), 
+                hjust = 0, 
+                vjust = 1, 
+                angle = 90, 
+                nudge_x = 1.2,
+                color = "white")+
+      theme_minimal() +
+      theme(text = element_text(face = "plain", size = 14),
+            axis.title.x = element_text(face = "plain", size = 14),
+            axis.title.y = element_text(face = "plain", size = 14, margin = margin(0, 5, 0, 0)),
+            plot.title = element_text(face = "plain", size = 18),
+            axis.text.x = element_text(face = "plain", size = 12),
+            axis.text.y = element_text(face = "plain", size = 12),
+            axis.ticks.length = unit(0.15, "lines"),
+            legend.title = element_text(face = "bold", size = 14),
+            legend.position = "right",
+            legend.text = element_text(face = "plain", size = 12),
+            legend.key = element_rect(fill = "white"),
+            legend.key.size = unit(1, "cm"))
   } else{
-    p + theme_minimal()
+    p + theme_minimal() +
+      theme(text = element_text(face = "plain", size = 14),
+            axis.title.x = element_text(face = "plain", size = 14),
+            axis.title.y = element_text(face = "plain", size = 14, margin = margin(0, 5, 0, 0)),
+            plot.title = element_text(face = "plain", size = 18),
+            axis.text.x = element_text(face = "plain", size = 12),
+            axis.text.y = element_text(face = "plain", size = 12),
+            axis.ticks.length = unit(0.15, "lines"),
+            legend.title = element_text(face = "bold", size = 14),
+            legend.position = "right",
+            legend.text = element_text(face = "plain", size = 12),
+            legend.key = element_rect(fill = "white"),
+            legend.key.size = unit(1, "cm"))
   }
 }
 
