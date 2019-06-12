@@ -2234,6 +2234,39 @@ shinyServer(function(input, output, session) {
     
   })
   
+  output$winprobchart_userinput <- renderPlot({
+    homegoaltimes <- na.omit(as.numeric(sapply(strsplit(input$winprob_userinput_homegoals, ","), 
+                                       function(x) as.numeric(trimws(x)))))
+    awaygoaltimes <- na.omit(as.numeric(sapply(strsplit(input$winprob_userinput_awaygoals, ","), 
+                                       function(x) as.numeric(trimws(x)))))
+    homeredtimes <- na.omit(as.numeric(sapply(strsplit(input$winprob_userinput_homereds, ","), 
+                                       function(x) as.numeric(trimws(x)))))
+    awayredtimes <- na.omit(as.numeric(sapply(strsplit(input$winprob_userinput_awayreds, ","), 
+                                       function(x) as.numeric(trimws(x)))))
+    
+    minutes <- c(homegoaltimes, awaygoaltimes, homeredtimes, awayredtimes)
+    
+    action.input <- data.frame(minute = c(minutes, max(95, minutes)),
+                               hteam = input$winprob_userinput_hometeam, 
+                               ateam = input$winprob_userinput_awayteam,
+                               date = input$winprob_userinput_date,
+                               team = c(rep(input$winprob_userinput_hometeam, length(homegoaltimes)),
+                                        rep(input$winprob_userinput_awayteam, length(awaygoaltimes)),
+                                        rep(input$winprob_userinput_hometeam, length(homeredtimes)),
+                                        rep(input$winprob_userinput_awayteam, length(awayredtimes)),
+                                        NA),
+                               Action = c(rep("Goal", length(c(homegoaltimes, awaygoaltimes))),
+                                          rep("Red card", length(c(homeredtimes, awayredtimes))),
+                                          "lastminute"),
+                               final = 0,
+                               gameID = 0) %>%
+      mutate(half = ifelse(minute <= 45, 1, 2))
+
+    winprobchart.func(action.input,
+                      winmodel.purged,
+                      drawmodel.purged)
+  })
+  
   # Playoffs seeding ####
   output$playoffsseeding_west <- DT::renderDataTable({
     

@@ -9,7 +9,7 @@
 # load("ASAShootingApp_master/AppData/WinExpectancyModels.Rdata")
 # app <- "master"
 # action.data <- readRDS(paste0("ASAShootingApp_", app, "/AppData/WinProbabilityActions_bygame.rds"))
-# action.input <- action.data %>% 
+# action.input <- action.data %>%
 #   filter(gameID == 914862)
 # winmodel <- winmodel.purged
 # drawmodel <- drawmodel.purged
@@ -81,7 +81,10 @@ winprobchart.func <- function(action.input,
                                   "#BE1E2D")) +
     geom_vline(xintercept = 45, 
                color = "black", 
-               linetype = "dotted")+
+               linetype = "dotted")
+  
+  if(nrow(action.data) > 0){
+    p +
     geom_vline(data=action.data, 
                aes(xintercept = minute), 
                color = "black", 
@@ -98,8 +101,9 @@ winprobchart.func <- function(action.input,
               nudge_x = 1.2,
               color = "white")+
     theme_minimal()
-  
-  p
+  } else{
+    p + theme_minimal()
+  }
 }
 
 # # Function testing ####
@@ -112,7 +116,8 @@ winprobchart.func <- function(action.input,
 # app <- "master"
 # action.data <- readRDS(paste0("ASAShootingApp_", app, "/AppData/WinProbabilityActions_bygame.rds"))
 # action.input <- action.data %>%
-#   filter(gameID == 914862)
+#   filter(gameID == 914862) %>%
+#   filter(Action == "lastminute")
 # 
 # winprobchart.func(action.input,
 #                   winmodel.purged,

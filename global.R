@@ -7,6 +7,8 @@ library(ggplot2)
 library(plotly)
 library(ggrepel)
 library(mgcv)
+library(zoo)
+library(reshape2)
 
 seasonFilter <- 2015
 
@@ -118,4 +120,5 @@ source("Functions/TeamxPassesFunction.R")
 source("Functions/xGChainPlayerFunction.R")
 source("Functions/SalaryFunction_Player.R")
 source("Functions/SalaryFunction_Team.R")
+source("Functions/PlotWinProbCharts.R")
 load("AppData/WinExpectancyModels.Rdata")
