@@ -6,6 +6,7 @@ library(shinyjs)
 library(ggplot2)
 library(plotly)
 library(ggrepel)
+library(mgcv)
 
 seasonFilter <- 2015
 
@@ -117,3 +118,4 @@ source("Functions/TeamxPassesFunction.R")
 source("Functions/xGChainPlayerFunction.R")
 source("Functions/SalaryFunction_Player.R")
 source("Functions/SalaryFunction_Team.R")
+load("AppData/WinExpectancyModels.Rdata")

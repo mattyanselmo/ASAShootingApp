@@ -65,6 +65,8 @@ shooterxgoals.func <- function(playerxgoals = playerxgoals,
                 xA = sum(xA),
                 `A-xA` = sum(`A-xA`),
                 `xG+xA` = sum(xG + xA),
+                PA = sum(PA),
+                xPA = sum(xPA),
                 Salary = mean(Guaranteed, na.rm = T)) %>%
       filter(Shots >= shotfilter,
              KeyP >= keyfilter) %>%
@@ -102,6 +104,8 @@ shooterxgoals.func <- function(playerxgoals = playerxgoals,
                 xA = sum(xA),
                 `A-xA` = sum(`A-xA`),
                 `xG+xA` = sum(xG + xA),
+                PA = sum(PA),
+                xPA = sum(xPA),
                 Salary = mean(Guaranteed, na.rm = T)) %>%
       filter(Shots >= shotfilter,
              KeyP >= keyfilter) %>%
@@ -141,6 +145,8 @@ shooterxgoals.func <- function(playerxgoals = playerxgoals,
                 xA = sum(xA),
                 `A-xA` = sum(`A-xA`),
                 `xG+xA` = sum(xG + xA),
+                PA = sum(PA),
+                xPA = sum(xPA),
                 Salary = mean(Guaranteed, na.rm = T)) %>%
       filter(Shots >= shotfilter,
              KeyP >= keyfilter) %>%
@@ -179,6 +185,8 @@ shooterxgoals.func <- function(playerxgoals = playerxgoals,
                 xA = sum(xA),
                 `A-xA` = sum(`A-xA`),
                 `xG+xA` = sum(xG + xA),
+                PA = sum(PA),
+                xPA = sum(xPA),
                 Salary = mean(Guaranteed, na.rm = T)) %>%
       filter(Shots >= shotfilter,
              KeyP >= keyfilter) %>%

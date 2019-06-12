@@ -60,9 +60,9 @@ shinyServer(function(input, output, session) {
                                    # shooting_pk = T,
                                    # setpiece = T,
                                    shooterplot_xvar = "xG",
-                                   shooterplot_yvar = "Goals",
+                                   shooterplot_yvar = "G",
                                    shooterplot_per96_xvar = "xG",
-                                   shooterplot_per96_yvar = "Goals")
+                                   shooterplot_per96_yvar = "G")
   
   # Updated values
   observeEvent(input$shooting_action,
@@ -164,7 +164,9 @@ shinyServer(function(input, output, session) {
                `G-xG/shot` = ifelse(Shots > 0, `G-xG`/Shots, 0),
                `A-xA/pass` = ifelse(KeyP > 0, `A-xA`/KeyP, 0)) %>%
         mutate(`Comp ($K)` = round(Salary/1000, 0)) %>%
-        select(-Salary)
+        select(-Salary) %>%
+        rename(A = Assts,
+               G = Goals)
     } else{
       dt_total <- shooterxgoals.func(playerxgoals,
                                      date1 = shooter_inputs$shooting_date1,
@@ -185,7 +187,9 @@ shinyServer(function(input, output, session) {
                `G-xG/shot` = ifelse(Shots > 0, `G-xG`/Shots, 0),
                `A-xA/pass` = ifelse(KeyP > 0, `A-xA`/KeyP, 0)) %>%
         mutate(`Comp ($K)` = round(Salary/1000, 0)) %>%
-        select(-Salary)
+        select(-Salary) %>%
+        rename(A = Assts,
+               G = Goals)
     }
     
     if("Pos" %in% names(dt_total)){
@@ -218,7 +222,9 @@ shinyServer(function(input, output, session) {
                                           PK = "PK" %in% shooter_inputs$pattern,
                                           SetPiece = "Setpiece" %in% shooter_inputs$pattern) %>%
         mutate(`Comp ($K)` = round(Salary/1000, 0)) %>%
-        select(-Salary)
+        select(-Salary) %>%
+        rename(A = Assts,
+               G = Goals)
       
     } else{
       dt_per96 <- shooterxgoals_perminute(playerxgoals,
@@ -237,7 +243,9 @@ shinyServer(function(input, output, session) {
                                           PK = "PK" %in% shooter_inputs$pattern,
                                           SetPiece = "Setpiece" %in% shooter_inputs$pattern) %>%
         mutate(`Comp ($K)` = round(Salary/1000, 0)) %>%
-        select(-Salary)
+        select(-Salary) %>%
+        rename(A = Assts,
+               G = Goals)
     }
     
     dt_per96 %>% filter(Pos %in% shooter_inputs$shooting_position)
@@ -248,11 +256,13 @@ shinyServer(function(input, output, session) {
     
     datatable(dt_total() %>% select(-c(Dist.key, `xG/shot`:`A-xA/pass`)),
               rownames = F,
-              options(list(autoWidth = T,
+              options = list(autoWidth = T,
                            pageLength = 25,
-                           lengthMenu = seq(25, 100, 25)))) %>%
+                           lengthMenu = seq(25, 100, 25))) %>%
       formatRound(columns = c('Dist', 'xG', 'G-xG', 'xPlace', 'xA', 'A-xA', 'xG+xA'), 
                   digits = 1) %>%
+      formatRound(columns = c("PA", "xPA"), 
+                  digits = 2) %>%
       formatPercentage(columns = c('Solo'), digits = 1) %>%
       formatCurrency(columns = c("Comp ($K)"),
                      currency = "$",
@@ -267,10 +277,11 @@ shinyServer(function(input, output, session) {
     
     datatable(dt_per96() %>% select(-one_of("extreme", "plotnames")),
               rownames = F,
-              options(list(autoWidth = T,
+              options = list(autoWidth = T,
                            pageLength = 25,
-                           lengthMenu = seq(25, 100, 25)))) %>%
-      formatRound(columns = c("Shots", "SoT", "Goals", "xG", "xPlace", "G-xG", "KeyP", "Assts", "xA", "A-xA", "xG+xA"), 
+                           lengthMenu = seq(25, 100, 25))) %>%
+      formatRound(columns = c("Shots", "SoT", "G", "xG", "xPlace", "G-xG", 
+                              "KeyP", "A", "xA", "A-xA", "xG+xA", "PA", "xPA"), 
                   digits = 2)  %>%
       formatCurrency(columns = c("Comp ($K)"),
                      currency = "$",
@@ -343,7 +354,7 @@ shinyServer(function(input, output, session) {
                         inputId = 'shooterplot_yvar',
                         label = 'Y-axis variable',
                         choices = c(choices.total, choices.96),
-                        selected = "Goals")             
+                        selected = "G")             
     },
     once = T)
   
@@ -582,9 +593,9 @@ shinyServer(function(input, output, session) {
   output$passingtable_player <- DT::renderDataTable({
     DT::datatable(dt_passer(),
                   rownames = F,
-                  options(list(autoWidth = T,
+                  options = list(autoWidth = T,
                                pageLength = 25,
-                               lengthMenu = seq(25, 100, 25)))) %>%
+                               lengthMenu = seq(25, 100, 25))) %>%
       formatRound(columns = c("Score", "Per100", "Distance", "Vertical"), 
                   digits = 1) %>%
       formatPercentage(columns = c("PassPct", "xPassPct", "Touch%")[c(T, T, passer_inputs$passing_third == "All")], 
@@ -599,9 +610,9 @@ shinyServer(function(input, output, session) {
   output$passingtable_player_per96 <- DT::renderDataTable({
     DT::datatable(dt_passer_per96(),
                   rownames = F,
-                  options(list(autoWidth = T,
+                  options = list(autoWidth = T,
                                pageLength = 25,
-                               lengthMenu = seq(25, 100, 25)))) %>%
+                               lengthMenu = seq(25, 100, 25))) %>%
       formatRound(columns = c("Per100", "Distance", "Vertical", "Passes"), 
                   digits = 1) %>%
       formatRound(columns = c("Score"),
@@ -878,9 +889,9 @@ shinyServer(function(input, output, session) {
   output$playerxgchain_totals <- DT::renderDataTable({
     DT::datatable(dt_playerxgchain_totals(),
                   rownames = F,
-                  options(list(autoWidth = T,
+                  options = list(autoWidth = T,
                                pageLength = 25,
-                               lengthMenu = seq(25, 100, 25)))) %>%
+                               lengthMenu = seq(25, 100, 25))) %>%
       # formatRound(columns = c("NumChains"), 
       #             digits = 1) %>%
       formatRound(columns = c("xB", "xGChain"), 
@@ -897,9 +908,9 @@ shinyServer(function(input, output, session) {
   output$playerxgchain_per96 <- DT::renderDataTable({
     DT::datatable(dt_playerxgchain_per96(),
                   rownames = F,
-                  options(list(autoWidth = T,
+                  options = list(autoWidth = T,
                                pageLength = 25,
-                               lengthMenu = seq(25, 100, 25)))) %>%
+                               lengthMenu = seq(25, 100, 25))) %>%
       formatRound(columns = c("NumChains/96"), 
                   digits = 1) %>%
       formatRound(columns = c("xB/96", "xGChain/96"), 
@@ -1085,9 +1096,9 @@ shinyServer(function(input, output, session) {
     
     DT::datatable(dt_keeper() %>% select(-c(`Goals/Shot`:`G-xG/Shot`)),
               rownames = F,
-              options(list(autoWidth = T,
+              options = list(autoWidth = T,
                            pageLength = 25,
-                           lengthMenu = seq(25, 100, 25)))) %>%
+                           lengthMenu = seq(25, 100, 25))) %>%
       formatRound(columns = c('Dist'), 
                   digits = 1) %>%
       formatRound(columns = c('xG', 'G-xG'), 
@@ -1105,9 +1116,9 @@ shinyServer(function(input, output, session) {
     
     datatable(dt_keeper_per96(),
               rownames = F,
-              options(list(autoWidth = T,
+              options = list(autoWidth = T,
                            pageLength = 25,
-                           lengthMenu = seq(25, 100, 25)))) %>%
+                           lengthMenu = seq(25, 100, 25))) %>%
       formatRound(columns = c('Dist'), 
                   digits = 1) %>%
       formatRound(columns = c("Shots", "Goals", "Saves", 'xG', 'G-xG'), 
@@ -1400,8 +1411,8 @@ shinyServer(function(input, output, session) {
     if(!input$team_conferenceview | length(input$team_seasonfilter) > 1){
       DT::datatable(dt,
                     rownames = F,
-                    options(list(autoWidth = T,
-                                 pageLength = 25))) %>%
+                    options = list(autoWidth = T,
+                                 pageLength = 25)) %>%
         formatPercentage(columns = columns.perc1, digits = 1) %>%
         formatRound(columns = columns.dec1, digits = 1) %>%
         formatRound(columns = columns.dec1.2, digits = 1) %>%
@@ -1414,9 +1425,9 @@ shinyServer(function(input, output, session) {
     } else{
       DT::datatable(dt,
                     rownames = F,
-                    options(list(autoWidth = T,
+                    options = list(autoWidth = T,
                                  pageLength = 25,
-                                 dom = 't'))) %>%
+                                 dom = 't')) %>%
         formatPercentage(columns = columns.perc1, digits = 1) %>%
         formatRound(columns = columns.dec1, digits = 1) %>%
         formatRound(columns = columns.dec1.2, digits = 1) %>%
@@ -1451,9 +1462,9 @@ shinyServer(function(input, output, session) {
     
     DT::datatable(dt,
                   rownames = F,
-                  options(list(autoWidth = T,
+                  options = list(autoWidth = T,
                                pageLength = 25,
-                               dom = 'ft'))) %>%
+                               dom = 'ft')) %>%
       formatPercentage(columns = columns.perc1, digits = 1) %>%
       formatRound(columns = columns.dec1, digits = 1) %>%
       formatRound(columns = columns.dec2, digits = 2) %>%
@@ -1564,9 +1575,9 @@ shinyServer(function(input, output, session) {
     
     DT::datatable(dt,
               rownames = F,
-              options(list(autoWidth = T,
+              options = list(autoWidth = T,
                            pageLength = 25,
-                           dom = 'ft'))) %>%
+                           dom = 'ft')) %>%
       formatPercentage(columns = columns.perc1, digits = 1) %>%
       formatRound(columns = columns.dec1, digits = 1) %>%
       formatRound(columns = columns.dec2, digits = 2) %>%
@@ -1599,9 +1610,9 @@ shinyServer(function(input, output, session) {
     
     DT::datatable(dt,
               rownames = F,
-              options(list(autoWidth = T,
+              options = list(autoWidth = T,
                            pageLength = 25,
-                           dom = 'ft'))) %>%
+                           dom = 'ft')) %>%
       formatPercentage(columns = columns.perc1, digits = 1) %>%
       formatRound(columns = columns.dec1, digits = 1) %>%
       formatRound(columns = columns.dec2, digits = 2) %>%
@@ -1981,8 +1992,8 @@ shinyServer(function(input, output, session) {
     
     DT::datatable(dt,
                   rownames = F,
-                  options(list(autoWidth = T,
-                               pageLength = 25))) %>%
+                  options = list(autoWidth = T,
+                               pageLength = 25)) %>%
       formatPercentage(columns = columns.perc1, digits = 1) %>%
       formatRound(columns = columns.dec1, digits = 1) %>%
       formatRound(columns = columns.dec2, digits = 2) %>%
@@ -2004,8 +2015,8 @@ shinyServer(function(input, output, session) {
     
     DT::datatable(dt,
                   rownames = F,
-                  options(list(autoWidth = T,
-                               pageLength = 25))) %>%
+                  options = list(autoWidth = T,
+                               pageLength = 25)) %>%
       formatPercentage(columns = columns.perc1, digits = 1) %>%
       formatRound(columns = columns.dec1, digits = 1) %>%
       formatRound(columns = columns.dec2, digits = 2) %>%
@@ -2172,11 +2183,11 @@ shinyServer(function(input, output, session) {
   
   output$teamxgoalsbygame <- DT::renderDataTable({
     columns.dec1 <- c("HxPts", "AxPts")
-    datatable(dt_bygame(),
+    DT::datatable(dt_bygame(),
               rownames = F,
-              options(list(autoWidth = T,
+              options = list(autoWidth = T,
                            pageLength = 25,
-                           lengthMenu = seq(25, 100, 25)))) %>%
+                           lengthMenu = seq(25, 100, 25))) %>%
       formatRound(columns = columns.dec1, digits = 1)
   })
   
@@ -2190,14 +2201,47 @@ shinyServer(function(input, output, session) {
   
   # Predictions ####
   
+  # Win probability model ####
+  output$winproboutput <- DT::renderDataTable({
+    hwinprob <- predict(winmodel.purged, 
+                       data.frame(minute = input$minute_winprob,
+                                  gamestate = input$gamestate_winprob,
+                                  playerdiff = input$playerdiff_winprob),
+                       type = "response")
+    drawprob <- (1 - hwinprob)*predict(drawmodel.purged, 
+                       data.frame(minute = input$minute_winprob,
+                                  gamestate = input$gamestate_winprob,
+                                  playerdiff = input$playerdiff_winprob),
+                       type = "response")
+    awinprob <- 1 - hwinprob - drawprob
+    
+    hxpts = 3*hwinprob + drawprob
+    axpts = 3*awinprob + drawprob
+    
+    DT::datatable(data.frame(`Home win%` = hwinprob,
+                             `Draw%` = drawprob,
+                             `Away win%` = awinprob,
+                             `Home xPts` = hxpts,
+                             `Away xPts` = axpts,
+                             check.names = F),
+                  rownames = F,
+                  options = list(autoWidth = T,
+                               dom = "t")) %>%
+      formatPercentage(columns = c("Home win%", "Draw%", "Away win%"), 
+                       digits = 1) %>%
+      formatRound(columns = c("Home xPts", "Away xPts"),
+                  digits = 1)
+    
+  })
+  
   # Playoffs seeding ####
   output$playoffsseeding_west <- DT::renderDataTable({
     
     DT::datatable(playoffsseeding_west %>% select(-Bye),
                   rownames = F,
-                  options(list(autoWidth = T,
+                  options = list(autoWidth = T,
                                pageLength = 15,
-                               dom = "t"))) %>%
+                               dom = "t")) %>%
       formatPercentage(columns = c("1", "2", "3", "4", "5", "6", "7", "Playoffs", "Shield"), digits = 1)
   })
   
@@ -2205,9 +2249,9 @@ shinyServer(function(input, output, session) {
 
     DT::datatable(playoffsseeding_east %>% select(-Bye),
                   rownames = F,
-                  options(list(autoWidth = T,
+                  options = list(autoWidth = T,
                                pageLength = 15,
-                               dom = "t"))) %>%
+                               dom = "t")) %>%
       formatPercentage(columns = c("1", "2", "3", "4", "5", "6", "7", "Playoffs", "Shield"), digits = 1)
   })
   
@@ -2217,9 +2261,9 @@ shinyServer(function(input, output, session) {
     
     DT::datatable(cupchances,
                   rownames = F,
-                  options(list(autoWidth = T,
+                  options = list(autoWidth = T,
                                pageLength = 15,
-                               dom = "t"))) %>%
+                               dom = "t")) %>%
       formatPercentage(columns = c("Conf Semis", "Conf Finals", "Finals", "Champs"), digits = 1)
   })
   
@@ -2260,8 +2304,8 @@ shinyServer(function(input, output, session) {
     if(playersalaries_inputs$aggregate){
       DT::datatable(dt_playersalaries(),
                     rownames = F,
-                    options(list(autoWidth = T,
-                                 pageLength = 25))) %>%
+                    options = list(autoWidth = T,
+                                 pageLength = 25)) %>%
         formatCurrency(columns = c("Base", "Guaranteed", "Guar Total", "Guar Avg")[c(!playersalaries_inputs$aggregate, !playersalaries_inputs$aggregate, playersalaries_inputs$aggregate, playersalaries_inputs$aggregate)],
                        currency = "$",
                        interval = 3,
@@ -2270,8 +2314,8 @@ shinyServer(function(input, output, session) {
     } else{
     DT::datatable(dt_playersalaries() %>% mutate(Date = format(Date, "%m/%d/%Y")),
                  rownames = F,
-                 options(list(autoWidth = T,
-                              pageLength = 25))) %>%
+                 options = list(autoWidth = T,
+                              pageLength = 25)) %>%
       formatCurrency(columns = c("Base", "Guaranteed", "Guar Total", "Guar Avg")[c(!playersalaries_inputs$aggregate, !playersalaries_inputs$aggregate, playersalaries_inputs$aggregate, playersalaries_inputs$aggregate)],
                      currency = "$",
                      interval = 3,
@@ -2310,9 +2354,9 @@ shinyServer(function(input, output, session) {
   output$teamsalaries <- DT::renderDataTable({
     DT::datatable(dt_teamsalaries(),
                   rownames = F,
-                  options(list(autoWidth = T,
+                  options = list(autoWidth = T,
                                pageLength = 25,
-                               dom = "t"))) %>%
+                               dom = "t")) %>%
       formatCurrency(columns = c("TotalGuar", "AvgGuar", "MedGuar", "StdDevGuar"),
                      currency = "$",
                      interval = 3,
@@ -2333,9 +2377,9 @@ shinyServer(function(input, output, session) {
   output$glossary <- DT::renderDataTable({
     DT::datatable(glossary %>% select(c(1, 2, 3)),
                   rownames = F,
-                  options(list(autoWidth = T,
+                  options = list(autoWidth = T,
                                pageLength = 20,
-                               lengthMenu = c(10, 20, 30, 40, 50))))
+                               lengthMenu = c(10, 20, 30, 40, 50)))
   })
   
 })
