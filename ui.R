@@ -428,7 +428,7 @@ shinyUI(
                                    ),
                                    mainPanel(
                                      h1('Team xGoals by game'),
-                                     p(paste0('Updated through games on ', max(as.Date(xgbygame$Date)))),
+                                     p(paste0('Updated through games on ', max(as.Date(xgbygame$Date)), ". Own goals not included in goal totals (HG, AG, GD).")),
                                      downloadButton('teambygame_download', 'Download CSV'),
                                      br(),
                                      br(),
