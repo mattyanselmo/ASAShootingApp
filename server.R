@@ -2246,6 +2246,7 @@ shinyServer(function(input, output, session) {
     
     minutes <- c(homegoaltimes, awaygoaltimes, homeredtimes, awayredtimes)
     
+    
     action.input <- data.frame(minute = c(minutes, max(95, minutes)),
                                hteam = input$winprob_userinput_hometeam, 
                                ateam = input$winprob_userinput_awayteam,
@@ -2254,18 +2255,28 @@ shinyServer(function(input, output, session) {
                                         rep(input$winprob_userinput_awayteam, length(awaygoaltimes)),
                                         rep(input$winprob_userinput_hometeam, length(homeredtimes)),
                                         rep(input$winprob_userinput_awayteam, length(awayredtimes)),
-                                        NA),
+                                        "None"),
                                Action = c(rep("Goal", length(c(homegoaltimes, awaygoaltimes))),
                                           rep("Red card", length(c(homeredtimes, awayredtimes))),
                                           "lastminute"),
                                final = 0,
-                               gameID = 0) %>%
-      mutate(half = ifelse(minute <= 45, 1, 2))
+                               gameID = 0,
+                               stringsAsFactors = F)
+    
+    action.input <- action.input %>%
+      mutate(half = ifelse(minute <= 45, 1, 2),
+             gamestate = cumsum((team == hteam & Action == "Goal") -
+                                   (team == ateam & Action == "Goal")),
+             playerdiff = cumsum((team == ateam & Action == "Red card") -
+                                   (team == hteam & Action == "Red card")))
+    
+    print(action.input)
 
     winprobchart.func(action.input,
                       winmodel.purged,
                       drawmodel.purged)
-  })
+  },
+  width = 600, height = 400)
   
   # Playoffs seeding ####
   output$playoffsseeding_west <- DT::renderDataTable({
