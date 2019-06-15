@@ -2234,27 +2234,57 @@ shinyServer(function(input, output, session) {
     
   })
   
+  # Team reactive values ####
+  winprob_userinputs <- reactiveValues(
+    hometeam = as.character(c()),
+    awayteam = as.character(c()),
+    date = "4/10/1986",
+    homegoals = as.character(c()),
+    awaygoals = as.character(c()),
+    homereds = as.character(c()),
+    awayreds = as.character(c()))
+
+  observeEvent(input$winprob_userinput_action,
+               {
+                 winprob_userinputs$hometeam <- input$winprob_userinput_hometeam
+                 winprob_userinputs$awayteam <- input$winprob_userinput_awayteam
+                 winprob_userinputs$date <- input$winprob_userinput_date
+                 winprob_userinputs$homegoals <- input$winprob_userinput_homegoals
+                 winprob_userinputs$awaygoals <- input$winprob_userinput_awaygoals
+                 winprob_userinputs$homereds <- input$winprob_userinput_homereds
+                 winprob_userinputs$awayreds <- input$winprob_userinput_awayreds
+               })
+  
   output$winprobchart_userinput <- renderPlot({
-    homegoaltimes <- na.omit(as.numeric(sapply(strsplit(input$winprob_userinput_homegoals, ","), 
+    homegoaltimes <- na.omit(as.numeric(sapply(strsplit(winprob_userinputs$homegoals, ","), 
                                        function(x) as.numeric(trimws(x)))))
-    awaygoaltimes <- na.omit(as.numeric(sapply(strsplit(input$winprob_userinput_awaygoals, ","), 
+    awaygoaltimes <- na.omit(as.numeric(sapply(strsplit(winprob_userinputs$awaygoals, ","), 
                                        function(x) as.numeric(trimws(x)))))
-    homeredtimes <- na.omit(as.numeric(sapply(strsplit(input$winprob_userinput_homereds, ","), 
+    homeredtimes <- na.omit(as.numeric(sapply(strsplit(winprob_userinputs$homereds, ","), 
                                        function(x) as.numeric(trimws(x)))))
-    awayredtimes <- na.omit(as.numeric(sapply(strsplit(input$winprob_userinput_awayreds, ","), 
+    awayredtimes <- na.omit(as.numeric(sapply(strsplit(winprob_userinputs$awayreds, ","), 
                                        function(x) as.numeric(trimws(x)))))
     
     minutes <- c(homegoaltimes, awaygoaltimes, homeredtimes, awayredtimes)
     
-    
     action.input <- data.frame(minute = c(minutes, max(95, minutes)),
-                               hteam = input$winprob_userinput_hometeam, 
-                               ateam = input$winprob_userinput_awayteam,
-                               date = input$winprob_userinput_date,
-                               team = c(rep(input$winprob_userinput_hometeam, length(homegoaltimes)),
-                                        rep(input$winprob_userinput_awayteam, length(awaygoaltimes)),
-                                        rep(input$winprob_userinput_hometeam, length(homeredtimes)),
-                                        rep(input$winprob_userinput_awayteam, length(awayredtimes)),
+                               hteam = c(rep(winprob_userinputs$hometeam, 
+                                             length(c(homegoaltimes, awaygoaltimes,
+                                                      homeredtimes, awayredtimes))),
+                                         ifelse(length(winprob_userinputs$hometeam) == 1,
+                                                winprob_userinputs$hometeam,
+                                                "Flounders")), 
+                               ateam = c(rep(winprob_userinputs$awayteam,
+                                             length(c(homegoaltimes, awaygoaltimes,
+                                                      homeredtimes, awayredtimes))),
+                                         ifelse(length(winprob_userinputs$awayteam) == 1,
+                                                winprob_userinputs$awayteam,
+                                                "Mighty Timbers")),
+                               date = winprob_userinputs$date,
+                               team = c(rep(winprob_userinputs$hometeam, length(homegoaltimes)),
+                                        rep(winprob_userinputs$awayteam, length(awaygoaltimes)),
+                                        rep(winprob_userinputs$hometeam, length(homeredtimes)),
+                                        rep(winprob_userinputs$awayteam, length(awayredtimes)),
                                         "None"),
                                Action = c(rep("Goal", length(c(homegoaltimes, awaygoaltimes))),
                                           rep("Red card", length(c(homeredtimes, awayredtimes))),
@@ -2269,10 +2299,7 @@ shinyServer(function(input, output, session) {
                                    (team == ateam & Action == "Goal")),
              playerdiff = cumsum((team == ateam & Action == "Red card") -
                                    (team == hteam & Action == "Red card")))
-    
-    print(action.input)
-
-    winprobchart.func(action.input,
+        winprobchart.func(action.input,
                       winmodel.purged,
                       drawmodel.purged)
   },
