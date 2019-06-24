@@ -44,6 +44,7 @@ winprobchart.func <- function(action.input,
                          half = c(rep(1, 45), rep(2, last.minute - 45))) %>%
                 left_join(action.input %>% select(-c(gameID, date)),
                           by = c("half", "minute"))) %>%
+    arrange(half, minute) %>%
     mutate(playerdiff = na.locf(playerdiff),
            gamestate = na.locf(gamestate))
   
