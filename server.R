@@ -2233,6 +2233,27 @@ shinyServer(function(input, output, session) {
     
   })
   
+  # winexpreactive <- reactive({
+  #   
+  #   if(!is.na(input$gamestate_winprob)){
+  #   data.frame(winexptable %>%
+  #                rename(ModelWin = Win,
+  #                       ModelDraw = Draw,
+  #                       ModelLoss = Loss,
+  #                       ActDraw = ActTie),
+  #              check.names = F)
+  #   }
+  # })
+  
+  output$download_winprob <- downloadHandler(
+    filename = "ASAWinProbByGameState.csv",
+    content = function(file){
+      write.csv(winexptable, 
+                file, 
+                row.names = F)
+    }
+  )
+  
   # Team reactive values ####
   winprob_userinputs <- reactiveValues(
     hometeam = as.character(c()),

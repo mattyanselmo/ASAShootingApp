@@ -53,6 +53,8 @@ playerpos <- readRDS("AppData/playerpositions_byseason.rds") %>%
   filter(year >= seasonFilter)
 playerpassing <- readRDS("AppData/xPassingByPlayer.rds") %>%
   filter(Season >= seasonFilter)
+winexptable <- readRDS("AppData/WinExpectancy_fromGoalTimes.RDS")
+
 # %>%
 #   bind_rows(data.frame(passer = "God Zlatan",
 #                        year = 2018,

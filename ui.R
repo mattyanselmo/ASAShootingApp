@@ -1006,6 +1006,9 @@ shinyUI(
                                                        step = 1,
                                                        width = "100%")))),
                                  div(DT::dataTableOutput("winproboutput"), style = "width: 50%")),
+                                 br(),
+                                 downloadButton(outputId = "download_winprob", 
+                                                label = "Download CSV"),
                                  tabPanel("Win% charts (DIY)",
                                           p(HTML("<i> Enter integer times separated by commas. Leave blank if the event did not occur. </i>")),
                                           fluidPage(fluidRow(
