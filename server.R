@@ -1152,7 +1152,6 @@ shinyServer(function(input, output, session) {
       dt[['plotnames']] <- unlist(lapply(strsplit(dt$Keeper, " "), function(x) { return(x[length(x)]) }))
     }
     dt
-    print(dt)
   })
   
   keeper_plotvalues <- reactiveValues(keeperplot_xvar = "xG", keeperplot_yvar = "Goals")
@@ -2294,11 +2293,13 @@ shinyServer(function(input, output, session) {
                                stringsAsFactors = F)
     
     action.input <- action.input %>%
-      mutate(half = ifelse(minute <= 45, 1, 2),
-             gamestate = cumsum((team == hteam & Action == "Goal") -
+      mutate(half = ifelse(minute <= 45, 1, 2)) %>%
+      arrange(half, minute) %>%
+      mutate(gamestate = cumsum((team == hteam & Action == "Goal") -
                                    (team == ateam & Action == "Goal")),
              playerdiff = cumsum((team == ateam & Action == "Red card") -
                                    (team == hteam & Action == "Red card")))
+    
         winprobchart.func(action.input,
                       winmodel.purged,
                       drawmodel.purged)
@@ -2308,34 +2309,60 @@ shinyServer(function(input, output, session) {
   # Playoffs seeding ####
   output$playoffsseeding_west <- DT::renderDataTable({
     
-    DT::datatable(playoffsseeding_west %>% select(-Bye),
+    DT::datatable(playoffsseeding_west %>% 
+                    select(-Bye) %>%
+                    left_join(playoffsseeding_west_last %>%
+                                select(-Bye) %>%
+                                select(Team,
+                                       Playoffs_last = Playoffs,
+                                       Shield_last = Shield),
+                              by = "Team") %>%
+                    mutate(POChange = Playoffs - Playoffs_last,
+                           SSChange = Shield - Shield_last) %>%
+                    select(Team, `1`:Playoffs, POChange, Shield, SSChange),
                   rownames = F,
                   options = list(autoWidth = T,
                                pageLength = 15,
                                dom = "t")) %>%
-      formatPercentage(columns = c("1", "2", "3", "4", "5", "6", "7", "Playoffs", "Shield"), digits = 1)
+      formatPercentage(columns = c("1", "2", "3", "4", "5", "6", "7", "Playoffs", "POChange", "Shield", "SSChange"), digits = 1)
   })
   
   output$playoffsseeding_east <- DT::renderDataTable({
 
-    DT::datatable(playoffsseeding_east %>% select(-Bye),
+    DT::datatable(playoffsseeding_east %>% 
+                    select(-Bye) %>%
+                    left_join(playoffsseeding_east_last %>%
+                                select(-Bye) %>%
+                                select(Team,
+                                       Playoffs_last = Playoffs,
+                                       Shield_last = Shield),
+                              by = "Team") %>%
+                    mutate(POChange = Playoffs - Playoffs_last,
+                           SSChange = Shield - Shield_last) %>%
+                    select(Team, `1`:Playoffs, POChange, Shield, SSChange),
                   rownames = F,
                   options = list(autoWidth = T,
                                pageLength = 15,
                                dom = "t")) %>%
-      formatPercentage(columns = c("1", "2", "3", "4", "5", "6", "7", "Playoffs", "Shield"), digits = 1)
+      formatPercentage(columns = c("1", "2", "3", "4", "5", "6", "7", "Playoffs", "POChange", "Shield", "SSChange"), digits = 1)
   })
   
   # MLS Cup predictions ####
   
   output$cupchances_table <- DT::renderDataTable({
     
-    DT::datatable(cupchances,
+    DT::datatable(cupchances %>%
+                    left_join(cupchances_last %>%
+                                select(Team,
+                                       Champs_last = Champs),
+                              by = "Team") %>%
+                    mutate(ChampsChange = Champs - Champs_last) %>%
+                    select(-Champs_last),
                   rownames = F,
                   options = list(autoWidth = T,
                                pageLength = 15,
                                dom = "t")) %>%
-      formatPercentage(columns = c("Conf Semis", "Conf Finals", "Finals", "Champs"), digits = 1)
+      formatPercentage(columns = c("Conf Semis", "Conf Finals", "Finals", "Champs", "ChampsChange"), digits = 1)
   })
   
   # Salary ####

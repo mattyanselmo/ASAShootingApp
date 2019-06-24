@@ -74,9 +74,38 @@ teampassing.defense <- readRDS("AppData/xPassingByTeamDefense.rds") %>%
   filter(year >= seasonFilter)
 playerchaindata <- readRDS("AppData/PlayerxGChainData.rds") %>%
   filter(Season >= seasonFilter)
-playoffsseeding_west <- readRDS("AppData/CurrentSimulationResults_playoffseeding_west.rds")
-playoffsseeding_east <- readRDS("AppData/CurrentSimulationResults_playoffseeding_east.rds")
-cupchances <- readRDS(paste0("AppData/", sort(grep(".rds", grep("MLSCupSimulationResults", list.files("AppData"), value = T), value = T), decreasing = T)[1]))
+
+current.year <- max(playerxgoals$Season)
+simfiles <- grep("CurrentSimulationResults", list.files("AppData"), value = T)
+simfiles.weeks <- str_extract(simfiles, "(?<=_week)[0-9]*")
+simfiles.years <- str_extract(simfiles, "(?<=_year)[0-9]*")
+current.week <- max(as.numeric(simfiles.weeks)[simfiles.years == as.character(current.year)], na.rm = T)
+
+playoffsseeding_west <- readRDS(paste0("AppData/CurrentSimulationResults_playoffseeding_west_week",
+                                      current.week,
+                                      "_year", current.year, ".rds"))
+playoffsseeding_west_last <- readRDS(paste0("AppData/CurrentSimulationResults_playoffseeding_west_week",
+                                       current.week - 1,
+                                       "_year", current.year, ".rds"))
+
+playoffsseeding_east <- readRDS(paste0("AppData/CurrentSimulationResults_playoffseeding_east_week",
+                                       current.week,
+                                       "_year", current.year, ".rds"))
+playoffsseeding_east_last <- readRDS(paste0("AppData/CurrentSimulationResults_playoffseeding_east_week",
+                                            current.week - 1,
+                                            "_year", current.year, ".rds"))
+
+cupchances <- readRDS(paste0("AppData/MLSCupSimulationResults_week", 
+                             current.week,
+                             "_year",
+                             current.year,
+                             ".rds"))
+cupchances_last <- readRDS(paste0("AppData/MLSCupSimulationResults_week", 
+                             current.week - 1,
+                             "_year",
+                             current.year,
+                             ".rds"))
+
 salary.data <- readRDS("AppData/SalaryData.rds")
 
 #pred.data <- readRDS('IgnoreList/TeamPredictionsData_week35.rds')

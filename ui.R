@@ -1062,18 +1062,18 @@ shinyUI(
                                  h2("Eastern Conference"),
                                  div(DT::dataTableOutput("playoffsseeding_east"), style = "width: 75%"),
                                  br()
-                        )#,
-             #            tabPanel("Cup chances",
-             #                     value = "cupchancestab",
-             #                     tagList(
-             #                       tags$head(
-             #                         tags$style(".datatables .display {margin-left: 0;}"))),
-             #                     h1('Playoffs seeding probabilities'),
-             #                     p(HTML("Based on 10,000 simulated runs of the remaining MLS Cup playoffs. <br>
-             #                            Percentages shown to tenths only to reinforce mathematical certainties; margin of error is greater than 0.5% for probabilities between 10.0% and 90.0%.")), 
-             #                     br(),
-             #                     div(DT::dataTableOutput("cupchances_table"), style = "width: 50%"),
-             #                     br())
+                        ),
+                        tabPanel("Cup chances",
+                                 value = "cupchancestab",
+                                 tagList(
+                                   tags$head(
+                                     tags$style(".datatables .display {margin-left: 0;}"))),
+                                 h1('Playoffs seeding probabilities'),
+                                 p(HTML("Based on 1,000 simulated runs of the remaining regular season and MLS Cup playoffs. <br>
+                                        Percentages shown to tenths only to reinforce mathematical certainties; margin of error is greater than 0.5% for probabilities between 1.0% and 99.0%.")),
+                                 br(),
+                                 div(DT::dataTableOutput("cupchances_table"), style = "width: 50%"),
+                                 br())
                         ),
              navbarMenu(strong('Salaries'),
                         # Salary tabs ####
