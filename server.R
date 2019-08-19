@@ -1280,6 +1280,169 @@ shinyServer(function(input, output, session) {
       write.csv(data.frame(namesFL, dt_keeperplot(), check.names = FALSE), file, row.names = FALSE)
     })
   
+  ## Shot plots ---------------------------------------------------------------
+  # Updating possible selections based on previous selections in dropdown filters
+  output$shooter_name <- renderUI({
+    selectInput(inputId = "shooter_name",
+                label = "Player Name:",
+                choices = c('All', sort(shooter_lineups$shooter[shooter_lineups$year %in% input$shots_seasonfilter &
+                                                             if(input$shooter_team_name!='All'){shooter_lineups$team==input$shooter_team_name}
+                                                             else{TRUE}])))
+  })
+
+  output$opp_team_name <- renderUI({
+    selectInput(inputId = "opp_team_name",
+                label = "Opposing Team:",
+                choices = c('All', sort(shooter_lineups$team.1[shooter_lineups$year %in% input$shots_seasonfilter &
+                                                          if(input$shooter_team_name!='All'){shooter_lineups$team==input$shooter_team_name}
+                                                          else{TRUE}])))
+  })
+
+  output$game_dates <- renderUI({
+    selectInput(inputId = "game_dates",
+                label = "Game Date:",
+                choices = c('',as.character(sort(shooter_lineups$date[shooter_lineups$year %in% input$shots_seasonfilter &
+                                                 if(input$shooter_team_name!='All'){shooter_lineups$team==input$shooter_team_name}
+                                                 else{TRUE} &
+                                                 if(input$opp_team_name!='All'){shooter_lineups$team.1==input$opp_team_name}
+                                                 else{TRUE}]))))
+  })
+
+  # Initial values
+  shot_plot_inputs <- reactiveValues(shots_seasonfilter = max(shooter_lineups$year),
+                                     shooter_team_name = 'All',
+                                     shooter_name = 'All',
+                                     opp_team_name = 'All',
+                                     game_date = '',
+                                     shot_pattern = unique(shots_w_xG$patternOfPlay))
+
+  # Updated values
+  observeEvent(input$shooter_xG_action,
+               {
+                 shot_plot_inputs$shots_seasonfilter <- input$shots_seasonfilter
+                 shot_plot_inputs$shooter_team_name <- input$shooter_team_name
+                 shot_plot_inputs$shooter_name <- input$shooter_name
+                 shot_plot_inputs$opp_team_name <- input$opp_team_name
+                 shot_plot_inputs$game_date <- input$game_date
+                 shot_plot_inputs$shot_pattern <- input$shot_pattern
+                })
+
+  # Select all checkboxes
+  # Maybe this should be used? Would need to add a position column to the
+  # shots_w_xG dataframe
+  # observeEvent(input$shooting_position_selectall,
+  #              {
+  #                updateCheckboxGroupInput(
+  #                  session,
+  #                  "shooting_position",
+  #                  choices = c("Keeper (G)" = "G",
+  #                              "Central Def (D)" = "D",
+  #                              "Back (B)" = "B",
+  #                              "Midfielder (M)" = "M",
+  #                              "Attacking Mid (A)" = "A",
+  #                              "Forward (F)" = "F",
+  #                              "Sub (S)" = "S"),
+  #                  selected = if (input$shooting_position_selectall) c("G", "D", "B", "M", "A", "F", "S")
+  #                )
+  #              },
+  #              ignoreInit = T)
+  #
+  # The patternOfPlay labels in the xG dataframe are different than these,
+  # so need to match these first
+  observeEvent(input$shooting_pattern_selectall,
+               {
+                 updateCheckboxGroupInput(
+                   session,
+                   "shooting_pattern",
+                   choices = c("Open play" = "Open", "PK", "Direct FK" = "FK", "Set piece" = "Setpiece", 'Corner', 'Throw in', 'Fastbreak'),
+                   selected = if (input$shooting_pattern_selectall) c("Open play" = "Open", "PK", "Direct FK" = "FK", "Set piece" = "Setpiece", 'Corner', 'Throw in', 'Fastbreak')
+                 )
+               },
+               ignoreInit = T)
+
+  # xG data to plot on field ####
+  filtered_shot_data <- reactive({
+    # Need to figure out what to do when people select 'All' for the filters
+    # since a lot of the time this just creates an overly cluttered visual
+    shot_plot_data <- shots_w_xG %>%
+      filter(year %in% shot_plot_inputs$shots_seasonfilter &
+               if(shot_plot_inputs$shooter_team_name!='All'){team==shot_plot_inputs$shooter_team_name}else{TRUE} &
+               if(shot_plot_inputs$opp_team_name!='All'){team.1==shot_plot_inputs$opp_team_name}else{TRUE} &
+               if(shot_plot_inputs$shooter_name!='All'){shooter==shot_plot_inputs$shooter_name}else{TRUE} &
+               if(shot_plot_inputs$game_dates!=''){date==shot_plot_inputs$game_dates}else{TRUE} &
+               patternOfPlay %in% shot_plot_inputs$shot_pattern)
+
+  })
+
+  output$shot_plot <- renderPlotly({
+
+    p <- ggplot(data=filtered_shot_data(),
+                aes(x=x, y=y, color=as.factor(xG_percentile))) +
+      # draw_pitch(pitch_lines = 'black', pitch_color = 'white',
+      #            data_source = 'Opta', size = 'half')+
+      geom_point(alpha=.8)+
+      coord_flip()+
+      theme(legend.position = 'bottom')+
+      pitch_theme +
+      scale_color_viridis_d(name = 'xG')+
+      NULL
+
+    # p <- shot_data %>%
+    #   ggplot(aes_string(x = paste0('`', keeper_inputs$keeperplot_xvar, '`'),
+    #                     y = paste0('`', keeper_inputs$keeperplot_yvar, '`'))) +
+    #   geom_point(aes(text = paste0(plotnames, "<br>Shots faced:", Shots)),
+    #              color = '#0000cc') +
+    #   # geom_text(aes(label = ifelse(dt_keeperplot()$extreme >= sort(dt_keeperplot()$extreme, decreasing = T)[min(3, nrow(dt_keeperplot()))] |
+    #   #                                dt_keeperplot()$extreme <= sort(dt_keeperplot()$extreme)[min(3, nrow(dt_keeperplot()))] |
+    #   #                                dt_keeperplot()[[keeper_inputs$keeperplot_xvar]] == max(dt_keeperplot()[[keeper_inputs$keeperplot_xvar]]) |
+    #   #                                dt_keeperplot()[[keeper_inputs$keeperplot_yvar]] == max(dt_keeperplot()[[keeper_inputs$keeperplot_yvar]]),
+    #   #                              dt_keeperplot()$plotnames, ''),
+    #   #               hjust = "inward",
+    #   #               vjust = "inward"),
+    #   #           size = 5,
+    #   #           check_overlap = T,
+    #   #           color = '#ff3300') +
+
+    # a <- list(
+    #   x = m[[keeper_inputs$keeperplot_xvar]],
+    #   y = m[[keeper_inputs$keeperplot_yvar]],
+    #   text = m$plotnames,
+    #   xref = "x",
+    #   yref = "y",
+    #   showarrow = F,
+    #   xanchor = "center",
+    #   yanchor = "top",
+    #   font = list(color = '#ff3300',
+    #               size = 10)
+    # )
+    #
+    ggplotly(p,
+             tooltip = c("x", "y"),
+             width = 700,
+             height = 500) # %>%
+      # add_markers() %>%
+      # layout(annotations = a)
+
+  })
+
+  # output$shootplot_text <- renderText({
+  #   paste0('<font size = "4">',
+  #          lm_eqn2(dt_keeperplot(),
+  #                  paste0('`', keeper_inputs$keeperplot_xvar, '`'),
+  #                  paste0('`', keeper_inputs$keeperplot_yvar, '`')),
+  #          "</font>")
+  # })
+
+  # shot plot downloads ####
+  # output$xGoals_download <- downloadHandler(
+  #   filename = "ASAkeepertable.csv",
+  #
+  #   content = function(file){
+  #     namesFL <- as.data.frame(do.call("rbind", strsplit(sub(" ", ";", dt_keeperplot()$Keeper), ";")))
+  #     names(namesFL) <- c("First", "Last")
+  #     write.csv(data.frame(namesFL, dt_keeperplot(), check.names = FALSE), file, row.names = FALSE)
+  #   })
+  
   # Team shots tables ####
   dt_team <- reactive({
     if(input$team_seasonordate == 'Season'){

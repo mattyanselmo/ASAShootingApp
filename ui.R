@@ -577,7 +577,107 @@ shinyUI(
                                                  )
                                      ))
                                  )
-                        )),
+                        # )
+                        ),
+                        tabPanel('xGoal Plots',
+                                 value = "shooterxG_plot",
+                                 sidebarLayout(
+                                   sidebarPanel(tagList(
+                                     tags$head(
+                                       tags$style(
+                                         HTML(
+                                           ".checkbox-inline {
+                                           margin-left: 20px;
+                                           margin-right: 0px;
+                                           }
+                                           .checkbox-inline+.checkbox-inline {
+                                           margin-left: 20px;
+                                           margin-right: 0px;
+                                           }
+                                           "
+                                         )
+                                         )
+                                         )),
+                                     width = 2,
+                                     actionButton('shooter_xG_action',
+                                                  label = "Apply filters"),
+                                     dropdownButton(inputId = "shots_seasonfilter_dropdown",
+                                                    label = "Seasons:",
+                                                    circle = FALSE,
+                                                    width = 3,
+                                                    checkboxGroupInput("shots_seasonfilter",
+                                                                       label = NULL,
+                                                                       choices = min(shooter_lineups$year):max(shooter_lineups$year),
+                                                                       selected = max(shooter_lineups$year))),
+                                     br(),
+                                     # Question of whether to use full team name or not,
+                                     # if using abbr then can take full team name column
+                                     # out of data
+                                     selectInput(inputId = "shooter_team_name",
+                                                 label = "Team:",
+                                                 choices = c('All',sort(unique(shooter_lineups$team)))),
+                                     br(),
+                                     # # Player selection
+                                     uiOutput('shooter_name'),
+                                     br(),
+                                     # # Opposing team selection
+                                     uiOutput('opp_team_name'),
+                                     br(),
+                                     # # Date of game selection
+                                     uiOutput('game_dates'),
+                                     br(),
+                                     # All of these selections are independent of selections on other
+                                     # tabs, which may or may not be preferable? Seems to make sense
+                                     # for now since it cuts down on computations and the other filters
+                                     # above are different, though maybe it's better for consistency
+                                     # to use the same filters or at least the same type?
+                                     dropdownButton(inputId = "shot_pattern_dropdown",
+                                                    label = "Shot patterns:",
+                                                    circle = FALSE,
+                                                    width = 3,
+                                                    checkboxGroupInput("shot_pattern",
+                                                                       label = NULL,
+                                                                       choices = c("Open play" = "Open", "PK", "Direct FK" = "FK", "Set piece" = "Setpiece", 'Corner', 'Throw in', 'Fastbreak'),
+                                                                       selected = c("Open play" = "Open", "PK", "Direct FK" = "FK", "Set piece" = "Setpiece", 'Corner', 'Throw in', 'Fastbreak')))
+                                     ),
+                                   mainPanel(
+                                     h1('xGoals Plots'),
+                                     p(paste0('Updated through games on ', max(as.Date(shooter_lineups$date)))),
+                                     downloadButton('xGoals_download', 'Download CSV'),
+                                     br(),
+                                     br(),
+                                     tabsetPanel(id = 'shot_plots_subtab',
+                                                 tabPanel('Shot plots',
+                                                          value = "plotstotals",
+                                                          fluidPage(fluidRow(
+                                                            p(HTML("<i>Please allow a few seconds for the plot to load.</i>"))
+                                                            # column(4,
+                                                            #        selectInput('keeperplot_xvar',
+                                                            #                    label = 'X-axis variable',
+                                                            #                    choices = c('Shots faced' = 'Shots', 'Goals allowed' = 'GA',
+                                                            #                                'GA/shot' = 'GAperShot', 'xG/Shot' = 'xGperShot',
+                                                            #                                'G-xG/shot' = 'GmxGperShot',
+                                                            #                                '%Shots headed' = 'Header%', 'Avg. distance' = 'Dist',
+                                                            #                                'xG faced' = 'xG', 'GA above average' = 'G-xG'),
+                                                            #                    selected = 'xG')),
+                                                            # column(4,
+                                                            #        selectInput('keeperplot_yvar',
+                                                            #                    label = 'Y-axis variable',
+                                                            #                    choices = c('Shots faced' = 'Shots', 'Goals allowed' = 'GA',
+                                                            #                                'GA/shot' = 'GAperShot', 'xG/Shot' = 'xGperShot',
+                                                            #                                'G-xG/shot' = 'GmxGperShot',
+                                                            #                                '%Shots headed' = 'Header%', 'Avg. distance' = 'Dist',
+                                                            #                                'xG faced' = 'xG', 'GA above average' = 'G-xG'),
+                                                            #                    selected = 'G-xG'))
+                                                            )),
+                                                          htmlOutput("shootplot_text"),
+                                                          # verbatimTextOutput('selection_tests'),
+                                                          plotlyOutput('shot_plot')
+                                                 )
+                                     ))
+                                     )
+                                   )
+                        ),
              # Passing navbar ####
              navbarMenu(strong('xPasses'),
                         # Passing: Players tab panel ####

@@ -139,6 +139,10 @@ Mode <- function(x) {
   ux <- unique(x)
   ux[which.max(tabulate(match(x, ux)))]
 }
+## Shot plots -----------------------------------------------------------------
+shots_w_xG <- readRDS('AppData/ShotsWithxG.rds')
+shooter_lineups <- readRDS('AppData/ShooterLineups.rds')
+source('Functions/FieldPlotting.R')
 
 source('Functions/ShooterxGoalsFunction.R')
 source('Functions/ShooterxGoalsFunction_perminute.R')
