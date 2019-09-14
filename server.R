@@ -433,7 +433,7 @@ shinyServer(function(input, output, session) {
   # Passer reactive values ####
   
   # Initial values
-  passer_inputs <- reactiveValues(passing_position = c("G", "D", "B", "M", "A", "F", "S", "Heaven"),
+  passer_inputs <- reactiveValues(passing_position = c("GK", "CB", "FB/WB", "CM", "CDM", "ACM", "Wing", "F", "sub", "Heaven"),
                                   passing_third = "All",
                                   passing_seasonordate = "Season",
                                   passing_date1 = as.Date("2000-01-01"),
@@ -490,14 +490,16 @@ shinyServer(function(input, output, session) {
                  updateCheckboxGroupInput(
                    session, 
                    "passing_position", 
-                   choices = c("Keeper (G)" = "G",
-                               "Central Def (D)" = "D",
-                               "Back (B)" = "B",
-                               "Midfielder (M)" = "M",
-                               "Attacking Mid (A)" = "A",
+                   choices = c("Keeper (GK)" = "GK",
+                               "Central Def (CB)" = "CB",
+                               "Back (FB/WB)" = "FB/WB",
+                               "Midfielder (CM)" = "CM",
+                               "Attacking Mid (ACM)" = "ACM",
+                               "Defensive Mid (CDM)" = "CDM",
+                               "Wing (W)" = "Wing",
                                "Forward (F)" = "F",
                                "Sub (S)" = "S"),
-                   selected = if (input$passing_position_selectall) c("G", "D", "B", "M", "A", "F", "S")
+                   selected = c("GK", "CB", "FB/WB", "CM", "CDM", "ACM", "Wing", "F", "sub")
                  )
                },
                ignoreInit = T)

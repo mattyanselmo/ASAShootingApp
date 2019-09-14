@@ -50,7 +50,7 @@ xgbygame <- readRDS('AppData/xGoalsByTeam_byGame.rds')
 keeperxgoals <- readRDS('AppData/xGoalsByKeeper.rds')
 conferences <- read.csv('AppData/teamsbyconferencebyseason.csv')
 glossary <- read.csv('AppData/Glossary.csv')
-playerpos <- readRDS("AppData/playerpositions_byseason.rds") %>%
+playerpos <- readRDS("AppData/playerpositions_byseason_2.rds") %>%
   filter(year >= seasonFilter)
 playerpassing <- readRDS("AppData/xPassingByPlayer.rds") %>%
   filter(Season >= seasonFilter)
