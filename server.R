@@ -1369,17 +1369,23 @@ shinyServer(function(input, output, session) {
                if(shot_plot_inputs$shooter_team_name!='All'){team==shot_plot_inputs$shooter_team_name}else{TRUE} &
                if(shot_plot_inputs$opp_team_name!='All'){team.1==shot_plot_inputs$opp_team_name}else{TRUE} &
                if(shot_plot_inputs$shooter_name!='All'){shooter==shot_plot_inputs$shooter_name}else{TRUE} &
-               if(shot_plot_inputs$game_dates!=''){date==shot_plot_inputs$game_dates}else{TRUE} &
-               patternOfPlay %in% shot_plot_inputs$shot_pattern)
+               if(shot_plot_inputs$game_date!=''){date==shot_plot_inputs$game_dates}else{TRUE} &
+               patternOfPlay %in% input$shot_pattern &
+               x_full_field > 57.5)
 
   })
-
+  #output$shots_head <- renderDataTable({head(filtered_shot_data())})
+  
   output$shot_plot <- renderPlotly({
 
     p <- ggplot(data=filtered_shot_data(),
-                aes(x=x, y=y, color=as.factor(xG_percentile))) +
-      # draw_pitch(pitch_lines = 'black', pitch_color = 'white',
-      #            data_source = 'Opta', size = 'half')+
+                aes(x=x_full_field, y=y_full_field, color=as.factor(xG_percentile))) +
+      # Plotting the field throws off the plotly call since plotly is not
+      # implemented with geom_custom from ggplot that the field plot uses.
+      # This means these elements are not drawn, so need to change the 
+      # plotting function to not use the custom geom
+      draw_pitch(pitch_lines = 'black', pitch_color = 'white',
+                 data_source = 'Opta', size = 'half')+
       geom_point(alpha=.8)+
       coord_flip()+
       theme(legend.position = 'bottom')+
@@ -1387,26 +1393,10 @@ shinyServer(function(input, output, session) {
       scale_color_viridis_d(name = 'xG')+
       NULL
 
-    # p <- shot_data %>%
-    #   ggplot(aes_string(x = paste0('`', keeper_inputs$keeperplot_xvar, '`'),
-    #                     y = paste0('`', keeper_inputs$keeperplot_yvar, '`'))) +
-    #   geom_point(aes(text = paste0(plotnames, "<br>Shots faced:", Shots)),
-    #              color = '#0000cc') +
-    #   # geom_text(aes(label = ifelse(dt_keeperplot()$extreme >= sort(dt_keeperplot()$extreme, decreasing = T)[min(3, nrow(dt_keeperplot()))] |
-    #   #                                dt_keeperplot()$extreme <= sort(dt_keeperplot()$extreme)[min(3, nrow(dt_keeperplot()))] |
-    #   #                                dt_keeperplot()[[keeper_inputs$keeperplot_xvar]] == max(dt_keeperplot()[[keeper_inputs$keeperplot_xvar]]) |
-    #   #                                dt_keeperplot()[[keeper_inputs$keeperplot_yvar]] == max(dt_keeperplot()[[keeper_inputs$keeperplot_yvar]]),
-    #   #                              dt_keeperplot()$plotnames, ''),
-    #   #               hjust = "inward",
-    #   #               vjust = "inward"),
-    #   #           size = 5,
-    #   #           check_overlap = T,
-    #   #           color = '#ff3300') +
-
     # a <- list(
     #   x = m[[keeper_inputs$keeperplot_xvar]],
     #   y = m[[keeper_inputs$keeperplot_yvar]],
-    #   text = m$plotnames,
+    #   text = filtered_shot_data()$shooter,
     #   xref = "x",
     #   yref = "y",
     #   showarrow = F,
@@ -1415,9 +1405,9 @@ shinyServer(function(input, output, session) {
     #   font = list(color = '#ff3300',
     #               size = 10)
     # )
-    #
+
     ggplotly(p,
-             tooltip = c("x", "y"),
+             tooltip = c('color'),
              width = 700,
              height = 500) # %>%
       # add_markers() %>%
@@ -1442,6 +1432,144 @@ shinyServer(function(input, output, session) {
   #     names(namesFL) <- c("First", "Last")
   #     write.csv(data.frame(namesFL, dt_keeperplot(), check.names = FALSE), file, row.names = FALSE)
   #   })
+  
+  ## Comparitive xG plots -----------------------------------------------------
+  # Updating possible selections based on previous selections in dropdown filters
+  output$shooter_2_name <- renderUI({
+    selectInput(inputId = "shooter_2_name",
+                label = "Player 2 Name:",
+                choices = c('', sort(shooter_lineups$shooter[shooter_lineups$year %in% input$comp_shots_seasonfilter &
+                                                               if(input$shooter_1_name!=''){shooter_lineups$shooter!=input$shooter_1_name}
+                                                             else{TRUE}])))
+  })
+
+  output$team_2_name <- renderUI({
+    selectInput(inputId = "team_2_name",
+                label = "Team 2:",
+                choices = c('', sort(shooter_lineups$team[shooter_lineups$year %in% input$comp_shots_seasonfilter &
+                                                                 if(input$team_1_name!=''){shooter_lineups$team!=input$team_1_name}
+                                                               else{TRUE}])))
+  })
+  
+  # Initial values
+  comparison_plot_inputs <- reactiveValues(comp_shots_seasonfilter = max(shooter_lineups$year),
+                                     team_1_name = '',
+                                     team_2_name = '',
+                                     shooter_1_name = '',
+                                     shooter_2_name = ''#,
+                                     #shot_pattern = unique(shots_w_xG$patternOfPlay)
+                                     )
+
+  # Updated values
+  observeEvent(input$comparison_xG_action,
+               {
+                 comparison_plot_inputs$comp_shots_seasonfilter <- input$comp_shots_seasonfilter
+                 comparison_plot_inputs$team_1_name <- input$team_1_name
+                 comparison_plot_inputs$team_2_name <- input$team_2_name
+                 comparison_plot_inputs$shooter_1_name <- input$shooter_1_name
+                 comparison_plot_inputs$shooter_2_name <- input$shooter_2_name
+                 #comparison_plot_inputs$shot_pattern <- input$shot_pattern
+               })
+  
+  # Select all checkboxes
+  # Maybe this should be used? Would need to add a position column to the
+  # shots_w_xG dataframe
+  # observeEvent(input$shooting_position_selectall,
+  #              {
+  #                updateCheckboxGroupInput(
+  #                  session,
+  #                  "shooting_position",
+  #                  choices = c("Keeper (G)" = "G",
+  #                              "Central Def (D)" = "D",
+  #                              "Back (B)" = "B",
+  #                              "Midfielder (M)" = "M",
+  #                              "Attacking Mid (A)" = "A",
+  #                              "Forward (F)" = "F",
+  #                              "Sub (S)" = "S"),
+  #                  selected = if (input$shooting_position_selectall) c("G", "D", "B", "M", "A", "F", "S")
+  #                )
+  #              },
+  #              ignoreInit = T)
+  #
+  # The patternOfPlay labels in the xG dataframe are different than these,
+  # so need to match these first
+  observeEvent(input$shooting_pattern_selectall,
+               {
+                 updateCheckboxGroupInput(
+                   session,
+                   "shooting_pattern",
+                   choices = c("Open play" = "Open", "PK", "Direct FK" = "FK", "Set piece" = "Setpiece", 'Corner', 'Throw in', 'Fastbreak'),
+                   selected = if (input$shooting_pattern_selectall) c("Open play" = "Open", "PK", "Direct FK" = "FK", "Set piece" = "Setpiece", 'Corner', 'Throw in', 'Fastbreak')
+                 )
+               },
+               ignoreInit = T)
+  
+  # filter selection test
+  output$selection_tests <- renderText({
+    paste0('Shooter 1: ', comparison_plot_inputs$shooter_1_name, '\n',
+          'Shooter 2: ', comparison_plot_inputs$shooter_2_name, '\n',
+          'Team 1: ', comparison_plot_inputs$team_1_name, '\n',
+          'Team 2: ', comparison_plot_inputs$team_2_name, '\n',
+          'Year: ', comparison_plot_inputs$comp_shots_seasonfilter)
+  })
+  
+  # xG data to plot on field ####
+  comparitive_shot_data <- reactive({
+    if(input$comparison_metric == 'Team'){
+      comp_shot_plot_data <- shots_w_xG %>%
+        filter(year %in% comparison_plot_inputs$comp_shots_seasonfilter &
+                 (team == comparison_plot_inputs$team_1_name |
+                    team == comparison_plot_inputs$team_2_name)) %>%
+        mutate(comparitive = team)
+    }
+    else{
+      comp_shot_plot_data <- shots_w_xG %>%
+        filter(year %in% comparison_plot_inputs$comp_shots_seasonfilter & 
+                 (shooter == comparison_plot_inputs$shooter_1_name | 
+                    shooter == comparison_plot_inputs$shooter_2_name)) %>%
+        mutate(comparitive = shooter)
+    }
+  })
+  output$compare_head <- renderDataTable({head(comparitive_shot_data())})
+  
+  output$comp_shot_plot <- renderPlotly({
+
+    p <- ggplot(data=comparitive_shot_data(),
+                aes(x=x_full_field, y=y_full_field, color=comparitive)) +
+      # Plotting the field throws off the plotly call since plotly is not
+      # implemented with geom_custom from ggplot that the field plot uses.
+      # This means these elements are not drawn, so need to change the
+      # plotting function to not use the custom geom
+      draw_pitch(pitch_lines = 'black', pitch_color = 'white',
+                 data_source = 'Opta', size = 'half')+
+      geom_point(alpha=.8)+
+      coord_flip()+
+      theme(legend.position = 'bottom')+
+      pitch_theme +
+      # scale_color_viridis_d(name = 'xG')+
+      NULL
+    
+    # a <- list(
+    #   x = m[[keeper_inputs$keeperplot_xvar]],
+    #   y = m[[keeper_inputs$keeperplot_yvar]],
+    #   text = filtered_shot_data()$shooter,
+    #   xref = "x",
+    #   yref = "y",
+    #   showarrow = F,
+    #   xanchor = "center",
+    #   yanchor = "top",
+    #   font = list(color = '#ff3300',
+    #               size = 10)
+    # )
+    
+    ggplotly(p,
+             tooltip = c('color'),
+             width = 700,
+             height = 500) # %>%
+    # add_markers() %>%
+    # layout(annotations = a)
+
+  })
   
   # Team shots tables ####
   dt_team <- reactive({

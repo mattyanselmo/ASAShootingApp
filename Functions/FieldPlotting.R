@@ -40,8 +40,8 @@ draw_pitch <- function(pitch_lines='black',
   # x, y to opta full field (115x80)
   else if (data_source=='Opta') {
     pitch_dims <-list(
-      length = 100,
-      width = 100,
+      length = 115,
+      width = 80,
       penalty_box_length = 18,
       penalty_box_width = 44,
       six_yard_box_length = 6,
@@ -115,13 +115,13 @@ draw_pitch <- function(pitch_lines='black',
         yend = pitch_dims$width,
         color = pitch_lines
       ),
-      # drawing center point
-      ggplot2::annotate(
-        geom = 'point',
-        x = pitch_dims$length / 2,
-        y = pitch_dims$width / 2,
-        color = pitch_lines
-      ),
+      # drawing center point - Looks funny in the half field
+      # ggplot2::annotate(
+      #   geom = 'point',
+      #   x = pitch_dims$length / 2,
+      #   y = pitch_dims$width / 2,
+      #   color = pitch_lines
+      # ),
       # Drawing 18 yard box
       ggplot2::annotate(
         geom = 'rect',

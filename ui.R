@@ -617,13 +617,13 @@ shinyUI(
                                                  label = "Team:",
                                                  choices = c('All',sort(unique(shooter_lineups$team)))),
                                      br(),
-                                     # # Player selection
+                                     # Player selection
                                      uiOutput('shooter_name'),
                                      br(),
-                                     # # Opposing team selection
+                                     # Opposing team selection
                                      uiOutput('opp_team_name'),
                                      br(),
-                                     # # Date of game selection
+                                     # Date of game selection
                                      uiOutput('game_dates'),
                                      br(),
                                      # All of these selections are independent of selections on other
@@ -651,32 +651,97 @@ shinyUI(
                                                           value = "plotstotals",
                                                           fluidPage(fluidRow(
                                                             p(HTML("<i>Please allow a few seconds for the plot to load.</i>"))
-                                                            # column(4,
-                                                            #        selectInput('keeperplot_xvar',
-                                                            #                    label = 'X-axis variable',
-                                                            #                    choices = c('Shots faced' = 'Shots', 'Goals allowed' = 'GA',
-                                                            #                                'GA/shot' = 'GAperShot', 'xG/Shot' = 'xGperShot',
-                                                            #                                'G-xG/shot' = 'GmxGperShot',
-                                                            #                                '%Shots headed' = 'Header%', 'Avg. distance' = 'Dist',
-                                                            #                                'xG faced' = 'xG', 'GA above average' = 'G-xG'),
-                                                            #                    selected = 'xG')),
-                                                            # column(4,
-                                                            #        selectInput('keeperplot_yvar',
-                                                            #                    label = 'Y-axis variable',
-                                                            #                    choices = c('Shots faced' = 'Shots', 'Goals allowed' = 'GA',
-                                                            #                                'GA/shot' = 'GAperShot', 'xG/Shot' = 'xGperShot',
-                                                            #                                'G-xG/shot' = 'GmxGperShot',
-                                                            #                                '%Shots headed' = 'Header%', 'Avg. distance' = 'Dist',
-                                                            #                                'xG faced' = 'xG', 'GA above average' = 'G-xG'),
-                                                            #                    selected = 'G-xG'))
                                                             )),
+                                                          # dataTableOutput('shots_head'),
+                                                          # br(),
                                                           htmlOutput("shootplot_text"),
                                                           # verbatimTextOutput('selection_tests'),
                                                           plotlyOutput('shot_plot')
                                                  )
                                      ))
                                      )
-                                   )
+                                   ),
+                        # )
+                        # ),
+             tabPanel('xGoal Comparisons',
+                      value = "xG_comparison_plots",
+                      sidebarLayout(
+                        sidebarPanel(tagList(
+                          tags$head(
+                            tags$style(
+                              HTML(
+                                ".checkbox-inline {
+                                margin-left: 20px;
+                                margin-right: 0px;
+                                }
+                                .checkbox-inline+.checkbox-inline {
+                                margin-left: 20px;
+                                margin-right: 0px;
+                                }
+                                "
+                              )
+                              )
+                              )),
+                          width = 2,
+                          actionButton('comparison_xG_action',
+                                       label = "Apply filters"),
+                          dropdownButton(inputId = "comp_seasonfilter_dropdown",
+                                         label = "Seasons:",
+                                         circle = FALSE,
+                                         width = 3,
+                                         checkboxGroupInput("comp_shots_seasonfilter",
+                                                            label = NULL,
+                                                            choices = min(shooter_lineups$year):max(shooter_lineups$year),
+                                                            selected = max(shooter_lineups$year))),
+                          radioButtons('comparison_metric',
+                                          'Compare by:',
+                                          choices = c('Player', 'Team')),
+                              conditionalPanel(condition = "input.comparison_metric == 'Player'",
+                                               selectInput(inputId = "shooter_1_name",
+                                                           label = "Player 1 Name:",
+                                                           choices = c('', sort(shooter_lineups$shooter))),
+                                               uiOutput('shooter_2_name')
+                                               ),
+                              conditionalPanel(condition = "input.comparison_metric == 'Team'",
+                                               selectInput(inputId = "team_1_name",
+                                                           label = "Team 1:",
+                                                           choices = c('', sort(shooter_lineups$team))),
+                                               uiOutput('team_2_name')
+                                               ),
+                          # All of these selections are independent of selections on other
+                          # tabs, which may or may not be preferable? Seems to make sense
+                          # for now since it cuts down on computations and the other filters
+                          # above are different, though maybe it's better for consistency
+                          # to use the same filters or at least the same type?
+                          dropdownButton(inputId = "shot_pattern_dropdown",
+                                       label = "Shot patterns:",
+                                       circle = FALSE,
+                                       width = 3,
+                                       checkboxGroupInput("shot_pattern",
+                                                          label = NULL,
+                                                          choices = c("Open play" = "Open", "PK", "Direct FK" = "FK", "Set piece" = "Setpiece", 'Corner', 'Throw in', 'Fastbreak'),
+                                                          selected = c("Open play" = "Open", "PK", "Direct FK" = "FK", "Set piece" = "Setpiece", 'Corner', 'Throw in', 'Fastbreak')))
+                            ),
+                        mainPanel(
+                          h1('xG Comparison Plots'),
+                          p(paste0('Updated through games on ', max(as.Date(shooter_lineups$date)))),
+                          br(),
+                          br(),
+                          tabsetPanel(id = 'comp_shot_plots_subtab',
+                                      tabPanel('Comparitive Shot plots',
+                                               value = "plotstotals",
+                                               fluidPage(fluidRow(
+                                                 p(HTML("<i>Please allow a few seconds for the plot to load.</i>"))
+                                               )),
+                                               verbatimTextOutput('selection_tests'),
+                                               dataTableOutput('compare_head'),
+                                               br(),
+                                               htmlOutput("comp_shot_plot_text"),
+                                               plotlyOutput('comp_shot_plot')
+                                      )
+                          ))
+                            )
+                        )
                         ),
              # Passing navbar ####
              navbarMenu(strong('xPasses'),
