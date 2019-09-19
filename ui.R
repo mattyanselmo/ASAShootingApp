@@ -1005,10 +1005,10 @@ shinyUI(
                                                        max = 1,
                                                        step = 1,
                                                        width = "100%")))),
-                                 div(DT::dataTableOutput("winproboutput"), style = "width: 50%")),
+                                 div(DT::dataTableOutput("winproboutput"), style = "width: 50%"),
                                  br(),
-                                 downloadButton(outputId = "download_winprob", 
-                                                label = "Download CSV"),
+                                 downloadButton(outputId = "winprob_download",
+                                                label = "Download CSV")),
                                  tabPanel("Win% charts (DIY)",
                                           p(HTML("<i> Enter integer times separated by commas. Leave blank if the event did not occur. </i>")),
                                           fluidPage(fluidRow(
@@ -1049,34 +1049,43 @@ shinyUI(
                                                              width = "100%")))),
                                           div(plotOutput("winprobchart_userinput"))  
                                  ))),
-                        tabPanel('Playoffs seeding',
-                                 value = "playoffsseeding",
+                        tabPanel("Weekly predictions",
+                                 value = "weeklypredictions",
                                  tagList(
                                    tags$head(
                                      tags$style(".datatables .display {margin-left: 0;}"))),
-                                 h1('Playoffs seeding probabilities'),
+                                 h1("Weekly matchup probabilities"),
+                                 p(HTML("<i>Probabilities may not sum to exactly 100% due to rounding.</i>")),
+                                 div(DT::dataTableOutput("weeklypredictionstable"), style = "width: 60%")),
+                        tabPanel("Playoff/Cup chances",
+                                 value = "playoffchances",
+                                 tagList(
+                                   tags$head(
+                                     tags$style(".datatables .display {margin-left: 0;}"))),
+                                 h1('Playoff outcome probabilities'),
                                  p(HTML(paste0('Updated through games on ', max(as.Date(playerxgoals$date)), ".<br>
-                                          Based on 1,000 simulated runs of the remaining schedule. <br>
-                                          Percentages shown to tenths only to reinforce mathematical certainties; margin of error is greater than 0.5% for probabilities between 1.0% and 99.0%. <br>
-                                          Western conference shown first because everyone around here is tired of hearing about Atlanta."))),
+                                          Based on 4,000 simulated runs of the remaining schedule and playoffs. <br>
+                                          Percentages shown to tenths only to reinforce mathematical certainties; margin of error is greater than 0.5% for probabilities between 5% and 95%. <br>
+                                          Western conference shown first because that's the way it should be."))),
                                  h2("Western Conference"),
-                                 div(DT::dataTableOutput("playoffsseeding_west"), style = "width: 75%"),
+                                 div(DT::dataTableOutput("playoffsseeding_west"), style = "width: 80%"),
                                  br(),
                                  h2("Eastern Conference"),
-                                 div(DT::dataTableOutput("playoffsseeding_east"), style = "width: 75%"),
+                                 div(DT::dataTableOutput("playoffsseeding_east"), style = "width: 80%"),
                                  br()
-                        ),
-                        tabPanel("Cup chances",
-                                 value = "cupchancestab",
-                                 tagList(
-                                   tags$head(
-                                     tags$style(".datatables .display {margin-left: 0;}"))),
-                                 h1('Playoffs seeding probabilities'),
-                                 p(HTML("Based on 1,000 simulated runs of the remaining regular season and MLS Cup playoffs. <br>
-                                        Percentages shown to tenths only to reinforce mathematical certainties; margin of error is greater than 0.5% for probabilities between 1.0% and 99.0%.")),
-                                 br(),
-                                 div(DT::dataTableOutput("cupchances_table"), style = "width: 50%"),
-                                 br())
+                        )
+                        #,
+                        # tabPanel("Cup chances",
+                        #          value = "cupchancestab",
+                        #          tagList(
+                        #            tags$head(
+                        #              tags$style(".datatables .display {margin-left: 0;}"))),
+                        #          h1('Playoffs seeding probabilities'),
+                        #          p(HTML("Based on 1,000 simulated runs of the remaining regular season and MLS Cup playoffs. <br>
+                        #                 Percentages shown to tenths only to reinforce mathematical certainties; margin of error is greater than 0.5% for probabilities between 1.0% and 99.0%.")),
+                        #          br(),
+                        #          div(DT::dataTableOutput("cupchances_table"), style = "width: 50%"),
+                        #          br())
                         ),
              navbarMenu(strong('Salaries'),
                         # Salary tabs ####
