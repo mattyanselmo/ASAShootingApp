@@ -499,7 +499,7 @@ shinyServer(function(input, output, session) {
                                "Wing (W)" = "Wing",
                                "Forward (F)" = "F",
                                "Sub (S)" = "S"),
-                   selected = c("GK", "CB", "FB/WB", "CM", "CDM", "ACM", "Wing", "F", "sub")
+                   selected = if (input$passing_position_selectall)c("GK", "CB", "FB/WB", "CM", "CDM", "ACM", "Wing", "F", "sub")
                  )
                },
                ignoreInit = T)
