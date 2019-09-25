@@ -86,4 +86,12 @@ Possession chains: Players, xGChain, Total team-adjusted xGoals earned by the te
 Possession chains: Players, xB% (xBuildup%), Ratio of xB/xGChain,,,,,
 Possession chains: Players, xB% (0), Ratio of xB/xGChain in even gamestates,,,,,
 Possession chains: Players, Comp ($K), Annual compensation averaged across selected seasons,,,,,
+Predictions: Win% calculator, Home/Away win%, Probability that typical home/away team wins match from given gamestate,,,,,
+Predictions: Win% calculator, xPts, Expected points to be earned in match, based on win% and draw%,,,,,
+Predictions: Playoff/Cup chances, 1 - 7, Probability that the team will finish with the given seed number for the playoffs,,,,,
+Predictions: Playoff/Cup chances, Playoffs, Probability that the team will make the playoffs; sum of 1 - 7,,,,,
+Predictions: Playoff/Cup chances, POChange, Increase in playoff chances since the previous week's simulation (negative implies worsening chances),,,,,
+Predictions: Playoff/Cup chances, Shield, Probability that the team will win the Supporters' Shield,,,,,
+Predictions: Playoff/Cup chances, SSChange, Increase in Shield chances since the previous week's simulation (negative implies worsening chances),,,,,
+
 
