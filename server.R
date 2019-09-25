@@ -113,14 +113,16 @@ shinyServer(function(input, output, session) {
                  updateCheckboxGroupInput(
                    session, 
                    "shooting_position", 
-                   choices = c("Keeper (G)" = "G",
-                               "Central Def (D)" = "D",
-                               "Back (B)" = "B",
-                               "Midfielder (M)" = "M",
-                               "Attacking Mid (A)" = "A",
+                   choices = c("Keeper (GK)" = "GK",
+                               "Central Def (CB)" = "CB",
+                               "Back (FB/WB)" = "FB/WB",
+                               "Midfielder (CM)" = "CM",
+                               "Attacking Mid (ACM)" = "ACM",
+                               "Defensive Mid (CDM)" = "CDM",
+                               "Wing (W)" = "Wing",
                                "Forward (F)" = "F",
-                               "Sub (S)" = "S"),
-                   selected = if (input$shooting_position_selectall) c("G", "D", "B", "M", "A", "F", "S")
+                               "Sub (S)" = "sub"),
+                   selected = if (input$shooting_position_selectall) c("GK", "CB", "FB/WB", "CM", "CDM", "ACM", "Wing", "F", "sub")
                  )
                },
                ignoreInit = T)
@@ -499,7 +501,7 @@ shinyServer(function(input, output, session) {
                                "Wing (W)" = "Wing",
                                "Forward (F)" = "F",
                                "Sub (S)" = "S"),
-                   selected = c("GK", "CB", "FB/WB", "CM", "CDM", "ACM", "Wing", "F", "sub")
+                   selected = if (input$passing_position_selectall)c("GK", "CB", "FB/WB", "CM", "CDM", "ACM", "Wing", "F", "sub")
                  )
                },
                ignoreInit = T)
