@@ -84,6 +84,8 @@ simfiles.weeks <- str_extract(simfiles, "(?<=_week)[0-9]*")
 simfiles.years <- str_extract(simfiles, "(?<=_year)[0-9]*")
 current.week <- max(as.numeric(simfiles.weeks)[simfiles.years == as.character(current.year)], na.rm = T)
 
+weeklypreds <- readRDS(paste0("AppData/WeeklyMatchPredictions_week", current.week, "_year", current.year, ".rds"))
+
 playoffsseeding_west <- readRDS(paste0("AppData/CurrentSimulationResults_playoffseeding_west_week",
                                       current.week,
                                       "_year", current.year, ".rds"))

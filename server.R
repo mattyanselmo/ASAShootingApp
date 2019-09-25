@@ -1569,11 +1569,11 @@ shinyServer(function(input, output, session) {
     if(input$team_advanced == "Basic stats"){
       columns.perc1 <- c('SoT%F', 'SoT%A', 'Finish%F', 'Finish%A')
       columns.dec1 <- c("ShtF", "ShtA", "SoTF", "SoTA")
-      columns.dec2 <- c("GF", "GA", "GD", "Pts", "xPts")
+      columns.dec2 <- c("GF", "GA", "GD", "Pts", "xPts", "Gini18")
     } else{
       columns.perc1 <- c() #c("Solo%F", "Solo%A")
       columns.dec1 <- c("ShtF", "ShtA")
-      columns.dec2 <- c("xGF", "xGA", "xGD", "GF", "GA", "GD", "GD-xGD", "TSR", "Pts", "xPts")
+      columns.dec2 <- c("xGF", "xGA", "xGD", "GF", "GA", "GD", "GD-xGD", "TSR", "Pts", "xPts", "Gini18")
     }
     
     DT::datatable(dt,
@@ -2249,8 +2249,8 @@ shinyServer(function(input, output, session) {
   #   }
   # })
   
-  output$download_winprob <- downloadHandler(
-    filename = "ASAWinProbByGameState.csv",
+  output$winprob_download <- downloadHandler(
+    filename = paste0("ASAWinProbByGameState.csv"),
     content = function(file){
       write.csv(winexptable, 
                 file, 
@@ -2331,6 +2331,19 @@ shinyServer(function(input, output, session) {
   },
   width = 600, height = 400)
   
+  # Weekly predictions ####
+  output$weeklypredictionstable <- DT::renderDataTable({
+    DT::datatable(weeklypreds,
+                  rownames = F,
+                  options = list(autoWidth = T,
+                                 pageLength = nrow(weeklypreds),
+                                 dom = "t")) %>%
+      formatPercentage(columns = c("Home win%", "Away win%", "Draw%"), 
+                       digits = 0) %>%
+      formatRound(columns = c("HomexPts", "AwayxPts"), 
+                  digits = 1)
+  })
+  
   # Playoffs seeding ####
   output$playoffsseeding_west <- DT::renderDataTable({
     
@@ -2344,12 +2357,23 @@ shinyServer(function(input, output, session) {
                               by = "Team") %>%
                     mutate(POChange = Playoffs - Playoffs_last,
                            SSChange = Shield - Shield_last) %>%
-                    select(Team, `1`:Playoffs, POChange, Shield, SSChange),
+                    select(Team, `1`:Playoffs, POChange, Shield, SSChange) %>%
+                    left_join(cupchances,
+                              by = "Team") %>%
+                    left_join(cupchances_last %>%
+                                select(Team,
+                                       Champs_last = Champs),
+                              by = "Team") %>%
+                    mutate(ChampsChange = Champs - Champs_last) %>%
+                    select(-Champs_last),
                   rownames = F,
                   options = list(autoWidth = T,
                                pageLength = 15,
                                dom = "t")) %>%
-      formatPercentage(columns = c("1", "2", "3", "4", "5", "6", "7", "Playoffs", "POChange", "Shield", "SSChange"), digits = 1)
+      formatPercentage(columns = c("1", "2", "3", "4", "5", "6", "7", 
+                                   "Playoffs", "POChange", "Shield", "SSChange",
+                                   "Conf Semis", "Conf Finals", "Finals", "Champs", "ChampsChange"), 
+                       digits = 1)
   })
   
   output$playoffsseeding_east <- DT::renderDataTable({
@@ -2364,19 +2388,9 @@ shinyServer(function(input, output, session) {
                               by = "Team") %>%
                     mutate(POChange = Playoffs - Playoffs_last,
                            SSChange = Shield - Shield_last) %>%
-                    select(Team, `1`:Playoffs, POChange, Shield, SSChange),
-                  rownames = F,
-                  options = list(autoWidth = T,
-                               pageLength = 15,
-                               dom = "t")) %>%
-      formatPercentage(columns = c("1", "2", "3", "4", "5", "6", "7", "Playoffs", "POChange", "Shield", "SSChange"), digits = 1)
-  })
-  
-  # MLS Cup predictions ####
-  
-  output$cupchances_table <- DT::renderDataTable({
-    
-    DT::datatable(cupchances %>%
+                    select(Team, `1`:Playoffs, POChange, Shield, SSChange) %>%
+                    left_join(cupchances,
+                              by = "Team") %>%
                     left_join(cupchances_last %>%
                                 select(Team,
                                        Champs_last = Champs),
@@ -2387,9 +2401,30 @@ shinyServer(function(input, output, session) {
                   options = list(autoWidth = T,
                                pageLength = 15,
                                dom = "t")) %>%
-      formatPercentage(columns = c("Conf Semis", "Conf Finals", "Finals", "Champs", "ChampsChange"), digits = 1)
+      formatPercentage(columns = c("1", "2", "3", "4", "5", "6", "7", 
+                                   "Playoffs", "POChange", "Shield", "SSChange",
+                                   "Conf Semis", "Conf Finals", "Finals", "Champs", "ChampsChange"), 
+                       digits = 1)
   })
   
+  # # MLS Cup predictions ####
+  # 
+  # output$cupchances_table <- DT::renderDataTable({
+  #   
+  #   DT::datatable(cupchances %>%
+  #                   left_join(cupchances_last %>%
+  #                               select(Team,
+  #                                      Champs_last = Champs),
+  #                             by = "Team") %>%
+  #                   mutate(ChampsChange = Champs - Champs_last) %>%
+  #                   select(-Champs_last),
+  #                 rownames = F,
+  #                 options = list(autoWidth = T,
+  #                              pageLength = 15,
+  #                              dom = "t")) %>%
+  #     formatPercentage(columns = c("Conf Semis", "Conf Finals", "Finals", "Champs", "ChampsChange"), digits = 1)
+  # })
+  # 
   # Salary ####
   # Player salary inputs ####
   playersalaries_inputs <- reactiveValues(posfilter = c("GK", "D", "B", "M", "A", "F"),
