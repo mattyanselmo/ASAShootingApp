@@ -51,7 +51,7 @@ shinyServer(function(input, output, session) {
                                    teamfilter = sort(unique(playerxgoals$team)),
                                    shooting_minshots = 0,
                                    shooting_minkeypasses = 0,
-                                   shooting_position = c("G", "D", "B", "M", "A", "F", "S"),
+                                   shooting_position = c("GK", "CB", "FB/WB", "CM", "CDM", "CAM", "Wing", "F", "sub"),
                                    shooting_byteams = F,
                                    shooting_byseasons = T,
                                    pattern = c("Open", "PK", "FK", "Setpiece"),
@@ -117,12 +117,12 @@ shinyServer(function(input, output, session) {
                                "Central Def (CB)" = "CB",
                                "Back (FB/WB)" = "FB/WB",
                                "Midfielder (CM)" = "CM",
-                               "Attacking Mid (ACM)" = "ACM",
+                               "Attacking Mid (CAM)" = "CAM",
                                "Defensive Mid (CDM)" = "CDM",
                                "Wing (W)" = "Wing",
                                "Forward (F)" = "F",
                                "Sub (S)" = "sub"),
-                   selected = if (input$shooting_position_selectall) c("GK", "CB", "FB/WB", "CM", "CDM", "ACM", "Wing", "F", "sub")
+                   selected = if (input$shooting_position_selectall) c("GK", "CB", "FB/WB", "CM", "CDM", "CAM", "Wing", "F", "sub")
                  )
                },
                ignoreInit = T)
@@ -435,7 +435,7 @@ shinyServer(function(input, output, session) {
   # Passer reactive values ####
   
   # Initial values
-  passer_inputs <- reactiveValues(passing_position = c("GK", "CB", "FB/WB", "CM", "CDM", "ACM", "Wing", "F", "sub", "Heaven"),
+  passer_inputs <- reactiveValues(passing_position = c("GK", "CB", "FB/WB", "CM", "CDM", "CAM", "Wing", "F", "sub", "Heaven"),
                                   passing_third = "All",
                                   passing_seasonordate = "Season",
                                   passing_date1 = as.Date("2000-01-01"),
@@ -496,12 +496,12 @@ shinyServer(function(input, output, session) {
                                "Central Def (CB)" = "CB",
                                "Back (FB/WB)" = "FB/WB",
                                "Midfielder (CM)" = "CM",
-                               "Attacking Mid (ACM)" = "ACM",
+                               "Attacking Mid (CAM)" = "CAM",
                                "Defensive Mid (CDM)" = "CDM",
                                "Wing (W)" = "Wing",
                                "Forward (F)" = "F",
                                "Sub (S)" = "S"),
-                   selected = if (input$passing_position_selectall)c("GK", "CB", "FB/WB", "CM", "CDM", "ACM", "Wing", "F", "sub")
+                   selected = if (input$passing_position_selectall)c("GK", "CB", "FB/WB", "CM", "CDM", "CAM", "Wing", "F", "sub")
                  )
                },
                ignoreInit = T)
