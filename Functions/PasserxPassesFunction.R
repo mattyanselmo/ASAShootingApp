@@ -12,7 +12,7 @@
 # byteams = F
 # byseasons = T
 # third.filter = "All"
-# pos.filter = c("G", "D", "B", "M", "A", "F", "S")
+# pos.filter = c("GK", "CB", "FB/WB", "CM", "CDM", "CAM", "Wing", "F", "sub")
 
 passer.xpasses <- function(playerpassing,
                            minpasses,
@@ -24,7 +24,7 @@ passer.xpasses <- function(playerpassing,
                            byteams,
                            byseasons,
                            third.filter = "All", # options = c("All", "Att", "Def", "Mid"),
-                           pos.filter = c("G", "D", "B", "M", "A", "F", "S")){
+                           pos.filter = c("GK", "CB", "FB/WB", "CM", "CDM", "CAM", "Wing", "F", "sub")){
  
   # consider two summaries: for "All" and otherwise
   playerpassing.temp <- playerpassing %>%
@@ -70,4 +70,4 @@ passer.xpasses <- function(playerpassing,
 #                byteams = T,
 #                byseasons = T,
 #                third.filter = "All",
-#                pos.filter = c("G", "D", "B", "M", "A", "F", "S")) %>% as.data.frame() %>% head()
+#                pos.filter = c("GK", "CB", "FB/WB", "CM", "CDM", "CAM", "Wing", "F", "sub")) %>% as.data.frame() %>% head()
