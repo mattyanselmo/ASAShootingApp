@@ -2377,7 +2377,8 @@ shinyServer(function(input, output, session) {
                                        Champs_last = Champs),
                               by = "Team") %>%
                     mutate(ChampsChange = Champs - Champs_last) %>%
-                    select(-Champs_last),
+                    select(-Champs_last) %>%
+                    arrange(desc(`1`), desc(`2`), desc(`3`), desc(`4`), desc(`5`), desc(`6`), desc(`7`)),
                   rownames = F,
                   options = list(autoWidth = T,
                                pageLength = 15,
@@ -2408,7 +2409,8 @@ shinyServer(function(input, output, session) {
                                        Champs_last = Champs),
                               by = "Team") %>%
                     mutate(ChampsChange = Champs - Champs_last) %>%
-                    select(-Champs_last),
+                    select(-Champs_last) %>%
+                    arrange(desc(`1`), desc(`2`), desc(`3`), desc(`4`), desc(`5`), desc(`6`), desc(`7`)),
                   rownames = F,
                   options = list(autoWidth = T,
                                pageLength = 15,
