@@ -500,7 +500,7 @@ shinyServer(function(input, output, session) {
                                "Defensive Mid (CDM)" = "CDM",
                                "Wing (W)" = "Wing",
                                "Forward (F)" = "F",
-                               "Sub (S)" = "S"),
+                               "Sub (S)" = "sub"),
                    selected = if (input$passing_position_selectall)c("GK", "CB", "FB/WB", "CM", "CDM", "CAM", "Wing", "F", "sub")
                  )
                },
@@ -764,7 +764,15 @@ shinyServer(function(input, output, session) {
   
   # Player xGChain reactive values ####
   # Initial values
-  playerxgchain_inputs <- reactiveValues(playerxgchain_position = c("G", "D", "B", "M", "A", "F", "S"),
+  playerxgchain_inputs <- reactiveValues(playerxgchain_position = c("Keeper (GK)" = "GK",
+                                                                    "Central Def (CB)" = "CB",
+                                                                    "Back (FB/WB)" = "FB/WB",
+                                                                    "Midfielder (CM)" = "CM",
+                                                                    "Attacking Mid (CAM)" = "CAM",
+                                                                    "Defensive Mid (CDM)" = "CDM",
+                                                                    "Wing (W)" = "Wing",
+                                                                    "Forward (F)" = "F",
+                                                                    "Sub (S)" = "sub"),
                                          playerxgchain_seasonordate = "Season",
                                          playerxgchain_date1 = as.Date("2000-01-01"),
                                          playerxgchain_date2 = as.Date("9999-12-31"),
@@ -861,20 +869,24 @@ shinyServer(function(input, output, session) {
                  updateCheckboxGroupInput(
                    session, 
                    "playerxgchain_position", 
-                   choices = c("Keeper (G)" = "G",
-                               "Central Def (D)" = "D",
-                               "Back (B)" = "B",
-                               "Midfielder (M)" = "M",
-                               "Attacking Mid (A)" = "A",
+                   choices = c("Keeper (GK)" = "GK",
+                               "Central Def (CB)" = "CB",
+                               "Back (FB/WB)" = "FB/WB",
+                               "Midfielder (CM)" = "CM",
+                               "Attacking Mid (CAM)" = "CAM",
+                               "Defensive Mid (CDM)" = "CDM",
+                               "Wing (W)" = "Wing",
                                "Forward (F)" = "F",
-                               "Sub (S)" = "S"),
-                   selected = if (input$playerxgchain_position_selectall) c("Keeper (G)" = "G",
-                                                                              "Central Def (D)" = "D",
-                                                                              "Back (B)" = "B",
-                                                                              "Midfielder (M)" = "M",
-                                                                              "Attacking Mid (A)" = "A",
+                               "Sub (S)" = "sub"),
+                   selected = if (input$playerxgchain_position_selectall) c("Keeper (GK)" = "GK",
+                                                                              "Central Def (CB)" = "CB",
+                                                                              "Back (FB/WB)" = "FB/WB",
+                                                                              "Midfielder (CM)" = "CM",
+                                                                              "Attacking Mid (CAM)" = "CAM",
+                                                                              "Defensive Mid (CDM)" = "CDM",
+                                                                              "Wing (W)" = "Wing",
                                                                               "Forward (F)" = "F",
-                                                                              "Sub (S)" = "S")
+                                                                              "Sub (S)" = "sub")
                  )
                },
                ignoreInit = T)
@@ -2365,7 +2377,8 @@ shinyServer(function(input, output, session) {
                                        Champs_last = Champs),
                               by = "Team") %>%
                     mutate(ChampsChange = Champs - Champs_last) %>%
-                    select(-Champs_last),
+                    select(-Champs_last) %>%
+                    arrange(desc(`1`), desc(`2`), desc(`3`), desc(`4`), desc(`5`), desc(`6`), desc(`7`)),
                   rownames = F,
                   options = list(autoWidth = T,
                                pageLength = 15,
@@ -2396,7 +2409,8 @@ shinyServer(function(input, output, session) {
                                        Champs_last = Champs),
                               by = "Team") %>%
                     mutate(ChampsChange = Champs - Champs_last) %>%
-                    select(-Champs_last),
+                    select(-Champs_last) %>%
+                    arrange(desc(`1`), desc(`2`), desc(`3`), desc(`4`), desc(`5`), desc(`6`), desc(`7`)),
                   rownames = F,
                   options = list(autoWidth = T,
                                pageLength = 15,
