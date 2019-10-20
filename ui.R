@@ -982,7 +982,7 @@ shinyUI(
                                         esimate the probability of the home team winning and drawing the match based on
                                         the minute, score differential, and player differential (due to red cards). <br>
                                         <i> Use caution when extrapolating beyond the 90th minute, beyond a gamestate of 
-                                        +/- 3, or beyond a player differential of +/- 1. </i>")),
+                                        +/- 3, or beyond a player differential of +/- 1.</i>")),
                                  tabsetPanel(
                                    tabPanel("Win% calculator",
                                  
@@ -1062,7 +1062,9 @@ shinyUI(
                                      tags$style(".datatables .display {margin-left: 0;}"))),
                                  h1("Weekly matchup probabilities"),
                                  p(HTML("<i>Probabilities may not sum to exactly 100% due to rounding.</i>")),
-                                 div(DT::dataTableOutput("weeklypredictionstable"), style = "width: 60%")),
+                                 div(DT::dataTableOutput("weeklypredictionstable"), 
+                                     style = case_when(max(grepl("Draw", names(weeklypreds))) > 0 ~ "width: 60%",
+                                                       TRUE ~ "width: 20%"))),
                         tabPanel("Playoff/Cup chances",
                                  value = "playoffchances",
                                  tagList(
@@ -1072,12 +1074,18 @@ shinyUI(
                                  p(HTML(paste0('Updated through games on ', max(as.Date(playerxgoals$date)), ".<br>
                                           Based on 4,000 simulated runs of the remaining schedule and playoffs. <br>
                                           Percentages shown to tenths only to reinforce mathematical certainties; margin of error is greater than 0.5% for probabilities between 5% and 95%. <br>
-                                          Western conference shown first because that's the way it should be."))),
+                                          Western conference shown first because that's the way it should be. <br>"))),
                                  h2("Western Conference"),
-                                 div(DT::dataTableOutput("playoffsseeding_west"), style = "width: 80%"),
+                                 div(DT::dataTableOutput("playoffsseeding_west"), 
+                                     style = case_when(
+                                       max(grepl("Playoffs", names(playoffsseeding_west))) > 0 ~ "width: 80%",
+                                       TRUE ~ "width: 30%")),
                                  br(),
                                  h2("Eastern Conference"),
-                                 div(DT::dataTableOutput("playoffsseeding_east"), style = "width: 80%"),
+                                 div(DT::dataTableOutput("playoffsseeding_east"), 
+                                     style = case_when(
+                                       max(grepl("Playoffs", names(playoffsseeding_east))) > 0 ~ "width: 80%",
+                                       TRUE ~ "width: 30%")),
                                  br()
                         )
                         #,

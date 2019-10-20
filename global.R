@@ -82,15 +82,24 @@ playerchaindata <- readRDS("AppData/PlayerxGChainData.rds") %>%
 current.year <- max(playerxgoals$Season)
 simfiles <- grep("CurrentSimulationResults", list.files("AppData"), value = T)
 cupfiles <- grep("MLSCupSimulationResults", list.files("AppData"), value = T)
+weeklyfiles <- grep("WeeklyMatchPredictions", list.files("AppData"), value = T)
+
 simfiles.weeks <- str_extract(simfiles, "(?<=_week)[0-9]*")
 simfiles.years <- str_extract(simfiles, "(?<=_year)[0-9]*")
+
 cupfiles.weeks <- str_extract(cupfiles, "(?<=_week)[0-9]*")
 cupfiles.years <- str_extract(cupfiles, "(?<=_year)[0-9]*")
 
+weeklyfiles.weeks <- str_extract(weeklyfiles, "(?<=_week)[0-9]*")
+weeklyfiles.years <- str_extract(weeklyfiles, "(?<=_year)[0-9]*")
+
+
+# Need to include weekly files lookups, to get playoff predictions in app
 current.week <- max(as.numeric(simfiles.weeks)[simfiles.years == as.character(current.year)], na.rm = T)
 current.week.cup <- max(as.numeric(cupfiles.weeks)[cupfiles.years == as.character(current.year)], na.rm = T) 
+current.week.weekly <- max(as.numeric(weeklyfiles.weeks)[weeklyfiles.years == as.character(current.year)], na.rm = T) 
 
-weeklypreds <- readRDS(paste0("AppData/WeeklyMatchPredictions_week", current.week, "_year", current.year, ".rds"))
+weeklypreds <- readRDS(paste0("AppData/WeeklyMatchPredictions_week", current.week.weekly, "_year", current.year, ".rds"))
 
 playoffsseeding_west <- readRDS(paste0("AppData/CurrentSimulationResults_playoffseeding_west_week",
                                       current.week,

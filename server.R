@@ -2350,75 +2350,102 @@ shinyServer(function(input, output, session) {
                   options = list(autoWidth = T,
                                  pageLength = nrow(weeklypreds),
                                  dom = "t")) %>%
-      formatPercentage(columns = c("Home win%", "Away win%", "Draw%"), 
+      formatPercentage(columns = c("Home win%", "Away win%", "Draw%")[c(T, T, max(grepl("Draw", names(weeklypreds))) > 0)], 
                        digits = 0) %>%
-      formatRound(columns = c("HomexPts", "AwayxPts"), 
+      formatRound(columns = c("HomexPts", "AwayxPts")[rep(max(grepl("Draw", names(weeklypreds))) > 0, 2)], 
                   digits = 1)
   })
   
   # Playoffs seeding ####
   output$playoffsseeding_west <- DT::renderDataTable({
     
-    DT::datatable(playoffsseeding_west %>% 
-                    select(-Bye) %>%
-                    left_join(playoffsseeding_west_last %>%
-                                select(-Bye) %>%
-                                select(Team,
-                                       Playoffs_last = Playoffs,
-                                       Shield_last = Shield),
-                              by = "Team") %>%
-                    mutate(POChange = Playoffs - Playoffs_last,
-                           SSChange = Shield - Shield_last) %>%
-                    select(Team, `1`:Playoffs, POChange, Shield, SSChange) %>%
-                    left_join(cupchances,
-                              by = "Team") %>%
-                    left_join(cupchances_last %>%
-                                select(Team,
-                                       Champs_last = Champs),
-                              by = "Team") %>%
-                    mutate(ChampsChange = Champs - Champs_last) %>%
-                    select(-Champs_last) %>%
-                    arrange(desc(`1`), desc(`2`), desc(`3`), desc(`4`), desc(`5`), desc(`6`), desc(`7`)),
-                  rownames = F,
-                  options = list(autoWidth = T,
-                               pageLength = 15,
-                               dom = "t")) %>%
-      formatPercentage(columns = c("1", "2", "3", "4", "5", "6", "7", 
-                                   "Playoffs", "POChange", "Shield", "SSChange",
-                                   "Conf Semis", "Conf Finals", "Finals", "Champs", "ChampsChange"), 
-                       digits = 1)
+    if(max(grepl("Playoffs", names(playoffsseeding_west))) > 0){
+      DT::datatable(playoffsseeding_west %>% 
+                      select(-Bye) %>%
+                      left_join(playoffsseeding_west_last %>%
+                                  select(-Bye) %>%
+                                  select(Team,
+                                         Playoffs_last = Playoffs,
+                                         Shield_last = Shield),
+                                by = "Team") %>%
+                      mutate(POChange = Playoffs - Playoffs_last,
+                             SSChange = Shield - Shield_last) %>%
+                      select(Team, `1`:Playoffs, POChange, Shield, SSChange) %>%
+                      left_join(cupchances,
+                                by = "Team") %>%
+                      left_join(cupchances_last %>%
+                                  select(Team,
+                                         Champs_last = Champs),
+                                by = "Team") %>%
+                      mutate(ChampsChange = Champs - Champs_last) %>%
+                      select(-Champs_last) %>%
+                      arrange(desc(`1`), desc(`2`), desc(`3`), desc(`4`), desc(`5`), desc(`6`), desc(`7`)),
+                    rownames = F,
+                    options = list(autoWidth = T,
+                                   pageLength = 15,
+                                   dom = "t")) %>%
+        formatPercentage(columns = c("1", "2", "3", "4", "5", "6", "7", 
+                                     "Playoffs", "POChange", "Shield", "SSChange",
+                                     "Conf Semis", "Conf Finals", "Finals", "Champs", "ChampsChange"), 
+                         digits = 1)
+    } else{
+      DT::datatable(playoffsseeding_west %>% 
+                      left_join(cupchances,
+                                by = "Team"),
+                    rownames = F,
+                    options = list(autoWidth = T,
+                                   pageLength = 15,
+                                   dom = "t")) %>%
+        formatPercentage(columns = c("Conf Semis", "Conf Finals", 
+                                     "Finals", "Champs"), 
+                         digits = 1)
+    }
+    
   })
   
   output$playoffsseeding_east <- DT::renderDataTable({
 
-    DT::datatable(playoffsseeding_east %>% 
-                    select(-Bye) %>%
-                    left_join(playoffsseeding_east_last %>%
-                                select(-Bye) %>%
-                                select(Team,
-                                       Playoffs_last = Playoffs,
-                                       Shield_last = Shield),
-                              by = "Team") %>%
-                    mutate(POChange = Playoffs - Playoffs_last,
-                           SSChange = Shield - Shield_last) %>%
-                    select(Team, `1`:Playoffs, POChange, Shield, SSChange) %>%
-                    left_join(cupchances,
-                              by = "Team") %>%
-                    left_join(cupchances_last %>%
-                                select(Team,
-                                       Champs_last = Champs),
-                              by = "Team") %>%
-                    mutate(ChampsChange = Champs - Champs_last) %>%
-                    select(-Champs_last) %>%
-                    arrange(desc(`1`), desc(`2`), desc(`3`), desc(`4`), desc(`5`), desc(`6`), desc(`7`)),
-                  rownames = F,
-                  options = list(autoWidth = T,
-                               pageLength = 15,
-                               dom = "t")) %>%
-      formatPercentage(columns = c("1", "2", "3", "4", "5", "6", "7", 
-                                   "Playoffs", "POChange", "Shield", "SSChange",
-                                   "Conf Semis", "Conf Finals", "Finals", "Champs", "ChampsChange"), 
-                       digits = 1)
+    if(max(grepl("Playoffs", names(playoffsseeding_east))) > 0){
+      DT::datatable(playoffsseeding_east %>% 
+                      select(-Bye) %>%
+                      left_join(playoffsseeding_east_last %>%
+                                  select(-Bye) %>%
+                                  select(Team,
+                                         Playoffs_last = Playoffs,
+                                         Shield_last = Shield),
+                                by = "Team") %>%
+                      mutate(POChange = Playoffs - Playoffs_last,
+                             SSChange = Shield - Shield_last) %>%
+                      select(Team, `1`:Playoffs, POChange, Shield, SSChange) %>%
+                      left_join(cupchances,
+                                by = "Team") %>%
+                      left_join(cupchances_last %>%
+                                  select(Team,
+                                         Champs_last = Champs),
+                                by = "Team") %>%
+                      mutate(ChampsChange = Champs - Champs_last) %>%
+                      select(-Champs_last) %>%
+                      arrange(desc(`1`), desc(`2`), desc(`3`), desc(`4`), desc(`5`), desc(`6`), desc(`7`)),
+                    rownames = F,
+                    options = list(autoWidth = T,
+                                   pageLength = 15,
+                                   dom = "t")) %>%
+        formatPercentage(columns = c("1", "2", "3", "4", "5", "6", "7", 
+                                     "Playoffs", "POChange", "Shield", "SSChange",
+                                     "Conf Semis", "Conf Finals", "Finals", "Champs", "ChampsChange"), 
+                         digits = 1)
+    } else{
+      DT::datatable(playoffsseeding_east %>% 
+                      left_join(cupchances,
+                                by = "Team"),
+                    rownames = F,
+                    options = list(autoWidth = T,
+                                   pageLength = 15,
+                                   dom = "t")) %>%
+        formatPercentage(columns = c("Conf Semis", "Conf Finals", 
+                                     "Finals", "Champs"), 
+                         digits = 1)
+    }
   })
   
   # # MLS Cup predictions ####
