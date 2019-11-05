@@ -29,8 +29,7 @@ conn <- dbConnect(Postgres(),
                   dbname = getOption("asa_db_name"),
                   sslmode = "require")
 
-# SQL query for shots data to build model - currently limited to 
-# 300 obs to get around time out issue and for testing purposes
+# SQL query for shots data to build model 
 old_shots <- dbGetQuery(conn, "SELECT e1.*,
                                       games.date_time_et,
                                       games.home_team_score AS hfinal,
@@ -53,84 +52,14 @@ old_shots <- dbGetQuery(conn, "SELECT e1.*,
                                       AND e1.own_goal IS NULL
                                 LIMIT 400")
 
-# Potential function to transform new format of shots data to old format for
-# modeling
-old_shot_format <- function(dataframe, dbConnection){
-  # Isolate relevant extra variables ---------------------------
-  shots_non_null_vars <- dataframe %>%
-    summarize_all(~mean(is.na(.))) %>%
-    select(-(game_id:outcome_name),
-           -(date_time_et:ateam_id),
-           -goal_mouth_y, -goal_mouth_z, -big_chance, -related_event_id,
-           -assisted, -assist_cross, -assist_throughball, -passer_id,
-           -head, -left_foot, -right_foot, -other_body_part, -blocked,
-           -regular_play, -set_piece, -fast_break, -from_corner,
-           -direct_freekick, -penalty, -throwin_set_piece) %>%
-    gather() %>%
-    filter(value < 1) %>%
-    arrange(key)
-  
-  # Join and reshape -------------------------------------------
-  shots <- dataframe %>%
-    left_join(dbGetQuery(dbConnection, "SELECT player_id, player_name FROM mls.players") %>%
-                rename(shooter = player_name), "player_id") %>%
-    left_join(dbGetQuery(dbConnection, "SELECT player_id, player_name FROM mls.players") %>%
-                rename(passer_id = player_id, passer = player_name), "passer_id") %>%
-    left_join(dbGetQuery(dbConnection, "SELECT team_id, team_short_name FROM mls.teams") %>% 
-                rename(hteam = team_short_name), c("hteam_id" = "team_id")) %>%
-    left_join(dbGetQuery(dbConnection, "SELECT team_id, team_short_name FROM mls.teams") %>% 
-                rename(ateam = team_short_name), c("ateam_id" = "team_id")) %>%
-    left_join(dbGetQuery(dbConnection, "SELECT team_id, team_short_name FROM mls.teams") %>% 
-                rename(team = team_short_name), "team_id") %>%
-    mutate(date = format(as.Date(date_time_et), "%m/%d/%Y"),
-           time = sprintf("%02s:%02s", minute, second),
-           team.1_id = ifelse(hteam_id != team_id, hteam_id, ateam_id),
-           team.1 = ifelse(hteam != team, hteam, ateam),
-           hfinal = as.numeric(gsub("\\s+.*$", "", hfinal)),
-           afinal = as.numeric(gsub("\\s+.*$", "", afinal)),
-           final = hfinal - afinal,
-           cum_second = minute * 60 + second,
-           bodypart = case_when(head == TRUE ~ "Head",
-                                left_foot == TRUE ~ "Left foot",
-                                right_foot == TRUE ~ "Right foot",
-                                other_body_part == TRUE ~ "Other"),
-           patternOfPlay = case_when(regular_play == TRUE ~ "Regular",
-                                     set_piece == TRUE ~ "Set piece",
-                                     fast_break == TRUE ~ "Fastbreak",
-                                     from_corner == TRUE ~ "Corner",
-                                     direct_freekick == TRUE ~ "Free kick",
-                                     penalty == TRUE ~ "Penalty",
-                                     throwin_set_piece == TRUE ~ "Throw in"),
-           result = case_when(type_id == 13 ~ "Miss",
-                              type_id == 14 ~ "Post",
-                              type_id == 15 & blocked == TRUE ~ "Blocked",
-                              type_id == 15 & is.na(blocked) ~ "Miss",
-                              type_id == 16 ~ "Goal")) %>%
-    left_join(score_changes, c("game_id", "period_id")) %>%
-    filter(cum_second >= start_second,
-           cum_second <= end_second) %>%
-    select(-start_second, -end_second) %>%
-    left_join(player_changes, c("game_id", "period_id")) %>%
-    filter(cum_second >= start_second,
-           cum_second <= end_second) %>%
-    select(-start_second, -end_second) %>%
-    left_join(goalkeeper_changes, c("game_id", "period_id",
-                                    "team.1_id" = "team_id")) %>%
-    filter(cum_second >= start_second,
-           cum_second <= end_second) %>%
-    select(date, gameID = game_id, eventID = id, event = event_id, half = period_id,
-           time, minute, second, shooter_id = player_id, shooter, team_id, team, goalie_id,
-           goalie, team.1_id, team.1, passer_id, passer, assisted, passID = related_event_id,
-           through = assist_throughball, cross = assist_cross, x, y,
-           gmlocy = goal_mouth_y, gmlocz = goal_mouth_z, bodypart, result, patternOfPlay,
-           hteam_id, hteam, ateam_id, ateam, hscore, ascore, hplayers, aplayers,
-           hfinal, afinal, final, bigchance = big_chance, shots_non_null_vars$key) %>%
-    mutate_if(is.logical, ~as.numeric(ifelse(is.na(.), FALSE, .))) %>%
-    arrange(date, gameID, half, minute, second, team_id)
-}
+all_shots <- rbind(new_shots, old_shots)
+# new data is missing the following columns: date_time_et,
+# hfinal, afinal, hteam_id, ateam_id, assist_throughball,
+# assist_cross, passer_id
 
 # Isolate relevant extra variables ---------------------------
-shots_non_null_vars <- old_shots %>%
+## Maybe unnecessary
+shots_non_null_vars <- all_shots %>%
   summarize_all(~mean(is.na(.))) %>%
   select(-(game_id:outcome_name),
          -(date_time_et:ateam_id),
@@ -144,67 +73,117 @@ shots_non_null_vars <- old_shots %>%
   arrange(key)
 
 # Join and reshape -------------------------------------------
-##### Maybe unnecessary ######
-# half_starts <- dbGetQuery(conn, "SELECT DISTINCT events.game_id, events.period_id,
-#                                                  MIN(events.minute) AS minute,
-#                           MIN(events.second) AS second
-#                           FROM mls.events
-#                           LEFT JOIN mls.games
-#                           USING(game_id)
-#                           WHERE season_name = (SELECT MAX(season_name)
-#                           FROM mls.games)
-#                           AND period_id IN (1, 2, 3, 4)
-#                           GROUP BY events.game_id, events.period_id") %>%
-#   mutate(type_id = 32)
-# 
-# half_ends <- dbGetQuery(conn, "SELECT DISTINCT events.game_id, events.period_id,
-#                         MAX(events.minute) AS minute,
-#                         MAX(events.second) AS second
-#                         FROM mls.events
-#                         LEFT JOIN mls.games
-#                         USING(game_id)
-#                         WHERE season_name = (SELECT MAX(season_name)
-#                         FROM mls.games)
-#                         AND period_id IN (1, 2, 3, 4)
-#                         GROUP BY events.game_id, events.period_id") %>%
-#   mutate(type_id = 30)
-# 
-# half_starts_ends <- rbind(half_starts, half_ends)
-# 
-# player_changes_raw <- dbGetQuery(conn, "SELECT DISTINCT events.game_id, events.team_id, events.period_id,
-#                                                         events.type_id, events.minute, events.second
-#                                  FROM mls.events
-#                                  LEFT JOIN mls.games
-#                                  USING(game_id)
-#                                  WHERE season_name = (SELECT MAX(season_name)
-#                                  FROM mls.games)
-#                                  AND type_id = 17
-#                                  AND (red = TRUE OR second_yellow = TRUE)")
-# 
-# player_changes <- plyr::rbind.fill(player_changes_raw, half_starts_ends) %>%
-#   arrange(game_id, period_id, minute, second) %>%
-#   left_join(games %>% select(game_id, home_team_id, away_team_id), "game_id") %>%
-#   mutate(hplayers = case_when(team_id == home_team_id & type_id == 17 ~ -1,
-#                               type_id == 32 & period_id == 1 ~ 11,
-#                               TRUE ~ 0),
-#          aplayers = case_when(team_id == away_team_id & type_id == 17 ~ -1,
-#                               type_id == 32 & period_id == 1 ~ 11,
-#                               TRUE ~ 0)) %>%
-#   distinct() %>%
-#   group_by(game_id) %>%
-#   mutate(cum_hplayers = cumsum(hplayers),
-#          cum_aplayers = cumsum(aplayers),
-#          start_second = minute * 60 + second,
-#          end_second = ifelse(lead(type_id) == 30,
-#                              lead(minute) * 60 + lead(second),
-#                              lead(minute) * 60 + lead(second) - 1)) %>%
-#   ungroup() %>%
-#   filter(type_id != 30) %>%
-#   select(game_id, period_id, start_second, end_second,
-#          hplayers = cum_hplayers, aplayers = cum_aplayers)
-##### Maybe unnecessary ######
+## Maybe unnecessary if can condense the goalie information
+## into a simpler query to get the information 
+half_starts_gk <- dbGetQuery(conn, "SELECT DISTINCT events.game_id, events.period_id,
+                                                 events.team_id,
+                             MIN(events.minute) AS minute,
+                             MIN(events.second) AS second
+                             FROM mls.events
+                             LEFT JOIN mls.games
+                             USING(game_id)
+                             WHERE season_name = (SELECT MAX(season_name)
+                             FROM mls.games)
+                             AND period_id IN (1, 2, 3, 4)
+                             GROUP BY events.game_id, events.period_id, events.team_id") %>%
+  mutate(type_id = 32)
 
-shots <- old_shots %>%
+half_ends_gk <- dbGetQuery(conn, "SELECT DISTINCT events.game_id, events.period_id,
+                           events.team_id,
+                           MAX(events.minute) AS minute,
+                           MAX(events.second) AS second
+                           FROM mls.events
+                           LEFT JOIN mls.games
+                           USING(game_id)
+                           WHERE season_name = (SELECT MAX(season_name)
+                           FROM mls.games)
+                           AND period_id IN (1, 2, 3, 4)
+                           GROUP BY events.game_id, events.period_id, events.team_id") %>%
+  mutate(type_id = 30)
+
+half_starts_ends_gk <- rbind(half_starts_gk, half_ends_gk)
+
+goalkeeper_changes_raw <- dbGetQuery(conn, "SELECT DISTINCT formations.game_id, formations.team_id,
+                                     formations.player_id AS goalie_id,
+                                     formations.start_period AS period_id,
+                                     formations.start_minute AS minute,
+                                     formations.start_second AS second
+                                     FROM mls.formations
+                                     LEFT JOIN mls.games
+                                     USING(game_id)
+                                     WHERE season_name = (SELECT MAX(season_name)
+                                     FROM mls.games)
+                                     AND position = 'GK'") %>%
+  mutate(type_id = 999)
+
+goalkeeper_changes <- plyr::rbind.fill(goalkeeper_changes_raw, half_starts_ends_gk) %>%
+  arrange(game_id, team_id, period_id, minute, second, type_id) %>%
+  distinct() %>%
+  group_by(game_id, team_id) %>%
+  mutate(start_second = minute * 60 + second,
+         end_second = ifelse(lead(type_id) == 30,
+                             lead(minute) * 60 + lead(second),
+                             lead(minute) * 60 + lead(second) - 1)) %>%
+  fill(goalie_id, .direction = "down") %>%
+  ungroup() %>%
+  filter(type_id != 30,
+         end_second != -1) %>%
+  left_join(players %>% select(goalie_id = player_id, goalie = player_name), "goalie_id") %>%
+  select(game_id, period_id, team_id, start_second, end_second, goalie_id, goalie)
+
+## Function to add distance, available, and keepreach columns -----------------
+shotloc <- function(data, fwidth = 80, flength = 115){
+  # Getting initial values of X and Y
+  X <- data[1]
+  Y <- data[2]
+  gmX <- data[3]
+  X <- (100 - X)*flength/100
+  Y <- (Y-50)*fwidth/100
+  
+  # Calculating distance to goal and 'available'? 
+  distance <- sqrt(X^2 + Y^2)
+  theta <- atan(Y/X)*180/pi
+  slope1 <- -abs(Y)/X
+  slope2 <- X/(abs(Y) + 4)
+  xpoint1 <- -4*(slope1 + slope2)/(slope2 - slope1)
+  ypoint1 <- flength - slope2*(xpoint1 + 4)
+  available <- sqrt((4-xpoint1)^2 + (flength-ypoint1)^2)
+  
+  # Calculating keepreach
+  ang1 <- ifelse(Y == -4, pi/2, ifelse(Y < -4, pi + atan(X/(4+Y)), atan(X/(4+Y))))
+  ang2 <- ifelse(Y == 4, pi/2, ifelse(Y < 4, atan(X/(4-Y)), pi + atan(X/(4-Y))))
+  angshot <- apply(data.frame(ang1, pi-ang2), 1, mean, na.rm = T)
+  slope3 <- -1/tan(angshot) ##slope from near post perpendicular to shot angle
+  slope4 <- ifelse(Y > 0, X/(Y+4), X/(Y-4)) ##slope to far post
+  xpoint2 <- ifelse(Y == 0, -4, sign(Y)*4*(slope3 + slope4)/(slope3 - slope4)) 
+  ypoint2 <- ifelse(angshot > pi/2, flength - (4-xpoint2)*abs(slope3), flength - (xpoint2 + 4)*abs(slope4))
+  xmid <- (xpoint2 + sign(Y)*4)/2
+  ymid <- (ypoint2 + flength)/2
+  GmX <- (gmX - 50)*fwidth/100
+  xshot <- array(dim = length(X))
+  yshot <- array(dim = length(X))
+  xshot[GmX == Y & is.na(GmX) == F] <- GmX[GmX == Y & is.na(GmX) == F]
+  xshot[GmX != Y & is.na(GmX) == F] <- c(ifelse(Y < GmX, (4*slope3 - GmX*X/abs(Y-GmX))/(-X/abs(Y-GmX)-slope3),(-4*slope3+GmX*abs(X/(Y-GmX)))/(-slope3 + X/(Y-GmX))))[GmX != Y & is.na(GmX) == F]
+  yshot[GmX == Y & is.na(GmX) == F] <- (-abs(slope3)*abs(abs(xshot) - 4) + flength)[GmX == Y & is.na(GmX) == F]
+  yshot[GmX != Y & is.na(GmX) == F] <- ifelse(Y < 0, flength - slope3*(xshot+4), flength - slope3*(xshot-4))[GmX != Y & is.na(GmX) == F]
+  keepreach <- sqrt((xmid - xshot)^2 + (ymid - yshot)^2)
+  dive.dir <- sign(xshot - xmid)
+  dive.dir[is.na(GmX) == T] <- 0
+  
+  return(c(distance, theta, available, keepreach, dive.dir))
+}
+
+output <- apply(cbind(all_shots$x, all_shots$y, all_shots$goal_mouth_y),1,shotloc)
+all_shots$distance <- output[seq(1,length(output),5)]
+all_shots$angle <- output[seq(2,length(output),5)]
+all_shots$available <- output[seq(3,length(output),5)]
+all_shots$keepreach <- output[seq(4,length(output),5)]
+all_shots$dive <- output[seq(5,length(output),5)]
+
+# shots$gmlocz <- 8*shots$gmlocz/37.5
+
+## Transforming shot dataframe into old format that fits modeling -------------
+shots <- all_shots %>%
   left_join(dbGetQuery(conn, "SELECT player_id, player_name FROM mls.players") %>%
               rename(shooter = player_name), "player_id") %>%
   left_join(dbGetQuery(conn, "SELECT player_id, player_name FROM mls.players") %>%
@@ -257,27 +236,18 @@ shots <- old_shots %>%
   # filter(cum_second >= start_second,
   #        cum_second <= end_second) %>%
   # select(-start_second, -end_second) %>%
-  # left_join(goalkeeper_changes, c("game_id", "period_id",
-  #                                 "team.1_id" = "team_id")) %>%
-  # filter(cum_second >= start_second,
-  #        cum_second <= end_second) %>%
+  left_join(goalkeeper_changes, c("game_id", "period_id",
+                                  "team.1_id" = "team_id")) %>%
+  filter(cum_second >= start_second,
+         cum_second <= end_second) %>%
   select(date, time, half = period_id, shooter, gameID, team, team.1, passer, 
-         assisted, dive = diving_save, bodypart,
+         assisted, dive = diving_save, bodypart, gmlocy = goal_mouth_y,
          angle, through = assist_throughball, cross = assist_cross, 
-         ateam, final, patternOfPlay, year, gmlocz = goal_mouth_z, result, hteam,
-         distance = Distance, goalie = Keeper, available = Available, 
-         keepreach = KeepReach, hplayers = PlayerH,
-         aplayers = PlayerA, hscore, ascore) %>%
-  # select(date, gameID = game_id, eventID = id, event = event_id, half = period_id,
-  #        time, minute, second, shooter_id = player_id, shooter, team_id, team, goalie_id,
-  #        goalie, team.1_id, team.1, passer_id, passer, assisted, passID = related_event_id,
-  #        through = assist_throughball, cross = assist_cross, x, y,
-  #        gmlocy = goal_mouth_y, gmlocz = goal_mouth_z, bodypart, result, patternOfPlay,
-  #        hteam_id, hteam, ateam_id, ateam, hscore, ascore, hplayers, aplayers,
-  #        hfinal, afinal, final, bigchance = big_chance, shots_non_null_vars$key) %>%
-  # mutate_if(is.logical, ~as.numeric(ifelse(is.na(.), FALSE, .))) %>%
-  # arrange(date, gameID, half, minute, second, team_id)
-  mutate(patternOfPlay.model = ifelse(patternOfPlay == 'Throw in', 'Regular', patternOfPlay),
+         ateam, final, patternOfPlay, year, gmlocz = goal_mouth_z, result,
+         distance, keepreach, available, hteam, goalie_id, goalie,
+         hscore, ascore) %>%
+  mutate(patternOfPlay.model = ifelse(patternOfPlay == 'Throw in', 
+                                      'Regular', patternOfPlay),
          distance = ifelse(patternOfPlay == 'Penalty', 
                            12, 
                            distance),
@@ -286,60 +256,6 @@ shots <- old_shots %>%
                             ifelse(is.na(available),
                                    0, 
                                    available)))
-
-# This should just be a single SQL query
-# shooting15 <- bind_rows(lapply(paste0('IgnoreList/', grep('shots with xG', list.files('IgnoreList'), value = T)), 
-#                                function(x) read.csv(x, stringsAsFactors = F) %>% select(-one_of("X")))) %>%
-#   left_join(teamnames, by = c('team' = 'FullName')) %>%
-#   left_join(teamnames, by = c('team.1' = 'FullName')) %>%
-#   mutate(team = Abbr.x,
-#          team.1 = Abbr.y) %>%
-#   select(-c(Abbr.x, Abbr.y)) %>%
-#   left_join(teamnames, by = c('hteam' = 'FullName')) %>%
-#   left_join(teamnames, by = c('ateam' = 'FullName')) %>%
-#   mutate(hteam = Abbr.x,
-#          ateam = Abbr.y) %>%
-#   select(-c(Abbr.x, Abbr.y)) %>%
-#   mutate(date = as.Date(date, format = ifelse(row_number() %in% grep("/", date), "%m/%d/%Y", "%Y-%m-%d")),
-#          year = format(date, '%Y'),
-#          time = sapply(strsplit(time, ':'), function(x) as.numeric(x[1]) + as.numeric(x[2])/60))
-# 
-# shooting14 <- bind_rows(lapply(paste0('IgnoreList/', grep('shotdata with xgoals', list.files("IgnoreList"), value = T)), 
-#                                function(x) read.csv(x, stringsAsFactors = F))) %>%
-#   left_join(teamnames, by = c('Team' = 'FullName')) %>%
-#   left_join(teamnames, by = c('Team.1' = 'FullName')) %>%
-#   mutate(team = Abbr.x,
-#          team.1 = Abbr.y) %>%
-#   select(-c(Abbr.x, Abbr.y)) %>%
-#   left_join(teamnames, by = c('hteam' = 'FullName')) %>%
-#   left_join(teamnames, by = c('ateam' = 'FullName')) %>%
-#   mutate(hteam = Abbr.x,
-#          ateam = Abbr.y) %>%
-#   select(-c(Abbr.x, Abbr.y)) %>%
-#   mutate(Date = as.Date(Date, origin = '1899-12-30'),
-#          year = format(Date, '%Y'),
-#          Time = floor(Time) + (Time - floor(Time))/0.6)
-# 
-# shooting14 <- shooting14 %>%
-#   mutate(gameID = 0) %>%
-#   select(date = Date, time = Time, half = Half, shooter = Shooter, gameID,
-#          team, goalie = Keeper, team.1, passer = Passer, assisted = Assisted,
-#          through = Through, cross = Cross, distance = Distance, angle = Angle,
-#          available = Available, keepreach = KeepReach, dive = Dive, gmlocz = GMLocZ,
-#          bodypart = Body.Part, result = Result, hteam, ateam, hplayers = PlayerH, 
-#          aplayers = PlayerA, year, hscore, ascore, final, patternOfPlay = Pattern.of.Play)
-# 
-# shooting <- bind_rows(shooting14,
-#                       shooting15) %>%
-#   mutate(patternOfPlay.model = ifelse(patternOfPlay == 'Throw in', 'Regular', patternOfPlay),
-#          distance = ifelse(patternOfPlay == 'Penalty', 
-#                            12, 
-#                            distance),
-#          available = ifelse(patternOfPlay == 'Penalty', 
-#                             8, 
-#                             ifelse(is.na(available),
-#                                    0, 
-#                                    available)))
 
 ## Build xG xGKeeper models ---------------------------------------------------
 xgoal.model <- glm(result == 'Goal' ~ 
@@ -351,7 +267,7 @@ xgoal.model <- glm(result == 'Goal' ~
                      I(bodypart == 'Head') +
                      through +
                      cross,
-                   data = shooting,
+                   data = shots,
                    family = binomial)
 
 xgoal.model.keeper <- glm(result == 'Goal' ~
@@ -364,7 +280,7 @@ xgoal.model.keeper <- glm(result == 'Goal' ~
                             through +
                             patternOfPlay.model +
                             as.factor(year),
-                          data = shooting %>%
+                          data = shots %>%
                             filter(result == 'Goal' | result == 'Saved'),
                           family = binomial)
 
@@ -374,7 +290,7 @@ xgoal.model.keeper <- glm(result == 'Goal' ~
 ## Not sure what this is? -----------------------------------------------------
 # Append predictions ####
 # Weight current season against previous season
-season.progress <- (shooting %>%
+season.progress <- (shots %>%
                       filter(year == max(year)) %>%
                       group_by(team) %>%
                       summarize(games = length(unique(gameID))) %>%
@@ -383,45 +299,45 @@ season.progress <- (shooting %>%
                       select(progress))$progress
 
 ## Predicting xG on new data --------------------------------------------------
-shooting[['xGShooter1']] <- predict(xgoal.model, 
-                                    shooting %>%
+shots[['xGShooter1']] <- predict(xgoal.model, 
+                                    shots %>%
                                       mutate(year = ifelse(as.numeric(year) == max(as.numeric(year)), 
                                                            as.character(max(as.numeric(year)) - 1), 
                                                            year)), 
                                     type = 'response')
-shooting[['xGShooter2']] <- predict(xgoal.model, 
-                                    shooting, 
+shots[['xGShooter2']] <- predict(xgoal.model, 
+                                    shots, 
                                     type = 'response')
 
-shooting[['xGTeam1']] <- predict(xgoal.model, shooting %>%
+shots[['xGTeam1']] <- predict(xgoal.model, 
+                                 shots %>%
                                    mutate(patternOfPlay.model = ifelse(patternOfPlay.model == 'Penalty', 
-                                                                       'Regular', 
-                                                                       patternOfPlay.model),
+                                                                       'Regular', patternOfPlay.model),
                                           year = ifelse(as.numeric(year) == max(as.numeric(year)), 
                                                         as.character(max(as.numeric(year)) - 1), 
                                                         year)), 
                                  type = 'response')
-shooting[['xGTeam2']] <- predict(xgoal.model, shooting %>%
+shots[['xGTeam2']] <- predict(xgoal.model, 
+                                 shots %>%
                                    mutate(patternOfPlay.model = ifelse(patternOfPlay.model == 'Penalty', 
-                                                                       'Regular', 
-                                                                       patternOfPlay.model)), 
+                                                                       'Regular', patternOfPlay.model)), 
                                  type = 'response')
 
-shooting[['xGKeeper1']][shooting$result %in% c('Goal', 'Saved')] <- predict(xgoal.model.keeper, 
-                                                                            shooting %>%
-                                                                              filter(result == 'Goal' | result == 'Saved') %>%
-                                                                              mutate(year = ifelse(as.numeric(year) == max(as.numeric(year)), 
-                                                                                                   as.character(max(as.numeric(year)) - 1), 
-                                                                                                   year)), 
+shots[['xGKeeper1']][shots$result %in% c('Goal', 'Saved')] <- predict(xgoal.model.keeper, 
+                                                                      shots %>%
+                                                                        filter(result == 'Goal' | result == 'Saved') %>%
+                                                                        mutate(year = ifelse(as.numeric(year) == max(as.numeric(year)),
+                                                                                             as.character(max(as.numeric(year)) - 1),
+                                                                                             year)), 
                                                                             type = 'response')
-shooting[['xGKeeper2']][shooting$result %in% c('Goal', 'Saved')] <- predict(xgoal.model.keeper, 
-                                                                            shooting %>%
-                                                                              filter(result == 'Goal' | result == 'Saved'), 
-                                                                            type = 'response')
+shots[['xGKeeper2']][shots$result %in% c('Goal', 'Saved')] <- predict(xgoal.model.keeper, 
+                                                                      shots %>%
+                                                                        filter(result == 'Goal' | result == 'Saved'),
+                                                                      type = 'response')
 
 ## ?????????????
 ## not sure what this is ------------------------------------------------------
-shooting <- shooting %>%
+shots <- shots %>%
   mutate(xGShooter = season.progress*xGShooter2 + (1 - season.progress)*xGShooter1,
          xGTeam = season.progress*xGTeam2 + (1 - season.progress)*xGTeam1,
          xGKeeper = season.progress*xGKeeper2 + (1 - season.progress)*xGKeeper1) %>%
