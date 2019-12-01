@@ -1,7 +1,26 @@
-sidebarxGoalsPlayersUI <- function(id){
+
+
+xGoalsPlayersUI <- function(id){
   ns <- NS(id)
   
   tagList(
+    tagList(
+          tags$head(
+            tags$style(
+              HTML(
+                ".checkbox-inline { 
+                margin-left: 20px;
+                margin-right: 0px;
+}
+.checkbox-inline+.checkbox-inline {
+margin-left: 20px;
+margin-right: 0px;
+}
+"
+              )
+              ) 
+              )),
+    #width = 8,
     actionButton(ns('refresh_data'),
                  label = "Refresh filters"),
     # unclear whether the input.seasonordate should be changed to
@@ -121,9 +140,11 @@ sidebarxGoalsPlayersUI <- function(id){
   
 }
 
-
 ###############################################################################
-sidebarxGoalsPlayers <- function(input, output, session, data=playerxgoals){
+###############################################################################
+###############################################################################
+
+xGoalsPlayers <- function(input, output, session, data=playerxgoals){
   # Shooter reactive values ####
   # Initial values for filters
   shooter_inputs <- reactiveValues(seasonordate = 'Season',
@@ -221,5 +242,5 @@ sidebarxGoalsPlayers <- function(input, output, session, data=playerxgoals){
                },
                ignoreInit = T)
   
-  
+  return(shooter_inputs)
 }
