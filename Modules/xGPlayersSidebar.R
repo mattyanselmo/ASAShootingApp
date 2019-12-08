@@ -1,6 +1,6 @@
-
-
-xGoalsPlayersUI <- function(id){
+# This module is used to create the sidebar layout for the shooter
+# tables.
+xGPlayersSidebarUI <- function(id){
   ns <- NS(id)
   
   tagList(
@@ -144,7 +144,7 @@ margin-right: 0px;
 ###############################################################################
 ###############################################################################
 
-xGoalsPlayers <- function(input, output, session, data=playerxgoals){
+xGPlayersSidebar <- function(input, output, session, data=playerxgoals){
   # Shooter reactive values ####
   # Initial values for filters
   shooter_inputs <- reactiveValues(seasonordate = 'Season',
@@ -158,15 +158,16 @@ xGoalsPlayers <- function(input, output, session, data=playerxgoals){
                                    position_checkbox = c("GK", "CB", "FB/WB", "CM", "CDM", "CAM", "Wing", "F", "sub"),
                                    split_byteams = F,
                                    split_byseasons = T,
-                                   pattern = c("Open", "PK", "FK", "Setpiece"),
+                                   pattern = c("Open", "PK", "FK", "Setpiece")
                                    # shooting_other = T, REPLACED BY SINGLE CHECKBOX GROUP "PATTERN"
                                    # shooting_fk = T,
                                    # shooting_pk = T,
                                    # setpiece = T,
-                                   shooterplot_xvar = "xG",
-                                   shooterplot_yvar = "G",
-                                   shooterplot_per96_xvar = "xG",
-                                   shooterplot_per96_yvar = "G")
+                                   #shooterplot_xvar = "xG",
+                                   #shooterplot_yvar = "G",
+                                   #shooterplot_per96_xvar = "xG",
+                                   #shooterplot_per96_yvar = "G"
+                                   )
   
   # Updated values
   observeEvent(input$refresh_data,
@@ -183,8 +184,8 @@ xGoalsPlayers <- function(input, output, session, data=playerxgoals){
                  shooter_inputs$split_byteams <- input$split_byteams
                  shooter_inputs$split_byseasons <- input$split_byseasons
                  shooter_inputs$pattern <- input$shooting_pattern
-                 shooter_inputs$shooterplot_xvar <- input$shooterplot_xvar
-                 shooter_inputs$shooterplot_yvar <- input$shooterplot_yvar
+                 #shooter_inputs$shooterplot_xvar <- input$shooterplot_xvar
+                 #shooter_inputs$shooterplot_yvar <- input$shooterplot_yvar
                  # shooter_inputs$shooterplot_per96_xvar <- input$shooterplot_per96_xvar
                  # shooter_inputs$shooterplot_per96_yvar <- input$shooterplot_per96_yvar
                })

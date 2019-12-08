@@ -6,7 +6,6 @@
 #
 
 library(shiny)
-source('Modules/xGoalsPlayers.R')
 
 shinyServer(function(input, output, session) {
   
@@ -138,8 +137,6 @@ shinyServer(function(input, output, session) {
   #                )
   #              },
   #              ignoreInit = T)
-  
-  shooter_inputs <- callModule(xGoalsPlayers, "shooting")
   
   # Shooter tables ####
   dt_total <- reactive({

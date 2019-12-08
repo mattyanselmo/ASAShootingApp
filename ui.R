@@ -6,8 +6,8 @@
 #
 
 library(shiny)
-source('Modules/xGoalsPlayers.R')
-source('Modules/xGPlayersTable.R')
+source('Modules/xGPlayersSidebar.R')
+source('Modules/xGPlayersScatter.R')
 
 shinyUI(
   # Shooting navbar ####
@@ -20,7 +20,7 @@ shinyUI(
                                  value = "playerxgoals",
                                  sidebarLayout(
                                    sidebarPanel(
-                                     xGoalsPlayersUI('shooting')
+                                     xGPlayersSidebarUI('shooting')
                                    ),
                                    mainPanel(
                                      # div(style="display: inline-block;vertical-align:bottom; width: 250px;", h1('Player xGoals')),
@@ -41,24 +41,15 @@ shinyUI(
                                                  tabPanel('Tables: per 96',
                                                           value = "tablesper96",
                                                           p(HTML("<i>Per-minutes data and position information only goes back to 2015.</i>")),
+                                                          # textOutput('testing')
+                                                          # DT::dataTableOutput('test_table')
                                                           DT::dataTableOutput('shooter_table_per96')
                                                  ),
                                                  tabPanel('Scatter plots',
                                                           value = "plots",
                                                           p(HTML("<i>Per-minutes data and position information only goes back to 2015. Please allow a few seconds for the plot to load.</i>")),
-                                                          fluidPage(fluidRow(
-                                                            column(3,
-                                                                   selectInput('shooterplot_xvar',
-                                                                               label = 'X-axis variable',
-                                                                               choices = "xG",
-                                                                               selected = "xG")),
-                                                            column(3,
-                                                                   selectInput('shooterplot_yvar',
-                                                                               label = 'Y-axis variable',
-                                                                               choices = "G",
-                                                                               selected = "G")))),
-                                                          htmlOutput("shooterplot_text"),
-                                                          plotlyOutput('shooterplot')
+                                                          # textOutput('testing'),
+                                                          xGPlayersScatterUI('shooter_scatter')
                                                           )
                                                  )                                                          
                                      )

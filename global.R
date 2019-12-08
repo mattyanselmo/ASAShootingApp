@@ -156,4 +156,5 @@ source("Functions/SalaryFunction_Player.R")
 source("Functions/SalaryFunction_Team.R")
 source("Functions/PlotWinProbCharts.R")
 load("AppData/WinExpectancyModels.Rdata")
-source('Modules/xGoalsPlayers.R')
+source('Modules/xGPlayersSidebar.R')
+

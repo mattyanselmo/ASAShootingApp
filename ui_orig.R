@@ -6,7 +6,6 @@
 #
 
 library(shiny)
-source('Modules/xGoalsPlayers.R')
 
 shinyUI(
   # Shooting navbar ####
@@ -19,7 +18,6 @@ shinyUI(
                                  value = "playerxgoals",
                                  sidebarLayout(
                                    sidebarPanel(
-                                     xGoalsPlayersUI('shooting')
         #                              tagList(
         #                                tags$head(
         #                                  tags$style(
@@ -172,44 +170,44 @@ shinyUI(
         #                              checkboxInput('shooting_byseasons',
         #                                            label = 'Split players by seasons',
         #                                            value = T)
-                                   ),
-                                   mainPanel(
-                                     # div(style="display: inline-block;vertical-align:bottom; width: 250px;", h1('Player xGoals')),
-                                     # div(style="display: inline-block;vertical-align:bottom; width: 250px;", downloadButton('player_download', 'Download CSV')),
-                                     h1('Player xGoals'),
-                                     p(paste0('Updated through games on ', max(as.Date(playerxgoals$date)))),
-                                     downloadButton('player_download', 'Download CSV'),
-                                     br(),
-                                     tabsetPanel(id = 'player_subtab',
-                                                 tabPanel('Tables: totals',
-                                                          value = "tablestotals",
-                                                          p(HTML("<i>Per-minutes data and position information only goes back to 2015. Related filters will disappear when seasons before 2015 are checked.</i>")),
-                                                          #tags$head(tags$script(src = "www/tablesorter.js")),
-                                                          DT::dataTableOutput('shootertable')
-                                                 ),
-                                                 tabPanel('Tables: per 96',
-                                                          value = "tablesper96",
-                                                          p(HTML("<i>Per-minutes data and position information only goes back to 2015.</i>")),
-                                                          DT::dataTableOutput('shootertable_per96')
-                                                 ),
-                                                 tabPanel('Scatter plots',
-                                                          value = "plots",
-                                                          p(HTML("<i>Per-minutes data and position information only goes back to 2015. Please allow a few seconds for the plot to load.</i>")),
-                                                          fluidPage(fluidRow(
-                                                            column(3,
-                                                                   selectInput('shooterplot_xvar',
-                                                                               label = 'X-axis variable',
-                                                                               choices = "xG",
-                                                                               selected = "xG")),
-                                                            column(3,
-                                                                   selectInput('shooterplot_yvar',
-                                                                               label = 'Y-axis variable',
-                                                                               choices = "G",
-                                                                               selected = "G")))),
-                                                          htmlOutput("shooterplot_text"),
-                                                          plotlyOutput('shooterplot')
-                                                          )
-                                                 ),
+                                   # ),
+                                   # mainPanel(
+                                   #   # div(style="display: inline-block;vertical-align:bottom; width: 250px;", h1('Player xGoals')),
+                                   #   # div(style="display: inline-block;vertical-align:bottom; width: 250px;", downloadButton('player_download', 'Download CSV')),
+                                   #   h1('Player xGoals'),
+                                   #   p(paste0('Updated through games on ', max(as.Date(playerxgoals$date)))),
+                                   #   downloadButton('player_download', 'Download CSV'),
+                                   #   br(),
+                                   #   tabsetPanel(id = 'player_subtab',
+                                   #               tabPanel('Tables: totals',
+                                   #                        value = "tablestotals",
+                                   #                        p(HTML("<i>Per-minutes data and position information only goes back to 2015. Related filters will disappear when seasons before 2015 are checked.</i>")),
+                                   #                        #tags$head(tags$script(src = "www/tablesorter.js")),
+                                   #                        DT::dataTableOutput('shootertable')
+                                   #               ),
+                                   #               tabPanel('Tables: per 96',
+                                   #                        value = "tablesper96",
+                                   #                        p(HTML("<i>Per-minutes data and position information only goes back to 2015.</i>")),
+                                   #                        DT::dataTableOutput('shootertable_per96')
+                                   #               ),
+                                   #               tabPanel('Scatter plots',
+                                   #                        value = "plots",
+                                   #                        p(HTML("<i>Per-minutes data and position information only goes back to 2015. Please allow a few seconds for the plot to load.</i>")),
+                                   #                        fluidPage(fluidRow(
+                                   #                          column(3,
+                                   #                                 selectInput('shooterplot_xvar',
+                                   #                                             label = 'X-axis variable',
+                                   #                                             choices = "xG",
+                                   #                                             selected = "xG")),
+                                   #                          column(3,
+                                   #                                 selectInput('shooterplot_yvar',
+                                   #                                             label = 'Y-axis variable',
+                                   #                                             choices = "G",
+                                   #                                             selected = "G")))),
+                                   #                        htmlOutput("shooterplot_text"),
+                                   #                        plotlyOutput('shooterplot')
+                                   #                        )
+                                   #               ),
                         
                         # Team xG tab panel ####
                         tabPanel('Teams',
