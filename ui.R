@@ -8,6 +8,7 @@
 library(shiny)
 source('Modules/xGPlayersSidebar.R')
 source('Modules/xGPlayersScatter.R')
+source('Modules/xGTeamsSidebar.R')
 
 shinyUI(
   # Shooting navbar ####
@@ -54,8 +55,52 @@ shinyUI(
                                                  )                                                          
                                      )
                                    )
+                                 ),
+                        tabPanel('Teams',
+                                 value = "teamxgoals",
+                                 sidebarLayout(
+                                   sidebarPanel(
+                                     xGTeamsSidebarUI('team_shooting')
+                                   ),
+                                   mainPanel(
+                                     h1('Team shots data'),
+                                     p(paste0('Updated through games on ', max(as.Date(teamxgoals$date)))),
+                                     tabsetPanel(id = 'team_subtab',
+                                                 tabPanel('Totals',
+                                                          downloadButton('team_download', 'Download CSV'),
+                                                          br(),
+                                                          br(),
+                                                          # textOutput('testing')
+                                                          # DT::dataTableOutput('test_table')
+                                                          div(id = 'west', conditionalPanel(condition = "team_shot_inputs.team_conferenceview == 1 && ((team_shot_inputs.team_seasonordate == 'Season' && team_shot_inputs.team_seasonfilter.length == 1) ||
+                                                                                            (team_shot_inputs.team_seasonordate == 'Date' && team_shot_inputs.team_date1.substring(0,4) == team_shot_inputs.team_date2.substring(0,4)))",
+                                                                                            h2('Western conference')),
+                                                              DT::dataTableOutput('teamtotalxgoalswest')),
+                                                          br(),
+                                                          div(id = 'east', conditionalPanel(condition = "team_shot_inputs.team_conferenceview == 1 && ((team_shot_inputs.team_seasonordate == 'Season' && team_shot_inputs.team_seasonfilter.length == 1) ||
+                                                                                            (team_shot_inputs.team_seasonordate == 'Date' && iteam_shot_inputs.team_date1.substring(0,4) == team_shot_inputs.team_date2.substring(0,4)))",
+                                                                                            h2('Eastern conference'),
+                                                                                            DT::dataTableOutput('teamtotalxgoalseast')))
+                                                  ),
+                                                 tabPanel('Per game',
+                                                          downloadButton('team_download_pergame', 'Download CSV'),
+                                                          br(),
+                                                          br(),
+                                                          conditionalPanel(condition = "team_shot_inputs.team_conferenceview == 1 && ((team_shot_inputs.team_seasonordate == 'Season' && team_shot_inputs.team_seasonfilter.length == 1) ||
+                                                                                              (team_shot_inputs.team_seasonordate == 'Date' && team_shot_inputs.team_date1.substring(0,4) == team_shot_inputs.team_date2.substring(0,4)))",
+                                                                           h2('Western conference')),
+                                                          div(DT::dataTableOutput('teampergamexgoalswest')),
+                                                          br(),
+                                                          conditionalPanel(condition = "team_shot_inputs.team_conferenceview == 1 && ((team_shot_inputs.team_seasonordate == 'Season' && team_shot_inputs.team_seasonfilter.length == 1) ||
+                                                                                              (team_shot_inputs.team_seasonordate == 'Date' && team_shot_inputs.team_date1.substring(0,4) == team_shot_inputs.team_date2.substring(0,4)))",
+                                                                           h2('Eastern conference'),
+                                                                           div(DT::dataTableOutput('teampergamexgoalseast')))
+                                                 )
+                                     )                                                          
+                                   )
                                  )
                           )
+                    )
              )
              
   )

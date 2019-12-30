@@ -213,128 +213,129 @@ shinyUI(
                         tabPanel('Teams',
                                  value = "teamxgoals",
                                  sidebarLayout(
-                                   sidebarPanel(tagList(
-                                     tags$head(
-                                       tags$style(
-                                         HTML(
-                                           ".checkbox-inline { 
-                                           margin-left: 20px;
-                                           margin-right: 0px;
-                                           }
-                                           .checkbox-inline+.checkbox-inline {
-                                           margin-left: 20px;
-                                           margin-right: 0px;
-                                           }
-                                           "
-                                         )
-                                       ) 
-                                     )),
-                                     width = 2,
-                                     # actionButton('team_action', 
-                                     #              label = "Refresh filters"),
-                                     radioButtons('team_advanced',
-                                                  'Stats option:',
-                                                  choices = c('Basic' = "Basic stats", 'Advanced' = "Advanced stats"),
-                                                  selected = "Advanced stats",
-                                                  inline = T),
-                                     radioButtons("team_homeadjusted",
-                                                  "Home adjustment:",
-                                                  choices = c("Standard", "Home-adjusted"),
-                                                  inline = T),
-                                     conditionalPanel("(input.team_seasonordate == 'Season' && 
-                                                      input.team_seasonfilter.length == 1) ||
-                                                      (input.team_seasonordate == 'Date' && 
-                                                      parseInt(input.team_date1.substring(0,4)) == parseInt(input.team_date2.substring(0,4)))",
-                                                      
-                                                      checkboxInput('team_conferenceview',
-                                                                    'View by conference',
-                                                                    value = T)),
-                                     checkboxInput('team_byseasons',
-                                                   label = 'Split teams by seasons',
-                                                   value = T),
-                                     radioButtons('team_seasonordate',
-                                                  'Filter by:',
-                                                  choices = c('Season', 'Date'),
-                                                  inline = T),
-                                     conditionalPanel(condition = "input.team_seasonordate == 'Season' && input.team_subtab != 'teamxgoalsplitsplots'",
-                                                      dropdownButton(inputId = "team_seasonfilter_dropdown",
-                                                                     label = "Seasons:",
-                                                                     circle = FALSE,
-                                                                     width = 3,
-                                                                     checkboxInput("team_seasonfilter_selectall",
-                                                                                   label = "All/None",
-                                                                                   value = F),
-                                                                     checkboxGroupInput('team_seasonfilter',
-                                                                                        "",
-                                                                                        choices = min(teamxgoals$Season):max(teamxgoals$Season),
-                                                                                        selected = max(teamxgoals$Season),
-                                                                                        inline = T))),
-                                     conditionalPanel(condition = "input.team_seasonordate == 'Season' && input.team_subtab == 'teamxgoalsplitsplots'",
-                                                      dropdownButton(inputId = "team_seasonfilter2_dropdown",
-                                                                     label = "Seasons:",
-                                                                     circle = FALSE,
-                                                                     width = 3,
-                                                                     checkboxInput("team_seasonfilter2_selectall",
-                                                                                   label = "All/None",
-                                                                                   value = F),
-                                                                     checkboxGroupInput('team_seasonfilter2',
-                                                                                        "",
-                                                                                        choices = min(teamxgoals$Season):(max(teamxgoals$Season) - 1),
-                                                                                        selected = min(teamxgoals$Season):(max(teamxgoals$Season) - 1),
-                                                                                        inline = T))),
-                                     conditionalPanel(condition = "input.team_seasonordate == 'Date'",
-                                                      dateInput('team_date1',
-                                                                'From:',
-                                                                value = min(teamxgoals$date[teamxgoals$Season == max(teamxgoals$Season)]),
-                                                                min = min(teamxgoals$date),
-                                                                max = max(teamxgoals$date),
-                                                                format = 'mm/dd/yyyy'),
-                                                      dateInput('team_date2',
-                                                                'To:',
-                                                                value = max(teamxgoals$date),
-                                                                min = min(teamxgoals$date),
-                                                                max = max(teamxgoals$date),
-                                                                format = 'mm/dd/yyyy')
-                                     ),
-                                     br(),
-                                     dropdownButton(inputId = "team_pattern_dropdown",
-                                                    label = "Pattern:",
-                                                    circle = FALSE,
-                                                    width = 3,
-                                                    checkboxInput("team_pattern_selectall",
-                                                                  label = "All/None",
-                                                                  value = F),
-                                                    checkboxGroupInput('team_pattern',
-                                                                       "",
-                                                                       choices = sort(unique(teamxgoals$patternOfPlay.model)),
-                                                                       selected = sort(unique(teamxgoals$patternOfPlay.model)),
-                                                                       inline = T)),
-                                     checkboxInput('team_evenstate',
-                                                   label = 'Even gamesate only',
-                                                   value = F),
-                                     checkboxGroupInput('team_home',
-                                                        label = 'Venue:',
-                                                        choices = c('Home', 'Away'),
-                                                        selected = c('Home', 'Away'),
-                                                        inline = T)),
+                                   sidebarPanel(
+                                     # tagList(
+                                     # tags$head(
+                                     #   tags$style(
+                                     #     HTML(
+                                     #       ".checkbox-inline { 
+                                     #       margin-left: 20px;
+                                     #       margin-right: 0px;
+                                     #       }
+                                     #       .checkbox-inline+.checkbox-inline {
+                                     #       margin-left: 20px;
+                                     #       margin-right: 0px;
+                                     #       }
+                                     #       "
+                                     #     )
+                                     #   ) 
+                                     # )),
+                                     # width = 2,
+                                     # # actionButton('team_action', 
+                                     # #              label = "Refresh filters"),
+                                     # radioButtons('team_advanced',
+                                     #              'Stats option:',
+                                     #              choices = c('Basic' = "Basic stats", 'Advanced' = "Advanced stats"),
+                                     #              selected = "Advanced stats",
+                                     #              inline = T),
+                                     # radioButtons("team_homeadjusted",
+                                     #              "Home adjustment:",
+                                     #              choices = c("Standard", "Home-adjusted"),
+                                     #              inline = T),
+                                     # conditionalPanel("(input.team_seasonordate == 'Season' && 
+                                     #                  input.team_seasonfilter.length == 1) ||
+                                     #                  (input.team_seasonordate == 'Date' && 
+                                     #                  parseInt(input.team_date1.substring(0,4)) == parseInt(input.team_date2.substring(0,4)))",
+                                     #                  
+                                     #                  checkboxInput('team_conferenceview',
+                                     #                                'View by conference',
+                                     #                                value = T)),
+                                     # checkboxInput('team_byseasons',
+                                     #               label = 'Split teams by seasons',
+                                     #               value = T),
+                                     # radioButtons('team_seasonordate',
+                                     #              'Filter by:',
+                                     #              choices = c('Season', 'Date'),
+                                     #              inline = T),
+                                     # conditionalPanel(condition = "input.team_seasonordate == 'Season' && input.team_subtab != 'teamxgoalsplitsplots'",
+                                     #                  dropdownButton(inputId = "team_seasonfilter_dropdown",
+                                     #                                 label = "Seasons:",
+                                     #                                 circle = FALSE,
+                                     #                                 width = 3,
+                                     #                                 checkboxInput("team_seasonfilter_selectall",
+                                     #                                               label = "All/None",
+                                     #                                               value = F),
+                                     #                                 checkboxGroupInput('team_seasonfilter',
+                                     #                                                    "",
+                                     #                                                    choices = min(teamxgoals$Season):max(teamxgoals$Season),
+                                     #                                                    selected = max(teamxgoals$Season),
+                                     #                                                    inline = T))),
+                                     # conditionalPanel(condition = "input.team_seasonordate == 'Season' && input.team_subtab == 'teamxgoalsplitsplots'",
+                                     #                  dropdownButton(inputId = "team_seasonfilter2_dropdown",
+                                     #                                 label = "Seasons:",
+                                     #                                 circle = FALSE,
+                                     #                                 width = 3,
+                                     #                                 checkboxInput("team_seasonfilter2_selectall",
+                                     #                                               label = "All/None",
+                                     #                                               value = F),
+                                     #                                 checkboxGroupInput('team_seasonfilter2',
+                                     #                                                    "",
+                                     #                                                    choices = min(teamxgoals$Season):(max(teamxgoals$Season) - 1),
+                                     #                                                    selected = min(teamxgoals$Season):(max(teamxgoals$Season) - 1),
+                                     #                                                    inline = T))),
+                                     # conditionalPanel(condition = "input.team_seasonordate == 'Date'",
+                                     #                  dateInput('team_date1',
+                                     #                            'From:',
+                                     #                            value = min(teamxgoals$date[teamxgoals$Season == max(teamxgoals$Season)]),
+                                     #                            min = min(teamxgoals$date),
+                                     #                            max = max(teamxgoals$date),
+                                     #                            format = 'mm/dd/yyyy'),
+                                     #                  dateInput('team_date2',
+                                     #                            'To:',
+                                     #                            value = max(teamxgoals$date),
+                                     #                            min = min(teamxgoals$date),
+                                     #                            max = max(teamxgoals$date),
+                                     #                            format = 'mm/dd/yyyy')
+                                     # ),
+                                     # br(),
+                                     # dropdownButton(inputId = "team_pattern_dropdown",
+                                     #                label = "Pattern:",
+                                     #                circle = FALSE,
+                                     #                width = 3,
+                                     #                checkboxInput("team_pattern_selectall",
+                                     #                              label = "All/None",
+                                     #                              value = F),
+                                     #                checkboxGroupInput('team_pattern',
+                                     #                                   "",
+                                     #                                   choices = sort(unique(teamxgoals$patternOfPlay.model)),
+                                     #                                   selected = sort(unique(teamxgoals$patternOfPlay.model)),
+                                     #                                   inline = T)),
+                                     # checkboxInput('team_evenstate',
+                                     #               label = 'Even gamesate only',
+                                     #               value = F),
+                                     # checkboxGroupInput('team_home',
+                                     #                    label = 'Venue:',
+                                     #                    choices = c('Home', 'Away'),
+                                     #                    selected = c('Home', 'Away'),
+                                     #                    inline = T)),
                                    mainPanel(
                                      h1('Team shots data'),
                                      p(paste0('Updated through games on ', max(as.Date(teamxgoals$date)))),
                                      tabsetPanel(id = 'team_subtab',
-                                                 tabPanel('Totals',
-                                                          downloadButton('team_download', 'Download CSV'),
-                                                          br(),
-                                                          br(),
-                                                          div(id = 'west', conditionalPanel(condition = "input.team_conferenceview == 1 && ((input.team_seasonordate == 'Season' && input.team_seasonfilter.length == 1) ||
-                                                                                              (input.team_seasonordate == 'Date' && input.team_date1.substring(0,4) == input.team_date2.substring(0,4)))",
-                                                                                            h2('Western conference')),
-                                                              DT::dataTableOutput('teamtotalxgoalswest')),
-                                                          br(),
-                                                          div(id = 'east', conditionalPanel(condition = "input.team_conferenceview == 1 && ((input.team_seasonordate == 'Season' && input.team_seasonfilter.length == 1) ||
-                                                                                              (input.team_seasonordate == 'Date' && input.team_date1.substring(0,4) == input.team_date2.substring(0,4)))",
-                                                                                            h2('Eastern conference'),
-                                                                                            DT::dataTableOutput('teamtotalxgoalseast')))
-                                                 ),
+                                                 # tabPanel('Totals',
+                                                 #          downloadButton('team_download', 'Download CSV'),
+                                                 #          br(),
+                                                 #          br(),
+                                                 #          div(id = 'west', conditionalPanel(condition = "input.team_conferenceview == 1 && ((input.team_seasonordate == 'Season' && input.team_seasonfilter.length == 1) ||
+                                                 #                                              (input.team_seasonordate == 'Date' && input.team_date1.substring(0,4) == input.team_date2.substring(0,4)))",
+                                                 #                                            h2('Western conference')),
+                                                 #              DT::dataTableOutput('teamtotalxgoalswest')),
+                                                 #          br(),
+                                                 #          div(id = 'east', conditionalPanel(condition = "input.team_conferenceview == 1 && ((input.team_seasonordate == 'Season' && input.team_seasonfilter.length == 1) ||
+                                                 #                                              (input.team_seasonordate == 'Date' && input.team_date1.substring(0,4) == input.team_date2.substring(0,4)))",
+                                                 #                                            h2('Eastern conference'),
+                                                 #                                            DT::dataTableOutput('teamtotalxgoalseast')))
+                                                 # ),
                                                  tabPanel('Per game',
                                                           downloadButton('team_download_pergame', 'Download CSV'),
                                                           br(),

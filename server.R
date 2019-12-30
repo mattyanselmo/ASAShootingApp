@@ -8,6 +8,7 @@
 library(shiny)
 source('Modules/xGPlayersSidebar.R')
 source('Modules/xGPlayersScatter.R')
+source('Modules/xGTeamsSidebar.R')
 source('Modules/wrangle.R')
 source('Modules/outputs.R')
 
@@ -59,10 +60,32 @@ shinyServer(function(input, output, session) {
   )
   
   ## Team shot inputs ---------------------------------------------------------
-  
+  team_shot_inputs <- callModule(xGTeamsSidebar, "team_shooting")
+  # output$testing <- renderText({names(team_shot_inputs)})
   
   ## Team shot tables ---------------------------------------------------------
-  
+  # Total team shot tables
+  dt_team_total <- reactive({get_team_xg_total(team_shot_inputs)})
+  # output$testing <- renderText({class(dt_team_total())})
+  # output$test_table <- DT::renderDataTable({head(dt_team_total())})
+  # dt_team_total is getting updated by the team_shot_inputs filters
+  output$teamtotalxgoalswest <- DT::renderDataTable({xGTeamTotalTable(dt_team_total(), 
+                                                                      team_shot_inputs, 
+                                                                      'west')})
+  output$teamtotalxgoalseast <- DT::renderDataTable({xGTeamTotalTable(dt_team_total(),
+                                                                      team_shot_inputs,
+                                                                      'east')})
+  # Per game team shot tables
+  dt_team_pergame <- reactive({get_team_xg_pergame(team_shot_inputs)})
+  # output$testing <- renderText({class(dt_team_pergame())})
+  # output$test_table <- DT::renderDataTable({head(dt_team_pergame())})
+  # dt_team_pergame is getting updated by the team_shot_inputs filters
+  output$teampergamexgoalswest <- DT::renderDataTable({xGTeamPerGameTable(dt_team_pergame(), 
+                                                                      team_shot_inputs, 
+                                                                      'west')})
+  output$teampergamexgoalseast <- DT::renderDataTable({xGTeamPerGameTable(dt_team_pergame(),
+                                                                      team_shot_inputs,
+                                                                      'east')})
   ## Team shot scatter plots --------------------------------------------------
   
   

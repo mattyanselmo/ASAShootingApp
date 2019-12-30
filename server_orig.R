@@ -432,9 +432,9 @@ shinyServer(function(input, output, session) {
     }
   )
   
-  # Passer reactive values ####
+  # Passer reactive values #####################################
   
-  # Initial values
+  # Initial values 
   passer_inputs <- reactiveValues(passing_position = c("GK", "CB", "FB/WB", "CM", "CDM", "CAM", "Wing", "F", "sub", "Heaven"),
                                   passing_third = "All",
                                   passing_seasonordate = "Season",
@@ -528,7 +528,7 @@ shinyServer(function(input, output, session) {
                },
                ignoreInit = T)
  
-  # Passer tables ####
+  # Passer tables #############################################
   dt_passer <- reactive({
     if(passer_inputs$passing_seasonordate == "Season"){
       dt <- passer.xpasses(playerpassing,
@@ -947,7 +947,7 @@ shinyServer(function(input, output, session) {
       write.csv(data.frame(namesFL, dt_playerxgchain_per96(), check.names = FALSE), file, row.names = FALSE)
     })
   
-  # Keeper reactive values ####
+  # Keeper reactive values #########################################
   # Initial values
   keeper_inputs <- reactiveValues(keeper_minshots = 0,
                                   keeper_minfilter = 0,
@@ -1284,199 +1284,199 @@ shinyServer(function(input, output, session) {
       write.csv(data.frame(namesFL, dt_keeperplot(), check.names = FALSE), file, row.names = FALSE)
     })
   
-  # Team shots tables ####
-  dt_team <- reactive({
-    if(input$team_seasonordate == 'Season'){
-      if(input$team_homeadjusted == "Home-adjusted"){
-        dt <- teamxgoals.func(teamxgoals.adj, 
-                              date1 = as.Date('2000-01-01'), 
-                              date2 = as.Date('9999-12-31'),
-                              season = input$team_seasonfilter,
-                              even = input$team_evenstate,
-                              pattern = input$team_pattern,
-                              pergame = F,
-                              advanced = ifelse(input$team_advanced == 'Basic stats', F, T),
-                              venue = input$team_home,
-                              byseasons = input$team_byseasons,
-                              confview = input$team_conferenceview) %>%
-          mutate(`Comp ($MM)` = Comp/1000000) %>%
-          select(-Comp)  
-      } else{
-      dt <- teamxgoals.func(teamxgoals, 
-                            date1 = as.Date('2000-01-01'), 
-                            date2 = as.Date('9999-12-31'),
-                            season = input$team_seasonfilter,
-                            even = input$team_evenstate,
-                            pattern = input$team_pattern,
-                            pergame = F,
-                            advanced = ifelse(input$team_advanced == 'Basic stats', F, T),
-                            venue = input$team_home,
-                            byseasons = input$team_byseasons,
-                            confview = input$team_conferenceview) %>%
-        mutate(`Comp ($MM)` = Comp/1000000) %>%
-        select(-Comp)
-      }
-      
-    } else{
-      if(input$team_homeadjusted == "Home-adjusted"){
-        
-        dt <- teamxgoals.func(teamxgoals.adj, 
-                              date1 = input$team_date1, 
-                              date2 = input$team_date2,
-                              season = as.numeric(format(input$team_date1, "%Y")):as.numeric(format(input$team_date2, "%Y")),
-                              even = input$team_evenstate,
-                              pattern = input$team_pattern,
-                              pergame = F,
-                              advanced = ifelse(input$team_advanced == 'Basic stats', F, T),
-                              venue = input$team_home,
-                              byseasons = input$team_byseasons,
-                              confview = input$team_conferenceview) %>%
-          mutate(`Comp ($MM)` = Comp/1000000) %>%
-          select(-Comp)
-      }else{
-      dt <- teamxgoals.func(teamxgoals, 
-                            date1 = input$team_date1, 
-                            date2 = input$team_date2,
-                            season = as.numeric(format(input$team_date1, "%Y")):as.numeric(format(input$team_date2, "%Y")),
-                            even = input$team_evenstate,
-                            pattern = input$team_pattern,
-                            pergame = F,
-                            advanced = ifelse(input$team_advanced == 'Basic stats', F, T),
-                            venue = input$team_home,
-                            byseasons = input$team_byseasons,
-                            confview = input$team_conferenceview) %>%
-        mutate(`Comp ($MM)` = Comp/1000000) %>%
-        select(-Comp)
-      }
-    }
-    
-    is.num <- sapply(dt, is.numeric)
-    dt[is.num] <- lapply(dt[is.num], round, 3)
-    
-    dt
-  })
+  # Team shots tables #############################################
+  # dt_team <- reactive({
+  #   if(input$team_seasonordate == 'Season'){
+  #     if(input$team_homeadjusted == "Home-adjusted"){
+  #       dt <- teamxgoals.func(teamxgoals.adj, 
+  #                             date1 = as.Date('2000-01-01'), 
+  #                             date2 = as.Date('9999-12-31'),
+  #                             season = input$team_seasonfilter,
+  #                             even = input$team_evenstate,
+  #                             pattern = input$team_pattern,
+  #                             pergame = F,
+  #                             advanced = ifelse(input$team_advanced == 'Basic stats', F, T),
+  #                             venue = input$team_home,
+  #                             byseasons = input$team_byseasons,
+  #                             confview = input$team_conferenceview) %>%
+  #         mutate(`Comp ($MM)` = Comp/1000000) %>%
+  #         select(-Comp)  
+  #     } else{
+  #     dt <- teamxgoals.func(teamxgoals, 
+  #                           date1 = as.Date('2000-01-01'), 
+  #                           date2 = as.Date('9999-12-31'),
+  #                           season = input$team_seasonfilter,
+  #                           even = input$team_evenstate,
+  #                           pattern = input$team_pattern,
+  #                           pergame = F,
+  #                           advanced = ifelse(input$team_advanced == 'Basic stats', F, T),
+  #                           venue = input$team_home,
+  #                           byseasons = input$team_byseasons,
+  #                           confview = input$team_conferenceview) %>%
+  #       mutate(`Comp ($MM)` = Comp/1000000) %>%
+  #       select(-Comp)
+  #     }
+  #     
+  #   } else{
+  #     if(input$team_homeadjusted == "Home-adjusted"){
+  #       
+  #       dt <- teamxgoals.func(teamxgoals.adj, 
+  #                             date1 = input$team_date1, 
+  #                             date2 = input$team_date2,
+  #                             season = as.numeric(format(input$team_date1, "%Y")):as.numeric(format(input$team_date2, "%Y")),
+  #                             even = input$team_evenstate,
+  #                             pattern = input$team_pattern,
+  #                             pergame = F,
+  #                             advanced = ifelse(input$team_advanced == 'Basic stats', F, T),
+  #                             venue = input$team_home,
+  #                             byseasons = input$team_byseasons,
+  #                             confview = input$team_conferenceview) %>%
+  #         mutate(`Comp ($MM)` = Comp/1000000) %>%
+  #         select(-Comp)
+  #     }else{
+  #     dt <- teamxgoals.func(teamxgoals, 
+  #                           date1 = input$team_date1, 
+  #                           date2 = input$team_date2,
+  #                           season = as.numeric(format(input$team_date1, "%Y")):as.numeric(format(input$team_date2, "%Y")),
+  #                           even = input$team_evenstate,
+  #                           pattern = input$team_pattern,
+  #                           pergame = F,
+  #                           advanced = ifelse(input$team_advanced == 'Basic stats', F, T),
+  #                           venue = input$team_home,
+  #                           byseasons = input$team_byseasons,
+  #                           confview = input$team_conferenceview) %>%
+  #       mutate(`Comp ($MM)` = Comp/1000000) %>%
+  #       select(-Comp)
+  #     }
+  #   }
+  #   
+  #   is.num <- sapply(dt, is.numeric)
+  #   dt[is.num] <- lapply(dt[is.num], round, 3)
+  #   
+  #   dt
+  # })
+  # 
+  # # Select all controls
+  # observeEvent(input$team_seasonfilter_selectall,
+  #              { print(c(min(teamxgoals$Season):max(teamxgoals$Season))[-c(length(unique(teamxgoals$Season)))[input$team_subtab == "teamxgoalsplitsplots"]])
+  #                updateCheckboxGroupInput(
+  #                  session, 
+  #                  "team_seasonfilter", 
+  #                  choices = min(teamxgoals$Season):ifelse(input$team_subtab == "teamxgoalsplitsplots", max(teamxgoals$Season) - 1, max(teamxgoals$Season)),
+  #                  selected = if (input$team_seasonfilter_selectall) min(teamxgoals$Season):ifelse(input$team_subtab == "teamxgoalsplitsplots", max(teamxgoals$Season) - 1, max(teamxgoals$Season))
+  #                )
+  #              },
+  #              ignoreInit = T)
+  # 
+  # observeEvent(input$team_seasonfilter2_selectall,
+  #              {
+  #                updateCheckboxGroupInput(
+  #                  session, 
+  #                  "team_seasonfilter2", 
+  #                  choices = min(teamxgoals$Season):ifelse(input$team_subtab == "teamxgoalsplitsplots", max(teamxgoals$Season) - 1, max(teamxgoals$Season)),
+  #                  selected = if (input$team_seasonfilter2_selectall) min(teamxgoals$Season):ifelse(input$team_subtab == "teamxgoalsplitsplots", max(teamxgoals$Season) - 1, max(teamxgoals$Season))
+  #                )
+  #              },
+  #              ignoreInit = T)
+  # 
+  # observeEvent(input$team_pattern_selectall,
+  #              {
+  #                updateCheckboxGroupInput(
+  #                  session, 
+  #                  "team_pattern", 
+  #                  choices = sort(unique(teamxgoals$patternOfPlay.model)),
+  #                  selected = if (input$team_pattern_selectall) sort(unique(teamxgoals$patternOfPlay.model))
+  #                )
+  #              },
+  #              ignoreInit = T)
+  # 
   
-  # Select all controls
-  observeEvent(input$team_seasonfilter_selectall,
-               { print(c(min(teamxgoals$Season):max(teamxgoals$Season))[-c(length(unique(teamxgoals$Season)))[input$team_subtab == "teamxgoalsplitsplots"]])
-                 updateCheckboxGroupInput(
-                   session, 
-                   "team_seasonfilter", 
-                   choices = min(teamxgoals$Season):ifelse(input$team_subtab == "teamxgoalsplitsplots", max(teamxgoals$Season) - 1, max(teamxgoals$Season)),
-                   selected = if (input$team_seasonfilter_selectall) min(teamxgoals$Season):ifelse(input$team_subtab == "teamxgoalsplitsplots", max(teamxgoals$Season) - 1, max(teamxgoals$Season))
-                 )
-               },
-               ignoreInit = T)
-  
-  observeEvent(input$team_seasonfilter2_selectall,
-               {
-                 updateCheckboxGroupInput(
-                   session, 
-                   "team_seasonfilter2", 
-                   choices = min(teamxgoals$Season):ifelse(input$team_subtab == "teamxgoalsplitsplots", max(teamxgoals$Season) - 1, max(teamxgoals$Season)),
-                   selected = if (input$team_seasonfilter2_selectall) min(teamxgoals$Season):ifelse(input$team_subtab == "teamxgoalsplitsplots", max(teamxgoals$Season) - 1, max(teamxgoals$Season))
-                 )
-               },
-               ignoreInit = T)
-
-  observeEvent(input$team_pattern_selectall,
-               {
-                 updateCheckboxGroupInput(
-                   session, 
-                   "team_pattern", 
-                   choices = sort(unique(teamxgoals$patternOfPlay.model)),
-                   selected = if (input$team_pattern_selectall) sort(unique(teamxgoals$patternOfPlay.model))
-                 )
-               },
-               ignoreInit = T)
-  
-  
-  output$teamtotalxgoalswest <- DT::renderDataTable({
-    dt <- dt_team()
-    if('Conf' %in% names(dt)){
-      dt <- dt %>%
-        filter(Conf == 'west') %>%
-        select(-Conf)
-    }
-    
-    if(input$team_advanced == "Basic stats"){
-      columns.perc1 <- c('SoT%F', 'SoT%A', 'Finish%F', 'Finish%A')      
-      columns.dec1 <- c("Pts", "xPts")[c(input$team_homeadjusted == "Home-adjusted", T)]
-      columns.dec1.2 <- c("ShtF", "ShtA", "SoTF", "SoTA", "GF", "GA", "GD")[rep(input$team_homeadjusted == "Home-adjusted", 7)]
-      columns.dec2 <- c("Gini18")
-    } else{
-      columns.perc1 <- c() #c("Solo%F", "Solo%A")
-      columns.dec1 <- c("xGF", "xGA", "xGD", "GD-xGD", "xPts", "Pts")[c(T, T, T, T, T, input$team_homeadjusted == "Home-adjusted")]
-      columns.dec1.2 <- c("ShtF", "ShtA", "GF", "GA", "GD")[rep(input$team_homeadjusted == "Home-adjusted", 5)]
-      columns.dec2 <- c("TSR", "Gini18")
-    }
-    
-    if(!input$team_conferenceview | length(input$team_seasonfilter) > 1){
-      DT::datatable(dt,
-                    rownames = F,
-                    options = list(autoWidth = T,
-                                 pageLength = 25)) %>%
-        formatPercentage(columns = columns.perc1, digits = 1) %>%
-        formatRound(columns = columns.dec1, digits = 1) %>%
-        formatRound(columns = columns.dec1.2, digits = 1) %>%
-        formatRound(columns = columns.dec2, digits = 2) %>%
-        formatCurrency(columns = c("Comp ($MM)"),
-                       currency = "$",
-                       interval = 3,
-                       mark = ",",
-                       digits = 1) 
-    } else{
-      DT::datatable(dt,
-                    rownames = F,
-                    options = list(autoWidth = T,
-                                 pageLength = 25,
-                                 dom = 't')) %>%
-        formatPercentage(columns = columns.perc1, digits = 1) %>%
-        formatRound(columns = columns.dec1, digits = 1) %>%
-        formatRound(columns = columns.dec1.2, digits = 1) %>%
-        formatRound(columns = columns.dec2, digits = 2) %>%
-        formatCurrency(columns = c("Comp ($MM)"),
-                       currency = "$",
-                       interval = 3,
-                       mark = ",",
-                       digits = 1)
-      
-    }
-  })
-  
-  output$teamtotalxgoalseast <- DT::renderDataTable({
-    dt <- dt_team()
-    
-    if('Conf' %in% names(dt)){
-      dt <- dt %>%
-        filter(Conf == 'east') %>%
-        select(-Conf)
-    }
-    
-    if(input$team_advanced == "Basic stats"){
-      columns.perc1 <- c('SoT%F', 'SoT%A', 'Finish%F', 'Finish%A')
-      columns.dec1 <- c("Pts", "xPts")[c(input$team_homeadjusted == "Home-adjusted", T)]
-      columns.dec2 <- c("Gini18")
-    } else{
-      columns.perc1 <- c() #c("Solo%F", "Solo%A")
-      columns.dec1 <- c("xGF", "xGA", "xGD", "GD-xGD", "xPts", "Pts")[c(T, T, T, T, T, input$team_homeadjusted == "Home-adjusted")]
-      columns.dec2 <- c("TSR", "Gini18")
-    }
-    
-    DT::datatable(dt,
-                  rownames = F,
-                  options = list(autoWidth = T,
-                               pageLength = 25,
-                               dom = 'ft')) %>%
-      formatPercentage(columns = columns.perc1, digits = 1) %>%
-      formatRound(columns = columns.dec1, digits = 1) %>%
-      formatRound(columns = columns.dec2, digits = 2) %>%
-      formatCurrency(columns = c("Comp ($MM)"),
-                     currency = "$",
-                     interval = 3,
-                     mark = ",",
-                     digits = 1)
-  })
+  # output$teamtotalxgoalswest <- DT::renderDataTable({
+  #   dt <- dt_team()
+  #   if('Conf' %in% names(dt)){
+  #     dt <- dt %>%
+  #       filter(Conf == 'west') %>%
+  #       select(-Conf)
+  #   }
+  #   
+  #   if(input$team_advanced == "Basic stats"){
+  #     columns.perc1 <- c('SoT%F', 'SoT%A', 'Finish%F', 'Finish%A')      
+  #     columns.dec1 <- c("Pts", "xPts")[c(input$team_homeadjusted == "Home-adjusted", T)]
+  #     columns.dec1.2 <- c("ShtF", "ShtA", "SoTF", "SoTA", "GF", "GA", "GD")[rep(input$team_homeadjusted == "Home-adjusted", 7)]
+  #     columns.dec2 <- c("Gini18")
+  #   } else{
+  #     columns.perc1 <- c() #c("Solo%F", "Solo%A")
+  #     columns.dec1 <- c("xGF", "xGA", "xGD", "GD-xGD", "xPts", "Pts")[c(T, T, T, T, T, input$team_homeadjusted == "Home-adjusted")]
+  #     columns.dec1.2 <- c("ShtF", "ShtA", "GF", "GA", "GD")[rep(input$team_homeadjusted == "Home-adjusted", 5)]
+  #     columns.dec2 <- c("TSR", "Gini18")
+  #   }
+  #   
+  #   if(!input$team_conferenceview | length(input$team_seasonfilter) > 1){
+  #     DT::datatable(dt,
+  #                   rownames = F,
+  #                   options = list(autoWidth = T,
+  #                                pageLength = 25)) %>%
+  #       formatPercentage(columns = columns.perc1, digits = 1) %>%
+  #       formatRound(columns = columns.dec1, digits = 1) %>%
+  #       formatRound(columns = columns.dec1.2, digits = 1) %>%
+  #       formatRound(columns = columns.dec2, digits = 2) %>%
+  #       formatCurrency(columns = c("Comp ($MM)"),
+  #                      currency = "$",
+  #                      interval = 3,
+  #                      mark = ",",
+  #                      digits = 1) 
+  #   } else{
+  #     DT::datatable(dt,
+  #                   rownames = F,
+  #                   options = list(autoWidth = T,
+  #                                pageLength = 25,
+  #                                dom = 't')) %>%
+  #       formatPercentage(columns = columns.perc1, digits = 1) %>%
+  #       formatRound(columns = columns.dec1, digits = 1) %>%
+  #       formatRound(columns = columns.dec1.2, digits = 1) %>%
+  #       formatRound(columns = columns.dec2, digits = 2) %>%
+  #       formatCurrency(columns = c("Comp ($MM)"),
+  #                      currency = "$",
+  #                      interval = 3,
+  #                      mark = ",",
+  #                      digits = 1)
+  #     
+  #   }
+  # })
+  # 
+  # output$teamtotalxgoalseast <- DT::renderDataTable({
+  #   dt <- dt_team()
+  #   
+  #   if('Conf' %in% names(dt)){
+  #     dt <- dt %>%
+  #       filter(Conf == 'east') %>%
+  #       select(-Conf)
+  #   }
+  #   
+  #   if(input$team_advanced == "Basic stats"){
+  #     columns.perc1 <- c('SoT%F', 'SoT%A', 'Finish%F', 'Finish%A')
+  #     columns.dec1 <- c("Pts", "xPts")[c(input$team_homeadjusted == "Home-adjusted", T)]
+  #     columns.dec2 <- c("Gini18")
+  #   } else{
+  #     columns.perc1 <- c() #c("Solo%F", "Solo%A")
+  #     columns.dec1 <- c("xGF", "xGA", "xGD", "GD-xGD", "xPts", "Pts")[c(T, T, T, T, T, input$team_homeadjusted == "Home-adjusted")]
+  #     columns.dec2 <- c("TSR", "Gini18")
+  #   }
+  #   
+  #   DT::datatable(dt,
+  #                 rownames = F,
+  #                 options = list(autoWidth = T,
+  #                              pageLength = 25,
+  #                              dom = 'ft')) %>%
+  #     formatPercentage(columns = columns.perc1, digits = 1) %>%
+  #     formatRound(columns = columns.dec1, digits = 1) %>%
+  #     formatRound(columns = columns.dec2, digits = 2) %>%
+  #     formatCurrency(columns = c("Comp ($MM)"),
+  #                    currency = "$",
+  #                    interval = 3,
+  #                    mark = ",",
+  #                    digits = 1)
+  # })
   
   output$team_download <- downloadHandler(
     filename = 'ASAteamtable_total.csv',
@@ -1487,144 +1487,144 @@ shinyServer(function(input, output, session) {
   )
   
   # Per game team stats
-  dt_team_pergame <- reactive({
-    if(input$team_seasonordate == 'Season'){
-      if(input$team_homeadjusted == "Home-adjusted"){
-        dt <- teamxgoals.func(teamxgoals.adj, 
-                              date1 = as.Date('2000-01-01'), 
-                              date2 = as.Date('9999-12-31'),
-                              season = input$team_seasonfilter,
-                              even = input$team_evenstate,
-                              pattern = input$team_pattern,
-                              pergame = T,
-                              advanced = ifelse(input$team_advanced == 'Basic stats', F, T),
-                              venue = input$team_home,
-                              byseasons = input$team_byseasons,
-                              confview = input$team_conferenceview) %>%
-          mutate(`Comp ($MM)` = Comp/1000000) %>%
-          select(-Comp) 
-      } else{
-      dt <- teamxgoals.func(teamxgoals, 
-                            date1 = as.Date('2000-01-01'), 
-                            date2 = as.Date('9999-12-31'),
-                            season = input$team_seasonfilter,
-                            even = input$team_evenstate,
-                            pattern = input$team_pattern,
-                            pergame = T,
-                            advanced = ifelse(input$team_advanced == 'Basic stats', F, T),
-                            venue = input$team_home,
-                            byseasons = input$team_byseasons,
-                            confview = input$team_conferenceview) %>%
-        mutate(`Comp ($MM)` = Comp/1000000) %>%
-        select(-Comp)
-      }
-      
-    } else{
-      if(input$team_homeadjusted == "Home-adjusted"){
-        dt <- teamxgoals.func(teamxgoals.adj, 
-                              date1 = input$team_date1, 
-                              date2 = input$team_date2,
-                              season = as.numeric(format(input$team_date1, "%Y")):as.numeric(format(input$team_date2, "%Y")),
-                              even = input$team_evenstate,
-                              pattern = input$team_pattern,
-                              pergame = T,
-                              advanced = ifelse(input$team_advanced == 'Basic stats', F, T),
-                              venue = input$team_home,
-                              byseasons = input$team_byseasons,
-                              confview = input$team_conferenceview) %>%
-          mutate(`Comp ($MM)` = Comp/1000000) %>%
-          select(-Comp)
-      }else{
-      dt <- teamxgoals.func(teamxgoals, 
-                            date1 = input$team_date1, 
-                            date2 = input$team_date2,
-                            season = as.numeric(format(input$team_date1, "%Y")):as.numeric(format(input$team_date2, "%Y")),
-                            even = input$team_evenstate,
-                            pattern = input$team_pattern,
-                            pergame = T,
-                            advanced = ifelse(input$team_advanced == 'Basic stats', F, T),
-                            venue = input$team_home,
-                            byseasons = input$team_byseasons,
-                            confview = input$team_conferenceview) %>%
-        mutate(`Comp ($MM)` = Comp/1000000) %>%
-        select(-Comp)
-      }
-    }
-    
-    is.num <- sapply(dt, is.numeric)
-    dt[is.num] <- lapply(dt[is.num], round, 3)
-    dt
-  })
-  
-  output$teampergamexgoalswest <- DT::renderDataTable({
-    
-    if('Conf' %in% names(dt_team_pergame())){
-      dt <- dt_team_pergame() %>%
-        filter(Conf == 'west') %>%
-        select(-Conf)
-    } else{
-      dt <- dt_team_pergame()
-    }
-    
-    if(input$team_advanced == "Basic stats"){
-      columns.perc1 <- c('SoT%F', 'SoT%A', 'Finish%F', 'Finish%A')
-      columns.dec1 <- c("ShtF", "ShtA", "SoTF", "SoTA")
-      columns.dec2 <- c("GF", "GA", "GD", "Pts", "xPts", "Gini18")
-    } else{
-      columns.perc1 <- c() #c("Solo%F", "Solo%A")
-      columns.dec1 <- c("ShtF", "ShtA")
-      columns.dec2 <- c("xGF", "xGA", "xGD", "GF", "GA", "GD", "GD-xGD", "TSR", "Pts", "xPts", "Gini18")
-    }
-    
-    DT::datatable(dt,
-              rownames = F,
-              options = list(autoWidth = T,
-                           pageLength = 25,
-                           dom = 'ft')) %>%
-      formatPercentage(columns = columns.perc1, digits = 1) %>%
-      formatRound(columns = columns.dec1, digits = 1) %>%
-      formatRound(columns = columns.dec2, digits = 2) %>%
-      formatCurrency(columns = c("Comp ($MM)"),
-                     currency = "$",
-                     interval = 3,
-                     mark = ",",
-                     digits = 1)
-  })
-  
-  output$teampergamexgoalseast <- DT::renderDataTable({
-    
-    if('Conf' %in% names(dt_team_pergame())){
-      dt <- dt_team_pergame() %>%
-        filter(Conf == 'east') %>%
-        select(-Conf)
-    } else{
-      dt <- dt_team_pergame()
-    }
-    
-    if(input$team_advanced == "Basic stats"){
-      columns.perc1 <- c('SoT%F', 'SoT%A', 'Finish%F', 'Finish%A')
-      columns.dec1 <- c("ShtF", "ShtA", "SoTF", "SoTA")
-      columns.dec2 <- c("GF", "GA", "GD", "Pts", "Gini18", "xPts")
-    } else{
-      columns.perc1 <- c() #c("Solo%F", "Solo%A")
-      columns.dec1 <- c("ShtF", "ShtA")
-      columns.dec2 <- c("xGF", "xGA", "xGD", "GF", "GA", "GD", "GD-xGD", "TSR", "Pts", "Gini18", "xPts")
-    }
-    
-    DT::datatable(dt,
-              rownames = F,
-              options = list(autoWidth = T,
-                           pageLength = 25,
-                           dom = 'ft')) %>%
-      formatPercentage(columns = columns.perc1, digits = 1) %>%
-      formatRound(columns = columns.dec1, digits = 1) %>%
-      formatRound(columns = columns.dec2, digits = 2) %>%
-      formatCurrency(columns = c("Comp ($MM)"),
-                     currency = "$",
-                     interval = 3,
-                     mark = ",",
-                     digits = 1)
-  })
+  # dt_team_pergame <- reactive({
+  #   if(input$team_seasonordate == 'Season'){
+  #     if(input$team_homeadjusted == "Home-adjusted"){
+  #       dt <- teamxgoals.func(teamxgoals.adj, 
+  #                             date1 = as.Date('2000-01-01'), 
+  #                             date2 = as.Date('9999-12-31'),
+  #                             season = input$team_seasonfilter,
+  #                             even = input$team_evenstate,
+  #                             pattern = input$team_pattern,
+  #                             pergame = T,
+  #                             advanced = ifelse(input$team_advanced == 'Basic stats', F, T),
+  #                             venue = input$team_home,
+  #                             byseasons = input$team_byseasons,
+  #                             confview = input$team_conferenceview) %>%
+  #         mutate(`Comp ($MM)` = Comp/1000000) %>%
+  #         select(-Comp) 
+  #     } else{
+  #     dt <- teamxgoals.func(teamxgoals, 
+  #                           date1 = as.Date('2000-01-01'), 
+  #                           date2 = as.Date('9999-12-31'),
+  #                           season = input$team_seasonfilter,
+  #                           even = input$team_evenstate,
+  #                           pattern = input$team_pattern,
+  #                           pergame = T,
+  #                           advanced = ifelse(input$team_advanced == 'Basic stats', F, T),
+  #                           venue = input$team_home,
+  #                           byseasons = input$team_byseasons,
+  #                           confview = input$team_conferenceview) %>%
+  #       mutate(`Comp ($MM)` = Comp/1000000) %>%
+  #       select(-Comp)
+  #     }
+  #     
+  #   } else{
+  #     if(input$team_homeadjusted == "Home-adjusted"){
+  #       dt <- teamxgoals.func(teamxgoals.adj, 
+  #                             date1 = input$team_date1, 
+  #                             date2 = input$team_date2,
+  #                             season = as.numeric(format(input$team_date1, "%Y")):as.numeric(format(input$team_date2, "%Y")),
+  #                             even = input$team_evenstate,
+  #                             pattern = input$team_pattern,
+  #                             pergame = T,
+  #                             advanced = ifelse(input$team_advanced == 'Basic stats', F, T),
+  #                             venue = input$team_home,
+  #                             byseasons = input$team_byseasons,
+  #                             confview = input$team_conferenceview) %>%
+  #         mutate(`Comp ($MM)` = Comp/1000000) %>%
+  #         select(-Comp)
+  #     }else{
+  #     dt <- teamxgoals.func(teamxgoals, 
+  #                           date1 = input$team_date1, 
+  #                           date2 = input$team_date2,
+  #                           season = as.numeric(format(input$team_date1, "%Y")):as.numeric(format(input$team_date2, "%Y")),
+  #                           even = input$team_evenstate,
+  #                           pattern = input$team_pattern,
+  #                           pergame = T,
+  #                           advanced = ifelse(input$team_advanced == 'Basic stats', F, T),
+  #                           venue = input$team_home,
+  #                           byseasons = input$team_byseasons,
+  #                           confview = input$team_conferenceview) %>%
+  #       mutate(`Comp ($MM)` = Comp/1000000) %>%
+  #       select(-Comp)
+  #     }
+  #   }
+  #   
+  #   is.num <- sapply(dt, is.numeric)
+  #   dt[is.num] <- lapply(dt[is.num], round, 3)
+  #   dt
+  # })
+  # 
+  # output$teampergamexgoalswest <- DT::renderDataTable({
+  #   
+  #   if('Conf' %in% names(dt_team_pergame())){
+  #     dt <- dt_team_pergame() %>%
+  #       filter(Conf == 'west') %>%
+  #       select(-Conf)
+  #   } else{
+  #     dt <- dt_team_pergame()
+  #   }
+  #   
+  #   if(input$team_advanced == "Basic stats"){
+  #     columns.perc1 <- c('SoT%F', 'SoT%A', 'Finish%F', 'Finish%A')
+  #     columns.dec1 <- c("ShtF", "ShtA", "SoTF", "SoTA")
+  #     columns.dec2 <- c("GF", "GA", "GD", "Pts", "xPts", "Gini18")
+  #   } else{
+  #     columns.perc1 <- c() #c("Solo%F", "Solo%A")
+  #     columns.dec1 <- c("ShtF", "ShtA")
+  #     columns.dec2 <- c("xGF", "xGA", "xGD", "GF", "GA", "GD", "GD-xGD", "TSR", "Pts", "xPts", "Gini18")
+  #   }
+  #   
+  #   DT::datatable(dt,
+  #             rownames = F,
+  #             options = list(autoWidth = T,
+  #                          pageLength = 25,
+  #                          dom = 'ft')) %>%
+  #     formatPercentage(columns = columns.perc1, digits = 1) %>%
+  #     formatRound(columns = columns.dec1, digits = 1) %>%
+  #     formatRound(columns = columns.dec2, digits = 2) %>%
+  #     formatCurrency(columns = c("Comp ($MM)"),
+  #                    currency = "$",
+  #                    interval = 3,
+  #                    mark = ",",
+  #                    digits = 1)
+  # })
+  # 
+  # output$teampergamexgoalseast <- DT::renderDataTable({
+  #   
+  #   if('Conf' %in% names(dt_team_pergame())){
+  #     dt <- dt_team_pergame() %>%
+  #       filter(Conf == 'east') %>%
+  #       select(-Conf)
+  #   } else{
+  #     dt <- dt_team_pergame()
+  #   }
+  #   
+  #   if(input$team_advanced == "Basic stats"){
+  #     columns.perc1 <- c('SoT%F', 'SoT%A', 'Finish%F', 'Finish%A')
+  #     columns.dec1 <- c("ShtF", "ShtA", "SoTF", "SoTA")
+  #     columns.dec2 <- c("GF", "GA", "GD", "Pts", "Gini18", "xPts")
+  #   } else{
+  #     columns.perc1 <- c() #c("Solo%F", "Solo%A")
+  #     columns.dec1 <- c("ShtF", "ShtA")
+  #     columns.dec2 <- c("xGF", "xGA", "xGD", "GF", "GA", "GD", "GD-xGD", "TSR", "Pts", "Gini18", "xPts")
+  #   }
+  #   
+  #   DT::datatable(dt,
+  #             rownames = F,
+  #             options = list(autoWidth = T,
+  #                          pageLength = 25,
+  #                          dom = 'ft')) %>%
+  #     formatPercentage(columns = columns.perc1, digits = 1) %>%
+  #     formatRound(columns = columns.dec1, digits = 1) %>%
+  #     formatRound(columns = columns.dec2, digits = 2) %>%
+  #     formatCurrency(columns = c("Comp ($MM)"),
+  #                    currency = "$",
+  #                    interval = 3,
+  #                    mark = ",",
+  #                    digits = 1)
+  # })
   
   output$team_download_pergame <- downloadHandler(
     filename = 'ASAteamtable_pergame.csv',
@@ -1907,7 +1907,7 @@ shinyServer(function(input, output, session) {
     }
   )
   
-  # Team passing tables ####
+  # Team passing tables #########################################
   dt_team_passing <- reactive({
     if(input$teampassing_seasonordate == "Season"){
       dt <- teampassing.func(offense = teampassing.offense,
@@ -2202,7 +2202,7 @@ shinyServer(function(input, output, session) {
     }
   )
   
-  # Predictions ####
+  # Predictions ##############################################
   
   # Win probability model ####
   output$winproboutput <- DT::renderDataTable({
@@ -2331,7 +2331,7 @@ shinyServer(function(input, output, session) {
   },
   width = 600, height = 400)
   
-  # Weekly predictions ####
+  # Weekly predictions ############################################
   output$weeklypredictionstable <- DT::renderDataTable({
     DT::datatable(weeklypreds,
                   rownames = F,
