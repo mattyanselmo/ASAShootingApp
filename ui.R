@@ -1072,8 +1072,9 @@ shinyUI(
                                      tags$style(".datatables .display {margin-left: 0;}"))),
                                  h1('Playoff outcome probabilities'),
                                  p(HTML(paste0('Updated through games on ', max(as.Date(playerxgoals$date)), ".<br>
-                                          Based on 4,000 simulated runs of the remaining schedule and playoffs. <br>
-                                          Percentages shown to tenths only to reinforce mathematical certainties; margin of error is greater than 0.5% for probabilities between 5% and 95%. <br>
+                                          Based on 1,000 simulated runs of the remaining schedule and playoffs. <br>
+                                          Percentages shown to tenths only to reinforce mathematical certainties; 
+                                          margin of error is greater than 0.5% for probabilities between 1% and 99%. <br>
                                           Western conference shown first because that's the way it should be. <br>"))),
                                  h2("Western Conference"),
                                  div(DT::dataTableOutput("playoffsseeding_west"), 
