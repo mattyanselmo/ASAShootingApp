@@ -1427,7 +1427,7 @@ shinyServer(function(input, output, session) {
       DT::datatable(dt,
                     rownames = F,
                     options = list(autoWidth = T,
-                                 pageLength = 25)) %>%
+                                 pageLength = 30)) %>%
         formatPercentage(columns = columns.perc1, digits = 1) %>%
         formatRound(columns = columns.dec1, digits = 1) %>%
         formatRound(columns = columns.dec1.2, digits = 1) %>%
@@ -1441,7 +1441,7 @@ shinyServer(function(input, output, session) {
       DT::datatable(dt,
                     rownames = F,
                     options = list(autoWidth = T,
-                                 pageLength = 25,
+                                 pageLength = 30,
                                  dom = 't')) %>%
         formatPercentage(columns = columns.perc1, digits = 1) %>%
         formatRound(columns = columns.dec1, digits = 1) %>%
@@ -1478,7 +1478,7 @@ shinyServer(function(input, output, session) {
     DT::datatable(dt,
                   rownames = F,
                   options = list(autoWidth = T,
-                               pageLength = 25,
+                               pageLength = 30,
                                dom = 'ft')) %>%
       formatPercentage(columns = columns.perc1, digits = 1) %>%
       formatRound(columns = columns.dec1, digits = 1) %>%
@@ -1591,7 +1591,7 @@ shinyServer(function(input, output, session) {
     DT::datatable(dt,
               rownames = F,
               options = list(autoWidth = T,
-                           pageLength = 25,
+                           pageLength = 30,
                            dom = 'ft')) %>%
       formatPercentage(columns = columns.perc1, digits = 1) %>%
       formatRound(columns = columns.dec1, digits = 1) %>%
@@ -1626,7 +1626,7 @@ shinyServer(function(input, output, session) {
     DT::datatable(dt,
               rownames = F,
               options = list(autoWidth = T,
-                           pageLength = 25,
+                           pageLength = 30,
                            dom = 'ft')) %>%
       formatPercentage(columns = columns.perc1, digits = 1) %>%
       formatRound(columns = columns.dec1, digits = 1) %>%
