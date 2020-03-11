@@ -71,7 +71,7 @@ shinyUI(
                                                                                    value = F),
                                                                      checkboxGroupInput("shooting_seasonfilter",
                                                                                         label = NULL,
-                                                                                        choices = min(playerxgoals$Season):max(playerxgoals$Season),
+                                                                                        choices = max(playerxgoals$Season):min(playerxgoals$Season),
                                                                                         selected = max(playerxgoals$Season)))),
                                      conditionalPanel(condition = "input.shooting_seasonordate == 'Date'",
                                                       dateInput('shooting_date1',
@@ -265,7 +265,7 @@ shinyUI(
                                                                                    value = F),
                                                                      checkboxGroupInput('team_seasonfilter',
                                                                                         "",
-                                                                                        choices = min(teamxgoals$Season):max(teamxgoals$Season),
+                                                                                        choices = max(teamxgoals$Season):min(teamxgoals$Season),
                                                                                         selected = max(teamxgoals$Season),
                                                                                         inline = T))),
                                      conditionalPanel(condition = "input.team_seasonordate == 'Season' && input.team_subtab == 'teamxgoalsplitsplots'",
@@ -278,8 +278,8 @@ shinyUI(
                                                                                    value = F),
                                                                      checkboxGroupInput('team_seasonfilter2',
                                                                                         "",
-                                                                                        choices = min(teamxgoals$Season):(max(teamxgoals$Season) - 1),
-                                                                                        selected = min(teamxgoals$Season):(max(teamxgoals$Season) - 1),
+                                                                                        choices = (max(teamxgoals$Season) - 1):min(teamxgoals$Season),
+                                                                                        selected = (max(teamxgoals$Season) - 1):min(teamxgoals$Season),
                                                                                         inline = T))),
                                      conditionalPanel(condition = "input.team_seasonordate == 'Date'",
                                                       dateInput('team_date1',
@@ -413,7 +413,7 @@ shinyUI(
                                                                                               value = F),
                                                                                 checkboxGroupInput('teambygame_seasonfilter',
                                                                                                    'Select seasons:',
-                                                                                                   choices = min(xgbygame$Season):max(xgbygame$Season),
+                                                                                                   choices = max(xgbygame$Season):min(xgbygame$Season),
                                                                                                    selected = max(xgbygame$Season)))),
                                                 conditionalPanel(condition = "input.teambygame_seasonordate == 'Date'",
                                                                  dateInput('teambygame_date1',
@@ -489,7 +489,7 @@ shinyUI(
                                                                                    value = F),
                                                                      checkboxGroupInput("keeper_seasonfilter",
                                                                                         label = NULL,
-                                                                                        choices = min(keeperxgoals$Season):max(keeperxgoals$Season),
+                                                                                        choices = max(keeperxgoals$Season):min(keeperxgoals$Season),
                                                                                         selected = max(keeperxgoals$Season)))),
                                      conditionalPanel(condition = "input.keeper_seasonordate == 'Date'",
                                                       dateInput('keeper_date1',
@@ -644,7 +644,7 @@ shinyUI(
                                                                                    value = F),
                                                                      checkboxGroupInput('passing_seasonfilter',
                                                                                         'Select seasons:',
-                                                                                        choices = min(playerpassing$Season):max(playerpassing$Season),
+                                                                                        choices = max(playerpassing$Season):min(playerpassing$Season),
                                                                                         selected = max(playerpassing$Season)))),
                                      conditionalPanel(condition = "input.passing_seasonordate == 'Date'",
                                                       dateInput('passing_date1',
@@ -755,7 +755,7 @@ shinyUI(
                                                                                    value = F),
                                                                      checkboxGroupInput('teampassing_seasonfilter',
                                                                                         label = 'Select seasons:',
-                                                                                        choices = min(teampassing.offense$year):max(teampassing.offense$year),
+                                                                                        choices = max(teampassing.offense$year):min(teampassing.offense$year),
                                                                                         selected = max(teampassing.offense$year),
                                                                                         inline = T))
                                                       ),
@@ -922,7 +922,7 @@ shinyUI(
                                                                                    value = F),
                                                                      checkboxGroupInput('playerxgchain_seasonfilter',
                                                                                         "",
-                                                                                        choices = min(playerchaindata$Season):max(playerchaindata$Season),
+                                                                                        choices = max(playerchaindata$Season):min(playerchaindata$Season),
                                                                                         selected = max(playerchaindata$Season),
                                                                                         inline = T))
                                      ),
@@ -1072,9 +1072,9 @@ shinyUI(
                                      tags$style(".datatables .display {margin-left: 0;}"))),
                                  h1('Playoff outcome probabilities'),
                                  p(HTML(paste0('Updated through games on ', max(as.Date(playerxgoals$date)), ".<br>
-                                          Based on 1,000 simulated runs of the remaining schedule and playoffs. <br>
+                                          Based on 10,000 simulated runs of the remaining schedule and playoffs. <br>
                                           Percentages shown to tenths only to reinforce mathematical certainties; 
-                                          margin of error is greater than 0.5% for probabilities between 1% and 99%. <br>
+                                          margin of error is greater than 0.5% for probabilities between 10% and 90%. <br>
                                           Western conference shown first because that's the way it should be. <br>"))),
                                  h2("Western Conference"),
                                  div(DT::dataTableOutput("playoffsseeding_west"), 
